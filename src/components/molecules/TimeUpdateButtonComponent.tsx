@@ -1,5 +1,5 @@
 import { forwardRef, Ref } from "react";
-import { ChakraProvider, Box, Button, Text } from "@chakra-ui/react";
+import { Box, Button, Text } from '@mantine/core';
 
 import { useUpdateDateListMutation } from "../../hooks/useEventMutation";
 import { ChangingButtonProp } from "../../lib/TimelineType";
@@ -37,14 +37,14 @@ export const TimesUpdateButton = forwardRef(
   }
 
   return (
-    <ChakraProvider>
+    <>
       {timeChangeEvents.length > 0 &&
         <Box className={updateButtonArea.container} ref={buttonRef}>
           <Button onClick={handleUpdate}>変更する</Button>
           <Text className={updateButtonArea.countText}>変更回数: {timeChangeEvents.length}</Text>
-          <Button onClick={handleReset}>リセット</Button>
+          <Button onClick={handleReset} variant="default">リセット</Button>
         </Box>
       }
-    </ChakraProvider>
+    </>
   );
 });
