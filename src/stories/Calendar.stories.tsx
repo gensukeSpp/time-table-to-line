@@ -1,4 +1,3 @@
-/* eslint-disable storybook/no-renderer-packages */
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { userEvent, within } from '@storybook/test';
