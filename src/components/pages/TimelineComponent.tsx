@@ -1,13 +1,13 @@
 import { addHours, addDays } from 'date-fns';
 import React, { useRef, useEffect, useState } from 'react'; // Import useRef, useEffect, useState
-import { Timeline, TimelineGroupBase } from "react-calendar-timeline-v3";
+import { Timeline, TimelineGroupBase } from "react-calendar-timeline";
 
 import { useGroupUsersQuery, useAuthQuery } from "../../resources/queries";
 import { useAuthContext, useEventsState } from "../../hooks/useContextFamily";
 import { useTimelineDragZoom } from '../../hooks/useTimelineDragZoom'; // Import the new custom hook
 import { getGroup, getItems } from '../../lib/TmelineData';
 
-import 'react-calendar-timeline-v3/style.css';
+import 'react-calendar-timeline/lib/Timeline.css';
 import { TimelineEventProps } from '../../lib/TimelineType';
 
 export const MyHorizonTimeline = () => {
@@ -87,8 +87,8 @@ export const MyHorizonTimeline = () => {
               ...item,
             }
           })}
-          defaultTimeStart={new Date(defaultTimeStart)}
-          defaultTimeEnd={new Date(defaultTimeEnd)}
+          defaultTimeStart={defaultTimeStart}
+          defaultTimeEnd={defaultTimeEnd}
           visibleTimeStart={visibleTimeStart} // Use state from hook
           visibleTimeEnd={visibleTimeEnd}     // Use state from hook
           onTimeChange={handleTimeChange} // Use our combined handler
