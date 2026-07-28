@@ -8,7 +8,7 @@ import * as TimeGrid from 'react-big-calendar/lib/TimeGrid'
 import { addDays, startOfDay, isBefore, isEqual } from 'date-fns';
 import { TimelineEventProps } from '../../lib/TimelineType';
 
-import 'react-calendar-timeline/lib/Timeline.css'
+import 'react-calendar-timeline/style.css'
 
 export const MyWeek = () => {
 

@@ -7,7 +7,7 @@ import { useAuthContext, useEventsState } from "../../hooks/useContextFamily";
 import { useTimelineDragZoom } from '../../hooks/useTimelineDragZoom'; // Import the new custom hook
 import { getGroup, getItems } from '../../lib/TmelineData';
 
-import 'react-calendar-timeline/lib/Timeline.css';
+import 'react-calendar-timeline/style.css';
 import { TimelineEventProps } from '../../lib/TimelineType';
 
 export const MyHorizonTimeline = () => {

@@ -11,7 +11,7 @@ import { exEvents, exGroupUsers, exItems } from "../lib/SampleState";
 import { eventsStateMock, groupMockMember } from "./lib/timeline.mock";
 import { useEventsState } from "../hooks/useContextFamily";
 
-import "react-calendar-timeline/lib/Timeline.css";
+import "react-calendar-timeline/style.css";
 
 const queryClient = new QueryClient();
 
