@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, PropsWithChildren } from "react";
-import { chakra } from "@chakra-ui/system";
+import { Box } from '@mantine/core';
 
 import { TimelineEventProps, EventFormProps } from "../lib/TimelineType";
 import { topWidth } from "../components/sprinkles.responsive.css";
@@ -34,11 +34,11 @@ export const useCallingEditForm = ({onShowFormView, targetEvent}: EventFormProps
 
   const EditForm: React.FC<PropsWithChildren> = ({children}) => {
     return (
-      <chakra.div flexShrink="0" scrollSnapAlign="start"
+      <Box style={{ flexShrink: 0, scrollSnapAlign: 'start' }}
         className={topWidth}
         onClick={handleOuterFormBubbling}>
           {children}
-      </chakra.div>
+      </Box>
     )
   }
 
