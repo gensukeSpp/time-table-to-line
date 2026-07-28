@@ -1,0 +1,182 @@
+# Time Table & Timeline (v4) — Refactoring Project
+
+## プロジェクトの文脈と目的
+
+### 概要
+イベントを**タイムテーブル（カレンダー）** と **タイムライン（横軸ガントチャート風）** の 2 つのビューで管理する SPA。
+認証済みユーザーがイベントの CRUD、ドラッグ&ドロップによる日時移動・リサイズを行う。
+
+元は `Manabu-Aihara/time-table4` のリファクタリング + 機能追加プロジェクト。
+
+### 最優先目標
+1. **リファクタリング最優先** — 煩雑で問題の多い既存コードを段階的に整理する
+2. パフォーマンス低下や余分な負荷を生まないよう注意する
+3. コンポーネント単位で細かくタスクを分割し、順序立ててゆっくり確実に進める
+
+### リファクタリング前の前提作業（完了済み）
+- パッケージ管理: yarn → **bun** 移行（完了）
+- 全ライブラリを現時点の最新版に更新（完了）
+- 未使用ファイル削除: `src/DnDApp.tsx`, `src/lib/ClickOrDouble.js`（完了）
+- `vite.config.ts` 整理（完了）
+
+### 今後必要なコード修正タスク（順次実施）
+1. ESLint フラット設定: `.eslintrc.cjs` → `eslint.config.js` 移行
+2. UI ライブラリ統一: Chakra UI / Radix UI → **Mantine v7** に置き換え
+3. 日付ライブラリ統一: moment / dayjs → **date-fns** に書き換え
+4. `react-calendar-timeline` import 修正: `react-calendar-timeline-v3` → `react-calendar-timeline`
+5. React 19 互換性修正: useRef の引数なし呼び出し等
+6. TypeScript 型エラー修正
+7. コンポーネントリファクタリング（molecules → templates の順序等、提案ベースで決定）
+8. バグ修正（11PM 問題、タイムライン重なり表示）
+9. 機能追加（requirement-02.md で別途定義）
+
+### 既知のバグ
+- **タイムテーブル**: PM 11:00 にイベント追加不可（allDay 扱いになる）
+- **タイムテーブル**: DB 保存時刻が日本時間ではない（UTC の可能性）
+- **タイムライン**: イベントの重なり表示ができない
+
+### コード品質上の問題
+- セキュリティリスクになる `console.log` の残存 → 削除
+- コメントアウトされた不要コード → 削除
+- 未使用の型・モジュール（`Theme.ts` 等）→ 整理
+- 3 つの日付ライブラリ混在（moment / date-fns / dayjs）→ date-fns 統一
+- 2 つの UI ライブラリ混在（Chakra UI / Radix UI）→ Mantine 統一
+
+---
+
+## 開発スタック
+
+| カテゴリ | 技術 |
+|---|---|
+| **フレームワーク** | React 19 + TypeScript 5.7 |
+| **ビルド** | Vite 6 |
+| **パッケージ管理** | bun |
+| **ルーティング** | react-router-dom 7 |
+| **状態管理（サーバー）** | @tanstack/react-query 5 |
+| **状態管理（クライアント）** | Context API |
+| **カレンダー** | react-big-calendar (with dragAndDrop) |
+| **タイムライン** | react-calendar-timeline 0.30.0-beta.4 |
+| **UI ライブラリ** | Mantine v7（Chakra / Radix から移行済み） |
+| **スタイリング** | Vanilla Extract（zero-runtime CSS-in-JS） |
+| **HTTP クライアント** | Axios 1 |
+| **日付操作** | date-fns（moment / dayjs から統一予定） |
+| **テスト** | Vitest + jsdom + Testing Library |
+| **Storybook** | 8 (react-vite) |
+| **リンター** | ESLint 9 + Prettier 3 |
+| **フォーマッター** | Prettier 3 |
+
+## 実行コマンド
+
+```bash
+# 開発サーバー起動（HMR 有効）
+bun run dev
+
+# プロダクションビルド（tsc + vite build）
+bun run build
+
+# ビルド結果のプレビュー
+bun run preview
+
+# テスト（watch モード）
+bun test
+
+# テスト（CI モード / 1回実行）
+bun run testrun
+
+# リンター（--max-warnings 0）
+bun run lint
+
+# Storybook 起動（ポート 6006）
+bun run storybook
+
+# Storybook ビルド
+bun run build-storybook
+
+# 依存関係インストール
+bun install
+
+# パッケージ追加
+bun add <package>
+
+# 開発依存追加
+bun add -d <package>
+
+# パッケージ削除
+bun remove <package>
+```
+
+---
+
+## コーディングルール
+
+### ファイル命名規則
+- コンポーネント: PascalCase（例: `CalendarComponent.tsx`）
+- フック: camelCase（例: `useMouseHandle.ts`）
+- 型・ユーティリティ: camelCase（例: `TimelineType.ts`）
+- スタイル: `ComponentName.css.ts`（コンポーネントと同ディレクトリに配置）
+- テスト: `*.spec.tsx` または `*.spec.ts`
+- 拡張子: コンポーネントは `.tsx`、型・ロジックは `.ts`
+
+### コンポーネント構成（Atomic Design ベース）
+```
+src/components/
+├── molecules/    # 小さな再利用コンポーネント（ボタン、ラッパー等）
+├── organisms/    # 複合コンポーネント（モーダル、フォーム等）
+├── pages/        # ページレベルコンポーネント
+└── templates/    # レイアウト・プロバイダー
+```
+
+### その他ディレクトリ
+```
+src/
+├── hooks/        # カスタムフック
+├── lib/          # 型定義とユーティリティ
+├── resources/    # データフェッチ & TanStack Query
+├── stories/      # Storybook ストーリー
+└── tests/        # Vitest テスト
+```
+
+### 状態管理のルール
+- **サーバー状態**: 必ず TanStack Query で管理（クエリーキーは `resources/cache.ts` で一元管理）
+- **クライアント状態**: Context API（認証情報、イベントリスト）
+- **コンポーネントローカル**: `useState` / `useReducer`
+
+### スタイリング
+- すべて Vanilla Extract（`.css.ts`）で記述
+- `ComponentName.css.ts` はコンポーネントファイルと同じディレクトリに配置
+- CSS Modules（`.module.css`）は既存のもののみ許容、新規には使わない
+
+### テスト
+- フレームワーク: **Vitest**（Jest は使用しない）
+- 配置: `src/tests/` またはコンポーネント横置きの `*.spec.tsx`
+- コンポーネントテストは Testing Library で行う
+- Storybook の Playwright 連携で包括可能なら Storybook を優先
+
+### リンター / フォーマッター
+- ESLint は `--max-warnings 0`（警告ゼロ必須）
+- コード修正後は必ず `bun run lint` を通す
+- フォーマットは Prettier 3
+
+### 禁止事項
+- `console.log` の残存（セキュリティリスク）→ 削除必須
+- コメントアウトされた不要コード → 削除
+- 未使用の import / 変数 / 型 → 削除
+- クラスコンポーネントの新規作成（`App.tsx` に残存するもののみ許容）
+- 新たな UI ライブラリの追加（Mantine で統一）
+- 新たな日付ライブラリの追加（date-fns で統一）
+
+### 命名規則
+- 型: 接尾辞 `Props`（例: `TimelineEventProps`）
+- Context: `XxxStateContext` / `XxxDispatchContext`
+- イベント関連の型は `src/lib/TimelineType.ts` の `TimelineEventProps` を中心とする
+
+### セキュリティ
+- トークンは URL クエリパラメータ `?token=xxx` で受け取り、Context に保存
+- Axios インターセプターで全リクエストに Authorization ヘッダーを付与
+- トークン期限切れ時は自動リフレッシュ
+
+### 作業の進め方
+- タスクは `tasks/` ディレクトリに計画を保存してから開始する
+- コンポーネント単位で動作確認をこまめに行う
+- 変更の影響範囲を確認してから修正する（パフォーマンス低下に注意）
+- 参照: `requirement-01.md`（要件定義）、`QWEN.md`（詳細アーキテクチャ）
