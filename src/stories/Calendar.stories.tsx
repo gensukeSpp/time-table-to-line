@@ -3,6 +3,7 @@ import React from 'react';
 import { userEvent, within } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
 import { addHours } from 'date-fns';
+import { MantineProvider } from '@mantine/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { MyCalendar } from '../components/pages/CalendarComponent';
@@ -57,6 +58,7 @@ const meta: Meta<typeof MyCalendar> = {
     (Story) => {
       return (
         <MemoryRouter>
+          <MantineProvider>
           <QueryClientProvider client={queryClient}>
             <AuthStateContext.Provider value={mockAuthToken}>
               <EventsStateContext.Provider value={mockEvents}>
@@ -64,6 +66,7 @@ const meta: Meta<typeof MyCalendar> = {
               </EventsStateContext.Provider>
             </AuthStateContext.Provider>
           </QueryClientProvider>
+          </MantineProvider>
         </MemoryRouter>
       );
     },
