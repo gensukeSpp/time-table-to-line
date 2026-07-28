@@ -1,5 +1,5 @@
 import { useState, FormEvent, forwardRef, Ref } from 'react';
-import { ChakraProvider, Box, Text, Input, Button, Select } from '@chakra-ui/react';
+import { Box, Text, TextInput, NativeSelect, Button } from '@mantine/core';
 // import Select, { ActionMeta, SingleValue } from 'react-select';
 
 // import { EventItem } from '../../lib/EventItem';
@@ -58,45 +58,41 @@ export const AddChildForm = forwardRef(
 
 	const { Dialog, open, close } = useDialog();
 
-	return (
-		<ChakraProvider>
-			<Box ref={childRef} className={formParent}>
-				<Button type='button' backgroundColor='green' onClick={closeClick} className={buttonPosition}>
-					<Text fontSize='2rem' color='white'>×</Text><Text color='white'>閉じる</Text>
-				</Button>
-				<Text fontSize='2rem' fontWeight='bold'>{selectedEvent.staff_id}</Text>
-				<Text fontSize='2rem' fontWeight='bold' className={boundaryTop}>{selectedEvent.title}</Text>
-				<section className={boundaryTop}>
-					<Text>内容：</Text>
-					<Input name="summary" onChange={handleChange} value={eventItem.summary} />
-				</section>
-				<section className={boundaryTop}>
-					<Text>どんな感じ：</Text>
-					<Select name="progress" value={eventItem.progress} onChange={handleChange}>
-						<option>---進捗を選んでください---</option>
-						{options.map((option) => {
-							return (
-								<option value={option.label} key={option.value}>{option.label}</option>
-							);
-							})
-						}
-					</Select>
-					{/* <Select options={options} onChange={handleSelectChange} /> */}
-				</section>
-				{infoContext === selectedStaff ?
-					<section className={boundaryY}>
-						<EventUpdateButtons {...eventItem}></EventUpdateButtons>
-					</section> : <Box></Box>
-				}
-			</Box>
-			<Box>
-				<Dialog>
-					<Text>異なるスタッフの、変更はできません</Text>
-					<Button textAlign='center' onClick={close}>閉じる</Button>
-				</Dialog>
-			</Box>
-		</ChakraProvider>
-	);
+		return (
+		  <>
+		    <Box ref={childRef} className={formParent}>
+		      <Button color="green" onClick={closeClick} className={buttonPosition}>
+		        <Text style={{ fontSize: '2rem' }} c="white">×</Text><Text c="white">閉じる</Text>
+		      </Button>
+		      <Text style={{ fontSize: '2rem' }} fw={700}>{selectedEvent.staff_id}</Text>
+		      <Text style={{ fontSize: '2rem' }} fw={700} className={boundaryTop}>{selectedEvent.title}</Text>
+		      <section className={boundaryTop}>
+		        <Text>内容：</Text>
+		        <TextInput name="summary" onChange={handleChange} value={eventItem.summary} />
+		      </section>
+		      <section className={boundaryTop}>
+		        <Text>どんな感じ：</Text>
+		        <NativeSelect name="progress" value={eventItem.progress} onChange={handleChange}
+		          data={[
+		            '---進捗を選んでください---',
+		            ...options.map((option) => option.label),
+		          ]}
+		        />
+		      </section>
+		      {infoContext === selectedStaff ?
+		        <section className={boundaryY}>
+		          <EventUpdateButtons {...eventItem}></EventUpdateButtons>
+		        </section> : <Box></Box>
+		      }
+		    </Box>
+		    <Box>
+		      <Dialog>
+		        <Text>異なるスタッフの、変更はできません</Text>
+		        <Button onClick={close}>閉じる</Button>
+		      </Dialog>
+		    </Box>
+		  </>
+		);
 });
 
 // export const AddSideForm = forwardRef<HTMLDivElement, selectedEvent>((prop, _ref) => {
