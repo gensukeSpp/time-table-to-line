@@ -20,7 +20,7 @@ export const useCallingEditForm = ({onShowFormView, targetEvent}: EventFormProps
     setShowModal(false);
   }
 
-  const countRef = useRef<number | undefined>();
+  const countRef = useRef<number | undefined>(undefined);
   const handleSelectEvent = useCallback((callingEvent: TimelineEventProps) => {
     onShowFormView(callingEvent);
     countRef.current = undefined;
