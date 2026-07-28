@@ -1,5 +1,5 @@
 import { FormEvent } from 'react';
-import { Button } from '@chakra-ui/react';
+import { Button } from '@mantine/core';
 
 import { useDeleteMutation, useUpdateEventMutation } from '../../hooks/useEventMutation';
 import { TimelineEventProps } from '../../lib/TimelineType';
