@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { OnItemDragObjectResize } from 'react-calendar-timeline-v3';
+// OnItemDragObjectResize 型は react-calendar-timeline の型定義に存在しないため削除
 
 import { calculateZoomedTimeRange } from '../lib/timelineZoomUtils';
 
