@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef, useMemo, useEffect, CSSProperties } from 'react';
 import { Calendar, Views, View, SlotInfo } from 'react-big-calendar'
 import withDragAndDrop, { OnDragStartArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
-import moment from 'moment';
 import { Box } from '@mantine/core';
 
 import { useEventsState } from '../../hooks/useContextFamily';
@@ -189,10 +188,10 @@ export const MyCalendar = (
             // startAccessor="start"
             // endAccessor="end"
             startAccessor={(stateEvent: TimelineEventProps) => {
-              return stateEvent.start_time.toDate();
+              return stateEvent.start_time;
             }}
             endAccessor={(stateEvent: TimelineEventProps) => {
-              return stateEvent.end_time.toDate();
+              return stateEvent.end_time;
             }}
             onNavigate={onNavigate}
             // eventPropGetter={() => {return {'className': 'cn'}}}
