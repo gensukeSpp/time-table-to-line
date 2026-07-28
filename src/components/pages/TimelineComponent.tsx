@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { addHours, addDays } from 'date-fns';
 import React, { useRef, useEffect, useState } from 'react'; // Import useRef, useEffect, useState
 import { Timeline, TimelineGroupBase } from "react-calendar-timeline-v3";
 
@@ -34,8 +34,8 @@ export const MyHorizonTimeline = () => {
     }
   }, []); // Runs once on mount
 
-  const defaultTimeStart = moment().add(-12, 'hours').valueOf();
-  const defaultTimeEnd = moment().add(12, 'hours').valueOf();
+  const defaultTimeStart = addHours(new Date(), -12).getTime();
+  const defaultTimeEnd = addHours(new Date(), 12).getTime();
 
   const {
     visibleTimeStart,
@@ -52,8 +52,8 @@ export const MyHorizonTimeline = () => {
   );
 
   const onBoundsChange = (canvasTimeStart: number, canvasTimeEnd: number) => {
-    console.log(`Bounds changed: ${moment(canvasTimeStart).toDate()}`);
-    console.log(`Bounds changed: ${moment(canvasTimeEnd).toDate()}`);
+    console.log(`Bounds changed: ${new Date(canvasTimeStart).toISOString()}`);
+    console.log(`Bounds changed: ${new Date(canvasTimeEnd).toISOString()}`);
     // updateVisibleTime(canvasTimeStart, canvasTimeEnd);
   };
 
@@ -87,8 +87,8 @@ export const MyHorizonTimeline = () => {
               ...item,
             }
           })}
-          defaultTimeStart={moment(defaultTimeStart).toDate()}
-          defaultTimeEnd={moment(defaultTimeEnd).toDate()}
+          defaultTimeStart={new Date(defaultTimeStart)}
+          defaultTimeEnd={new Date(defaultTimeEnd)}
           visibleTimeStart={visibleTimeStart} // Use state from hook
           visibleTimeEnd={visibleTimeEnd}     // Use state from hook
           onTimeChange={handleTimeChange} // Use our combined handler

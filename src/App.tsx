@@ -1,20 +1,18 @@
 import { Component } from "react";
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
+import { Calendar } from "react-big-calendar";
+import { addDays } from 'date-fns';
+
+import localizer from "./lib/Localization";
 
 import "./App.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-
-const localizer = momentLocalizer(moment);
 
 class App extends Component {
   state = {
     events: [
       {
-        start: moment().toDate(),
-        end: moment()
-          .add(1, "days")
-          .toDate(),
+        start: new Date(),
+        end: addDays(new Date(), 1),
         title: "Some title"
       }
     ]
