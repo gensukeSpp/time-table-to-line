@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Box, Text, TextInput, Button } from '@mantine/core';
-import moment from 'moment';
+import { addHours, format } from 'date-fns';
 
 import { useEventsState } from '../../hooks/useContextFamily';
 import { useCreateMutation } from '../../hooks/useEventMutation';
@@ -26,8 +26,8 @@ export const TitleInput = ({
     setTitle(e.target.value);
   };
 
-  const startDT = moment(slotStartTime).format('YYYY-MM-DD HH:mm:ss');
-  const endDT = moment(slotStartTime).add(1, 'hours').format('YYYY-MM-DD HH:mm:ss');
+  const startDT = format(slotStartTime, "yyyy-MM-dd HH:mm:ss");
+  const endDT = format(addHours(slotStartTime, 1), "yyyy-MM-dd HH:mm:ss");
   // console.log(`end_time: ${moment(endDT)}`);
 
   const onSubmit = (e: FormEvent) => {
@@ -41,8 +41,8 @@ export const TitleInput = ({
         group: authInfo.code,
         staff_id: authInfo.authId,
         title: title,
-        start_time: moment(startDT),
-        end_time: moment(endDT)
+        start_time: new Date(startDT),
+        end_time: new Date(endDT)
       });
     }
     closeDialog();
