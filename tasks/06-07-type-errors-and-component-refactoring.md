@@ -398,3 +398,22 @@ Expected: 全テスト PASS。
 4. **DaysComponent の位置付け**: `DaysComponent.tsx` は `MyWeek` というカスタムカレンダービューを定義している。`react-big-calendar` のプラグイン的な位置付けであり、`organisms/` でも `pages/` でもない可能性がある。`templates/` または `lib/` が適切かもしれない。
 
 5. **console.log 削除の優先順位**: まず `no-console: 'off'` のまま `Theme.ts` を削除して build 0 error を達成し、その後に console.log 削除を別途行う、という2段階のアプローチが安全。console.log 削除で予期せぬ問題が発生した場合も、build 0 error を達成した状態をコミットとして残せる。
+
+---
+
+## 拡張リファクタリング計画（Task 7 後）
+
+Task 7（コンポーネント移動）完了後、以下の 6 つの Phase でリファクタリングを継続する。
+詳細は `tasks/task-07/` 以下の各ファイルを参照。
+
+| Phase | 内容 | 実行方式 | ファイル |
+|-------|------|---------|---------|
+| **A** | コードベースクレンジング | subagent 並列 | [`tasks/task-07/phase-a-codebase-cleansing.md`](./task-07/phase-a-codebase-cleansing.md) |
+| **B** | ESLint 安全性回復 | 対話 | [`tasks/task-07/phase-b-eslint-recovery.md`](./task-07/phase-b-eslint-recovery.md) |
+| **C** | クエリ統合 | subagent | [`tasks/task-07/phase-c-query-consolidation.md`](./task-07/phase-c-query-consolidation.md) |
+| **D** | 型安全性向上 | 対話 | [`tasks/task-07/phase-d-type-safety.md`](./task-07/phase-d-type-safety.md) |
+| **E** | バグ調査（タスク 8 準備） | subagent 並列 | [`tasks/task-07/phase-e-bug-investigation.md`](./task-07/phase-e-bug-investigation.md) |
+| **F** | 品質ゲート | 確認 | [`tasks/task-07/phase-f-quality-gate.md`](./task-07/phase-f-quality-gate.md) |
+
+**戦略文書:** `.hermes/plans/2026-07-28_215000-post-task7-refactoring-phases.md`
+**Phase 間の依存関係:** [`tasks/task-07/README.md`](./task-07/README.md) の実行順序図を参照。

@@ -25,8 +25,15 @@
 3. 日付ライブラリ統一: moment / dayjs → **date-fns** に書き換え
 4. `react-calendar-timeline` import 修正: `react-calendar-timeline-v3` → `react-calendar-timeline`
 5. React 19 互換性修正: useRef の引数なし呼び出し等
-6. TypeScript 型エラー修正
-7. コンポーネントリファクタリング（molecules → templates の順序等、提案ベースで決定）
+6. TypeScript 型エラー修正（`Theme.ts` 削除, `console.log` 一掃）
+7. コンポーネントリファクタリング（molecules / organisms / pages / templates 再配置）
+   - **Phase A** — コードベースクレンジング（未使用ファイル・型・コメントアウト一掃）
+   - **Phase B** — ESLint 安全性回復（no-console / no-unused-vars / exhaustive-deps 段階的有効化）
+   - **Phase C** — クエリ層重複排除（useEventsQuery 統合）
+   - **Phase D** — 型安全性向上（ESLint error 化 / fetch ヘッダー共通化）
+   - **Phase E** — バグ調査（11PM / 重なり / タイムゾーン）
+   - **Phase F** — 品質ゲート（lint / build / test 最終確認）
+   - 詳細は [`tasks/task-07/README.md`](./tasks/task-07/README.md) を参照
 8. バグ修正（11PM 問題、タイムライン重なり表示）
 9. 機能追加（requirement-02.md で別途定義）
 
