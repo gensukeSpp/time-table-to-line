@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useMemo, useEffect, CSSProperties } from
 import { Calendar, Views, View, SlotInfo } from 'react-big-calendar'
 import withDragAndDrop, { OnDragStartArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 import moment from 'moment';
-import { chakra } from '@chakra-ui/system';
+import { Box } from '@mantine/core';
 
 import { useEventsState } from '../../hooks/useContextFamily';
 import { useMouseEvents } from '../../hooks/useMouseHandle';
@@ -174,11 +174,11 @@ export const MyCalendar = (
   return (
     <>
       {/* <TimesUpdateButton timeChangeEvents={eventList} /> */}
-      <chakra.div className={cx(gridArea, topWidth)} flexShrink="0" scrollSnapAlign="start">
+      <Box className={cx(gridArea, topWidth)} style={{ flexShrink: 0, scrollSnapAlign: 'start' }}>
         <p>マイタイムテーブル</p>
         {/* 【CSS】overflowの使い方解説！要素のはみ出し解決
         https://zero-plus.io/media/overflow/ */}
-        <chakra.div overflowX="hidden">
+        <Box style={{ overflowX: 'hidden' }}>
           <DnDCalendar
             // allDayAccessor={allowAllDay}
             date={displayDate}
@@ -211,8 +211,8 @@ export const MyCalendar = (
             }}
           // components={customComponents}
           />
-        </chakra.div>
-      </chakra.div>
+        </Box>
+      </Box>
       {/* <DialogOnSlot slotInfo={slotInfoState} /> */}
       {modal.showModal &&
         <EditForm>
