@@ -1,9 +1,9 @@
-/* eslint-disable storybook/no-renderer-packages */
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { userEvent, within } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
-import moment from 'moment';
+import { addHours } from 'date-fns';
+import { MantineProvider } from '@mantine/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { MyCalendar } from '../components/pages/CalendarComponent';
@@ -15,9 +15,9 @@ import { MemoryRouter } from 'react-router-dom';
 
 // 1. Mock Data
 const mockEvents: TimelineEventProps[] = [
-  { id: 1, title: 'My Event 1', start_time: moment().add(-2, 'hours'), end_time: moment().add(-1, 'hours'), staff_id: 1, group: 1 },
-  { id: 2, title: 'Another User Event', start_time: moment(), end_time: moment().add(1, 'hours'), staff_id: 2, group: 2 },
-  { id: 3, title: 'My Event 2', start_time: moment().add(2, 'hours'), end_time: moment().add(3, 'hours'), staff_id: 1, group: 1 },
+  { id: 1, title: 'My Event 1', start_time: addHours(new Date(), -2), end_time: addHours(new Date(), -1), staff_id: 1, group: 1 },
+  { id: 2, title: 'Another User Event', start_time: new Date(), end_time: addHours(new Date(), 1), staff_id: 2, group: 2 },
+  { id: 3, title: 'My Event 2', start_time: addHours(new Date(), 2), end_time: addHours(new Date(), 3), staff_id: 1, group: 1 },
 ];
 
 const mockAuthToken: AuthInfoProp = { type: 'token', accessToken: '0123456789abcdef' };
@@ -58,6 +58,7 @@ const meta: Meta<typeof MyCalendar> = {
     (Story) => {
       return (
         <MemoryRouter>
+          <MantineProvider>
           <QueryClientProvider client={queryClient}>
             <AuthStateContext.Provider value={mockAuthToken}>
               <EventsStateContext.Provider value={mockEvents}>
@@ -65,6 +66,7 @@ const meta: Meta<typeof MyCalendar> = {
               </EventsStateContext.Provider>
             </AuthStateContext.Provider>
           </QueryClientProvider>
+          </MantineProvider>
         </MemoryRouter>
       );
     },

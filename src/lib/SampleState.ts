@@ -1,4 +1,4 @@
-import moment from "moment";
+import { addHours } from 'date-fns';
 
 import { AuthInfoProp, EventItem, GroupUserProps, TimelineEventProps } from "./TimelineType";
 import { TimelineItemBase } from "react-calendar-timeline";
@@ -6,18 +6,18 @@ import { TimelineItemBase } from "react-calendar-timeline";
 export const eventData: EventItem = {
   staff_id: 1000,
   title: 'Learn cool stuff',
-  start: moment().toDate(),
-  end: moment().add(1, 'hours').toDate()
+  start: new Date(),
+  end: addHours(new Date(), 1)
 }
 
-export const exItems: TimelineItemBase<moment.Moment>[] = [
+export const exItems: TimelineItemBase<Date>[] = [
   {
     id: 1,
     group: 2,
     // staff_id: 500,
     title: 'item 1',
-    start_time: moment(),
-    end_time: moment().add(1, 'hour'),
+    start_time: new Date(),
+    end_time: addHours(new Date(), 1),
     // start: new Date(),
     // end: new Date(new Date().setHours(new Date().getHours() + 1))
   },
@@ -26,8 +26,8 @@ export const exItems: TimelineItemBase<moment.Moment>[] = [
     group: 1,
     // staff_id: 501,
     title: 'item 2',
-    start_time: moment().add(-0.5, 'hour'),
-    end_time: moment().add(0.5, 'hour'),
+    start_time: addHours(new Date(), -0.5),
+    end_time: addHours(new Date(), 0.5),
     // start: new Date(),
     // end: new Date(new Date().setHours(new Date().getHours() + 1))
   },
@@ -36,8 +36,8 @@ export const exItems: TimelineItemBase<moment.Moment>[] = [
     group: 1,
     // staff_id: 500,
     title: 'item 3',
-    start_time: moment().add(2, 'hour'),
-    end_time: moment().add(3, 'hour'),
+    start_time: addHours(new Date(), 2),
+    end_time: addHours(new Date(), 3),
     // start: new Date(),
     // end: new Date(new Date().setHours(new Date().getHours() + 1))
   }
@@ -52,8 +52,8 @@ export const exEvents: TimelineEventProps[] = [
     group: 2,
     staff_id: 500,
     title: 'item 1',
-    start_time: moment(),
-    end_time: moment().add(1, 'hour'),
+    start_time: new Date(),
+    end_time: addHours(new Date(), 1),
     start: new Date(),
     end: adjustTime(1)
   },
@@ -62,8 +62,8 @@ export const exEvents: TimelineEventProps[] = [
     group: 1,
     staff_id: 501,
     title: 'item 2',
-    start_time: moment().add(-0.5, 'hour'),
-    end_time: moment().add(0.5, 'hour'),
+    start_time: addHours(new Date(), -0.5),
+    end_time: addHours(new Date(), 0.5),
     start: adjustTime(1),
     end: adjustTime(2)
   },
@@ -72,8 +72,8 @@ export const exEvents: TimelineEventProps[] = [
     group: 2,
     staff_id: 500,
     title: 'item 3',
-    start_time: moment().add(2, 'hour'),
-    end_time: moment().add(3, 'hour'),
+    start_time: addHours(new Date(), 2),
+    end_time: addHours(new Date(), 3),
     start: adjustTime(2),
     end: adjustTime(3)
   }

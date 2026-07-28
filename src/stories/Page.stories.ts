@@ -1,7 +1,5 @@
-/* eslint-disable storybook/no-renderer-packages */
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, userEvent, within } from '@storybook/test';
-
+import { within, userEvent, fn, expect } from '@storybook/test';
 import { Page } from './Page';
 
 const meta = {

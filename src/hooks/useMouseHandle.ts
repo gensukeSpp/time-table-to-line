@@ -7,7 +7,7 @@ export const useMouseEvents = () => {
   const [eventList, setEventList] = useState<TimelineEventProps[]>([]);
   // How to access previous props or state with React Hooks
   // https://blog.logrocket.com/accessing-previous-props-state-react-hooks/
-  const prevRef = useRef<TimelineEventProps>();
+  const prevRef = useRef<TimelineEventProps | undefined>(undefined);
   
   // const onEventResize: withDragAndDropProps<TimelineEventProps>['onEventResize'] = data => {
   const onEventResize = useCallback(
@@ -27,7 +27,7 @@ export const useMouseEvents = () => {
       return [...currentEvents, resizedEvent]
     });
     prevRef.current = handleEvent;
-    prevRef.current.isDraggable = true;
+    prevRef.current!.isDraggable = true;
     console.log(`DnD previsious event: ${JSON.stringify(prevRef.current)}`);
   // }
   }, []);
@@ -48,7 +48,7 @@ export const useMouseEvents = () => {
       return [...currentEvents, movedEvent]
     });
     prevRef.current = handleEvent;
-    prevRef.current.isDraggable = true;
+    prevRef.current!.isDraggable = true;
     console.log(`DnD Previsious event: ${JSON.stringify(prevRef.current)}`);
     // }
   }, []);

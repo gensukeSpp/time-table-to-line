@@ -1,15 +1,9 @@
-import { dateFnsLocalizer, momentLocalizer, dayjsLocalizer } from 'react-big-calendar';
-import { format } from 'date-fns/format';
-import { parse } from 'date-fns/parse';
-import { startOfWeek } from 'date-fns/startOfWeek';
-import { getDay } from 'date-fns/getDay';
-// import enUS from 'date-fns/locale/en-US';
-import { ja } from 'date-fns/locale/ja';
-import { addHours } from 'date-fns/addHours';
-import { startOfHour } from 'date-fns/startOfHour';
-
-import moment from 'moment';
-import dayjs from 'dayjs'
+import { dateFnsLocalizer } from 'react-big-calendar';
+import {
+  format, parse, startOfWeek, getDay,
+  addHours, startOfHour,
+} from 'date-fns';
+import { ja } from 'date-fns/locale';
 
 // const locales = {
 //   'en-US': enUS,
@@ -31,7 +25,5 @@ const localizer = dateFnsLocalizer({
   getDay,
   locales,
 })
-// const localizer = dayjsLocalizer(dayjs)
-// const localizer = momentLocalizer(moment)
 
 export default localizer;

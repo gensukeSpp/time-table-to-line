@@ -5,10 +5,10 @@ import { DateLocalizer, Navigate, TitleOptions } from 'react-big-calendar';
 import * as TimeGrid from 'react-big-calendar/lib/TimeGrid'
 // import Timeline from 'react-calendar-timeline'
 // make sure you include the timeline stylesheet or the timeline will not be styled
-import moment from 'moment';
+import { addDays, startOfDay, isBefore, isEqual } from 'date-fns';
 import { TimelineEventProps } from '../../lib/TimelineType';
 
-import 'react-calendar-timeline/lib/Timeline.css'
+import 'react-calendar-timeline/style.css'
 
 export const MyWeek = () => {
 
@@ -25,14 +25,13 @@ export const MyWeek = () => {
 
 MyWeek.range = (date: Date) => {
   const start = date;
-  const end = moment(start).add(2, 'day').toDate();
-
+  const end = addDays(start, 2);
   let current = start;
   const range = [];
 
-  while (moment(current).isSameOrBefore(moment(end), 'day')) {
+  while (isBefore(startOfDay(current), startOfDay(end)) || isEqual(startOfDay(current), startOfDay(end))) {
     range.push(current);
-    current = moment(current).add(1, 'day').toDate();
+    current = addDays(current, 1);
   }
 
   return range;

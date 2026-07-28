@@ -1,7 +1,6 @@
-/* eslint-disable storybook/no-renderer-packages */
-import { expect, within, userEvent, fn } from "@storybook/test";
-import type { Meta, StoryObj } from "@storybook/react";
-
+import type { Meta, StoryObj } from '@storybook/react';
+import { expect, within, userEvent, fn } from '@storybook/test';
+import { Timeline } from 'react-calendar-timeline';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { TimelineEventProps, AuthInfoProp } from "../lib/TimelineType";
@@ -12,7 +11,7 @@ import { exEvents, exGroupUsers, exItems } from "../lib/SampleState";
 import { eventsStateMock, groupMockMember } from "./lib/timeline.mock";
 import { useEventsState } from "../hooks/useContextFamily";
 
-import "react-calendar-timeline-v3/style.css";
+import "react-calendar-timeline/style.css";
 
 const queryClient = new QueryClient();
 

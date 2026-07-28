@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import moment from 'moment';
+import { addHours } from 'date-fns';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
 import { useEventsQueryForTL } from '../../resources/queries';
@@ -14,8 +14,8 @@ export const EventsContextProvider = ({ children }: { children: ReactNode }) => 
     group: 7,
     title: 'Learn cool stuff',
     // moment.utc("2019-02-21 09:00").local().format();  //"2019-02-21T18:00:00+09:00"
-    start_time: moment(),
-    end_time: moment().add(1, 'hours'),
+    start_time: new Date(),
+    end_time: addHours(new Date(), 1),
     start: new Date(),
     end: new Date(new Date().setHours(new Date().getHours() + 1))
   }

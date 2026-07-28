@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SlotInfo } from 'react-big-calendar';
-import { chakra } from '@chakra-ui/system';
-import * as Tabs from "@radix-ui/react-tabs";
+import { Box, Tabs } from '@mantine/core';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
 import { TimesUpdateButton } from '../molecules/TimeUpdateButtonComponent';
@@ -22,27 +21,24 @@ export const CalendarWrapper = () => {
   const [slotInfo, setSlotInfo] = useState<SlotInfo>();
 
   return (
-    <Tabs.Root defaultValue='tab1'>
+    <Tabs defaultValue='tab1'>
       <Tabs.List className={tabMenu}>
-        <Tabs.Trigger value='tab1' className={tabButton}>タイムテーブル</Tabs.Trigger>
-        <Tabs.Trigger value='tab2' className={tabButton}>タイムライン</Tabs.Trigger>
+        <Tabs.Tab value='tab1' className={tabButton}>タイムテーブル</Tabs.Tab>
+        <Tabs.Tab value='tab2' className={tabButton}>タイムライン</Tabs.Tab>
       </Tabs.List>
-      <Tabs.Content value="tab1">
-        <chakra.div className={flexXmandatory}>
-          {/* <button>
-            <Link to="/timeline">タイムライン</Link>
-          </button> */}
+      <Tabs.Panel value="tab1">
+        <Box className={flexXmandatory}>
           <MyCalendar
             onTimeChangeEvents={childData => setMovedEvents(childData)}
             onSlotInfo={childSlotInfo => setSlotInfo(childSlotInfo)}
           />
           <TimesUpdateButton timeChangeEvents={movedEvents} />
           <DialogOnSlot slotInfo={slotInfo} />
-        </chakra.div>
-      </Tabs.Content>
-      <Tabs.Content value='tab2'>
+        </Box>
+      </Tabs.Panel>
+      <Tabs.Panel value='tab2'>
         <MyHorizonTimeline />
-      </Tabs.Content>
-    </Tabs.Root>
+      </Tabs.Panel>
+    </Tabs>
   );
 }

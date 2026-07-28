@@ -1,5 +1,4 @@
 import { Event, EventWrapperProps, SlotInfo } from 'react-big-calendar';
-import moment from 'moment';
 import { TimelineItemBase as TimelineItem } from 'react-calendar-timeline';
 import { UseQueryResult } from '@tanstack/react-query';
 
@@ -29,8 +28,8 @@ type NewTimelineItem = Omit<TimelineItem<Date> & EventItem,
 	id: Id;
 	group: Id;
 	// title?: React.ReactNode;
-	start_time: DateType → monment.Moment;
-	end_time: DateType → moment.Moment;
+	start_time: DateType → Date;
+	end_time: DateType → Date;
 	start: Date;
 	end: Date;
 
@@ -54,8 +53,8 @@ export type TimelineEventProps = Merge<NewTimelineItem, {
 	// id: pickId;
 	// group: pickGroup;
 	title: React.ReactNode;
-	start_time: moment.Moment;
-	end_time: moment.Moment;
+	start_time: Date;
+	end_time: Date;
 	isDraggable?: boolean;
 }>;
 

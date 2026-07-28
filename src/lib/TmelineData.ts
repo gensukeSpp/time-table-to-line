@@ -1,4 +1,4 @@
-import { TimelineGroupBase } from 'react-calendar-timeline-v3';
+import { TimelineGroupBase } from 'react-calendar-timeline';
 
 import { GroupUserProps, TimelineEventProps } from '../lib/TimelineType';
 import { TimelineEventPropsList } from '../hooks/useContextFamily';

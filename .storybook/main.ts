@@ -11,7 +11,6 @@ const config: StorybookConfig = {
       "name": "@storybook/addon-essentials",
       "options": {}
     },
-    "@storybook/addon-onboarding",
     "@storybook/addon-interactions"
   ],
   async viteFinal(config) {
