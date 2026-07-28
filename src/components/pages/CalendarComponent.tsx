@@ -118,7 +118,7 @@ export const MyCalendar = (
   /**
    * Slot and Dialog
    */
-  const countRef = useRef<number | undefined>();
+  const countRef = useRef<number | undefined>(undefined);
 
   const clickRef = useRef<number | undefined>(undefined);
   const [slotInfoState, setSlotInfoState] = useState<SlotInfo>();
