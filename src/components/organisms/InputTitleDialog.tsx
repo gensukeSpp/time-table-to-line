@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect } from 'react';
-import { ChakraProvider, Box, Text, Input, Button } from '@chakra-ui/react';
+import { Box, Text, TextInput, Button } from '@mantine/core';
 import moment from 'moment';
 
 import { useEventsState } from '../../hooks/useContextFamily';
@@ -53,23 +53,15 @@ export const TitleInput = ({
   }, [closeDialog]);
 
   return (
-    <ChakraProvider>
-      <Box>
-        <Text>ID {authInfo.type === 'auth' ? authInfo.authId : 'IDなし'}</Text>
-        <Text>所属 {authInfo.type === 'auth' ? authInfo.group : 'グループなし'}</Text>
-        <Text></Text>
-        {/* <form onSubmit={onSubmit}> */}
-        <Input
-          // {...inputAttr}
-          placeholder="やることを入力してください"
-          onChange={handleChange}
-          // なぜこれが必要となった!?
-          value={title}
-        />
-        <Button onClick={onSubmit}>追加</Button>
-        {/* </form> */}
-        <Text></Text>
-      </Box>
-    </ChakraProvider>
+    <Box>
+      <Text>ID {authInfo.type === 'auth' ? authInfo.authId : 'IDなし'}</Text>
+      <Text>所属 {authInfo.type === 'auth' ? authInfo.group : 'グループなし'}</Text>
+      <TextInput
+        placeholder="やることを入力してください"
+        onChange={handleChange}
+        value={title}
+      />
+      <Button onClick={onSubmit} mt="sm">追加</Button>
+    </Box>
   );
 }
