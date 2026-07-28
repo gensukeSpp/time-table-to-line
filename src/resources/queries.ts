@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse } from "axios";
 import { useLocation } from "react-router-dom";
-import moment from 'moment';
 
 import { TimelineEventProps, AuthInfoProp, AuthGuardContext } from "../lib/TimelineType";
 import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember } from "./fetch";
@@ -60,8 +59,8 @@ export const useEventsQuery = () => {
       ...item,
       // That's point! "="
       // 日本標準時
-      start: item.start = moment(item.start).toDate(),
-      end: item.end = moment(item.end).toDate(),
+      start: item.start = new Date(item.start ?? new Date()),
+      end: item.end = new Date(item.end ?? new Date()),
       // summary: item.summary = 'sheep',
       // ...item
     })), [data])
@@ -80,8 +79,8 @@ export const useUserEventsQuery = () => {
     data: useMemo(() => data?.map(item => ({
       ...item,
       // 日本標準時
-      start: item.start = moment(item.start).toDate(),
-      end: item.end = moment(item.end).toDate(),
+      start: item.start = new Date(item.start ?? new Date()),
+      end: item.end = new Date(item.end ?? new Date()),
       // summary: item.summary = 'sheep',
       // ...item
     })), [data])
@@ -101,10 +100,10 @@ export const useEventsQueryForTL = () => {
     data: useMemo(() => data?.map(item => ({
       ...item,
       // 日本標準時
-      start: item.start = moment(item.start).toDate(),
-      end: item.end = moment(item.end).toDate(),
-      start_time: item.start_time = moment(item.start),//.add(9, 'hours'),
-      end_time: item.end_time = moment(item.end)//.add(9, 'hours'),
+      start: item.start = new Date(item.start ?? new Date()),
+      end: item.end = new Date(item.end ?? new Date()),
+      start_time: item.start_time = new Date(item.start ?? new Date()),//.add(9, 'hours'),
+      end_time: item.end_time = new Date(item.end ?? new Date())//.add(9, 'hours'),
       // item
     })), [data])
   }
