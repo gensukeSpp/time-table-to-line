@@ -14,10 +14,7 @@ export const fetchEventsData = async (postToken: string): Promise<TimelineEventP
 			'credentials': 'include' // ここを追加。
 		}
 	});
-	console.log(`Event fetch all: ${JSON.stringify(data)}`);
-	return data;
-	// .then(res => console.log(res))
-	// .catch(err => console.log(err));
+		return data;
 }
 
 export const fetchEventsDataForTT = async (postToken: string): Promise<TimelineEventProps[]> => {
@@ -30,8 +27,7 @@ export const fetchEventsDataForTT = async (postToken: string): Promise<TimelineE
 			'credentials': 'include' // ここを追加。
 		}
 	});
-	console.log(`Event fetch user: ${JSON.stringify(data)}`);
-	return data;
+		return data;
 }
 
 // とりあえず、値が取れるからこっち採用
@@ -50,8 +46,7 @@ export const fetchAuthResponse = async (postToken: string): Promise<AxiosRespons
   //   cache.set(postToken, authResponse);
   // }
   // const authCacheData: AuthInfoProp = cache.get(authResponse);
-	console.log(`Auth header: ${JSON.stringify(authResponse)}`);
-  return authResponse;
+	return authResponse;
 };
 
 export const refresh = async (prev: string): Promise<AxiosResponse<string>> => {
@@ -75,8 +70,7 @@ export const requestGroup = async (postToken: string)
 				'credentials': 'include'
 			}
 		});
-	console.log(`Group fetch data: ${JSON.stringify(groupNameResp)}`);
-	return groupNameResp;
+		return groupNameResp;
 }
 
 export const requestGroupMember = async (postToken: string): Promise<AxiosResponse<GroupUserProps[]>> => {
@@ -88,6 +82,5 @@ export const requestGroupMember = async (postToken: string): Promise<AxiosRespon
 			'credentials': 'include'
 		}
 	});
-	console.log(`Group fetch data: ${JSON.stringify(groupUsers)}`);
-	return groupUsers;
+		return groupUsers;
 }
