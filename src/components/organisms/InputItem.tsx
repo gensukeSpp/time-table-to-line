@@ -39,10 +39,9 @@ export const AddChildForm = forwardRef(
 		    setEventItem({...eventItem, [name]:value});
 	}
 
-	// const handleSelectChange = (selectedOption: SingleValue<OptionType>/*, actionMeta: ActionMeta<OptionType>*/) => {
-	// 	setDone(selectedOption?.label);
-	// 	// console.log(actionMeta);
-	// }
+		// const handleSelectChange = (selectedOption: SingleValue<OptionType>/*, actionMeta: ActionMeta<OptionType>*/) => {
+		// 	setDone(selectedOption?.label);
+		// }
 
 	// リテラルタイプ化
 	  const selectedStaff = `${selectedEvent.staff_id}` as const;

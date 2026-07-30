@@ -28,7 +28,6 @@ export const TimesUpdateButton = forwardRef(
 
   const handleUpdate = () => {
     updateEvents.mutate(timeChangeEvents);
-    // console.log('Updateしたつもり');
     resetAction();
   }
 
