@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
-import { withDragAndDropProps, EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
+import { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
 
-import { PickDate, TimelineEventProps } from '../lib/TimelineType';
+import { TimelineEventProps } from '../lib/TimelineType';
 
 export const useMouseEvents = () => {
   const [eventList, setEventList] = useState<TimelineEventProps[]>([]);
@@ -54,26 +54,4 @@ export const useMouseEvents = () => {
   }, []);
 
   return {onEventResize, onEventDrop, eventList, prevRef};
-}
-
-const useMouseEvent = () => {
-  const [eventDate, setEventDate] = useState<PickDate>({
-    id: '',
-    start: new Date(),
-    end: new Date()
-  });
-  
-  const onEventResize: withDragAndDropProps<TimelineEventProps>['onEventResize'] = data => {
-      const { event: handleEvent, start, end } = data;
-
-      setEventDate({...eventDate, id: handleEvent.id, start: new Date(start), end: new Date(end)});
-    }
-
-  const onEventDrop: withDragAndDropProps<TimelineEventProps>['onEventDrop'] = data => {
-      const { event: handleEvent, start, end } = data;
-  
-      setEventDate({...eventDate, id: handleEvent.id, start: new Date(start), end: new Date(end)});
-    }
-
-  return {onEventResize, onEventDrop, eventDate};
 }

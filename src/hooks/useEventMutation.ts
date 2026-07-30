@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import basicAxios from "../lib/AuthInfo";
-import { PickDate, TimelineEventProps } from "../lib/TimelineType";
+import { TimelineEventProps } from "../lib/TimelineType";
 import { eventKeys, useEventCache } from "../resources/cache";
 
 // ⑦ mutationFn
@@ -77,22 +77,4 @@ export const useUpdateDateListMutation = (targetIds: string[]) => {
   });
 }
 
-const useUpdateDateMutation = (targetId: number | string) => {
-  const queryClient = useQueryClient();
-  const eventCache = useEventCache();
 
-  return useMutation({
-    mutationFn: (timeBelt: PickDate) => 
-      basicAxios.post(`/date/update/${targetId}`, timeBelt),
-    onMutate: (newDate) => {
-      const prevEvents = queryClient.getQueryData(eventKeys.detail(targetId));
-      queryClient.setQueryData(eventKeys.detail(targetId),
-        newDate
-      );
-      return { prevEvents };
-    },
-    onSuccess: () => {
-      eventCache.invalidateDetail(targetId);
-    }
-  });
-}
