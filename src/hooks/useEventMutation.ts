@@ -4,13 +4,6 @@ import basicAxios from "../lib/AuthInfo";
 import { TimelineEventProps } from "../lib/TimelineType";
 import { eventKeys, useEventCache } from "../resources/cache";
 
-// ⑦ mutationFn
-// export const mutation = {
-//   createTodo: (request: PostTodoRequest) => {
-//     return todoApi.postTodo(request);
-//   },
-// };
-
 export const useCreateMutation = () => {
   const eventCache = useEventCache();
 
