@@ -9,7 +9,7 @@ import { MyCalendar } from './CalendarComponent';
 import { MyHorizonTimeline } from "../pages/TimelineComponent";
 import { DialogOnSlot } from '../organisms/DialogOnSlotComponent';
 
-import { tabMenu, tabButton } from './CalendarComponentWrapper.css';
+import { tabMenu, tabButton } from './CalendarWrapperComponent.css';
 import { flexXmandatory } from './CalendarComponent.css';
 // import { eventData } from '../../lib/SampleState';
 

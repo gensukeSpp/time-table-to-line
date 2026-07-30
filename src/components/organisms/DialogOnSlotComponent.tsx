@@ -4,7 +4,7 @@ import { SlotInfo } from "react-big-calendar";
 
 import { useDialog } from "../../hooks/useDialog";
 import { useAuthInfo } from "../../hooks/useAuthGuard";
-import { Dialog } from "./Dialog";
+import { Dialog } from "../molecules/Dialog";
 import { TitleInput } from '../organisms/InputTitleDialog';
 
 interface SlotOpenProps {
