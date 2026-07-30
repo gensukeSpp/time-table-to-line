@@ -4,8 +4,6 @@ import { GroupUserProps, TimelineEventProps } from '../lib/TimelineType';
 import { TimelineEventPropsList } from '../hooks/useContextFamily';
 import { exEvents, exItems } from './SampleState';
 
-// const groupQuery: GroupUserProps[] | undefined = useGroupUsersQuery().data?.data;
-
 const sampleGroups: TimelineGroupBase[] = [
   { id: 501, title: "group 1" },
   { id: 500, title: "group 2" },
