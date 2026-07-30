@@ -30,9 +30,6 @@ export const fetchEventsDataForTT = async (postToken: string): Promise<TimelineE
 		return data;
 }
 
-// とりあえず、値が取れるからこっち採用
-const cache = new Map();
-
 export const fetchAuthResponse = async (postToken: string): Promise<AxiosResponse<AuthInfoProp>> => {
   const authResponse = await basicAxios.post<AuthInfoProp>('/timetable/inquiry', postToken,
 		{
