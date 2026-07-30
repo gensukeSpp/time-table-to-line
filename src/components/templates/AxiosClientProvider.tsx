@@ -6,7 +6,6 @@ import basicAxios from "../../lib/AuthInfo";
 import { useRefreshQuery } from "../../resources/queries";
 
 export const AuthAxios = ({children}: {children: ReactNode}) => {
-  // useContext(AuthStateContext);
   const authContext = useAuthContext();
     const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;
 
@@ -20,7 +19,6 @@ export const AuthAxios = ({children}: {children: ReactNode}) => {
           config.headers["Authorization"] = `Bearer ${tokenContext}`;
         } else {
           config.headers["Authorization"] = `Bearer ${newAccessToken.data}`;
-          // config.headers["Authorization"] = `Bearer ${tokenContext}`;
         }
         return config;
       },
@@ -33,17 +31,10 @@ export const AuthAxios = ({children}: {children: ReactNode}) => {
       async (error: AxiosError) => {
         const prevRequest = error.config;
         // 403認証エラー(headerにaccess_tokenがない。もしくはaccess_tokenが無効)
-        if (error?.response?.status === 403/* && !prevRequest.sent*/) {
-          // prevRequest.sent = true;
-          // 判別可能なユニオン型 (discriminated union)
-          // https://typescriptbook.jp/reference/values-types-variables/discriminated-union
-          // if('accessToken' in authContext){
-          // 新しくaccess_tokenを発行する
-          // const newAccessToken = await useRefreshQuery();
+        if (error?.response?.status === 403) {
           prevRequest!.headers["Authorization"] = await `Bearer ${newAccessToken.data}`;
           // 再度実行する
           return basicAxios(prevRequest!);
-          // }
         }
         return Promise.reject(error);
       }
