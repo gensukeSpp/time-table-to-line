@@ -12,7 +12,6 @@ export const eventKeys = {
   user: () => ["event", "user"] as const,
   userList: () => ["group", "users"] as const,
   dateList: (ids: number[] | string[]) => ["date", "update", ids] as const
-  // dateList: (objs: PickDate[]) => ["listDate", objs] as const
 };
 
 export const authKeys = {

@@ -1,7 +1,6 @@
 import { AxiosResponse } from "axios";
 
 import { AuthInfoProp, GroupUserProps, TimelineEventProps } from "../lib/TimelineType";
-// import { AuthGuardContext } from "../components/templates/AuthParent";
 import basicAxios from "../lib/AuthInfo";
 
 export const fetchEventsData = async (postToken: string): Promise<TimelineEventProps[]> => {
@@ -39,10 +38,6 @@ export const fetchAuthResponse = async (postToken: string): Promise<AxiosRespons
 			'credentials': 'include' // ここを追加。
 			}
 		});
-	// if (!cache.has(postToken)) {
-  //   cache.set(postToken, authResponse);
-  // }
-  // const authCacheData: AuthInfoProp = cache.get(authResponse);
 	return authResponse;
 };
 
