@@ -9,10 +9,11 @@ This skill automates the process of generating high-level architecture snapshots
 ## Workflow
 
 1. **Identify Changes:**
-   - Determine the base branch (usually `origin/main`).
-   - Analyze the diff to deeply understand the changes and their impact.
-   - Identify changed ~~Python~~ source code files compared to the base branch.
-   - List commits between base and current head.
+   - Use `invoke_agent` with the `codebase_investigator` to:
+     - Determine the base branch (usually `origin/main`).
+     - Analyze the diff to deeply understand the changes and their impact.
+     - Identify changed source code files compared to the base branch.
+     - List commits between base and current head.
 
 2. **Generate Snapshot:**
    - Create a new file in `docs/architecture/` with the current date: `YYYY-MM-DD-architecture.md`.
