@@ -63,8 +63,7 @@ export const useUpdateDateListMutation = (targetIds: string[]) => {
       );
       return { prevEvents };
     },
-    onSettled: (data, error) => {
-      
+    onSettled: () => {
       eventCache.invalidateList();
     }
   });

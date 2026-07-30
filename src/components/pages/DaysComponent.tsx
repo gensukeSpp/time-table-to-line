@@ -1,11 +1,9 @@
-import { useMemo, useState } from 'react';
+
 import { DateLocalizer, Navigate, TitleOptions } from 'react-big-calendar';
 // 🙆‍♂️ valid (@ts-expect-error のあとに続けて説明を書く必要がある)
 // @ts-expect-error どうしても "foo" から bar() が呼びたいんです
 import * as TimeGrid from 'react-big-calendar/lib/TimeGrid'
 import { addDays, startOfDay, isBefore, isEqual } from 'date-fns';
-import { TimelineEventProps } from '../../lib/TimelineType';
-
 import 'react-calendar-timeline/style.css'
 
 export const MyWeek = () => {

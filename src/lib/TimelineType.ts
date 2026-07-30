@@ -1,4 +1,4 @@
-import { Event, EventWrapperProps, SlotInfo } from 'react-big-calendar';
+import { Event, SlotInfo } from 'react-big-calendar';
 import { TimelineItemBase as TimelineItem } from 'react-calendar-timeline';
 
 export interface EventItem extends Event {

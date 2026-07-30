@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { SlotInfo } from "react-big-calendar";
 
-import { useDialog } from "../../hooks/useDialog";
 import { useAuthInfo } from "../../hooks/useAuthGuard";
 import { Dialog } from "../molecules/Dialog";
 import { TitleInput } from '../organisms/InputTitleDialog';

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuthQuery } from "../../resources/queries";
 import { useAuthContext } from "../../hooks/useContextFamily";
@@ -8,7 +8,7 @@ export const AuthLeavePage = () => {
   const authContext = useAuthContext();
   const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;  
   
-  const { data, isPending, error } = useAuthQuery(tokenContext!);
+  const { data, isPending } = useAuthQuery(tokenContext!);
   const navigate = useNavigate();
 
   const strData = JSON.stringify(data?.data);

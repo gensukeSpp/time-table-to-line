@@ -2,7 +2,7 @@ import { TimelineGroupBase } from 'react-calendar-timeline';
 
 import { GroupUserProps, TimelineEventProps } from '../lib/TimelineType';
 import { TimelineEventPropsList } from '../hooks/useContextFamily';
-import { exEvents, exItems } from './SampleState';
+import { exEvents } from './SampleState';
 
 const sampleGroups: TimelineGroupBase[] = [
   { id: 501, title: "group 1" },
@@ -10,7 +10,7 @@ const sampleGroups: TimelineGroupBase[] = [
 ];
 
 export const getGroup = (groupQueries?: GroupUserProps[]): TimelineGroupBase[] => {
-  const result = groupQueries ? groupQueries.map((groupUser, k) => {
+  const result = groupQueries ? groupQueries.map((groupUser) => {
     return { id: groupUser.staff_id, title: groupUser.family_kana };
   }) : sampleGroups;
   return result;

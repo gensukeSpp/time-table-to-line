@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 
-import { TimelineEventProps, AuthInfoProp } from "../lib/TimelineType";
+
 import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember } from "./fetch";
 import { eventKeys, authKeys } from "./cache";
 import { useAuthContext } from "../hooks/useContextFamily";

@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useMemo, useEffect, CSSProperties } from 'react';
-import { Calendar, Views, View, SlotInfo } from 'react-big-calendar'
-import withDragAndDrop, { OnDragStartArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
+import { useState, useCallback, useRef, useEffect, CSSProperties } from 'react';
+import { Calendar, View, SlotInfo } from 'react-big-calendar'
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import { Box } from '@mantine/core';
 
 import { useEventsState } from '../../hooks/useContextFamily';
@@ -10,7 +10,6 @@ import { useCallingEditForm } from '../../hooks/useCallingForm';
 import localizer from '../../lib/Localization';
 import { CalendarActionProps, TimelineEventProps } from '../../lib/TimelineType';
 import { useSearchQuery } from '../../resources/queries';
-import { CustomEventWrapper, CustomEventCard } from '../molecules/WrapComponent';
 import { AddChildForm } from '../organisms/InputItem';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -54,15 +53,7 @@ export const MyCalendar = (
   /**
    * onDragStart and prevent
    */
-  const [dragStart, setDragStart] = useState<boolean>();
-  const onDragStart = useCallback((args: OnDragStartArgs<TimelineEventProps>) => {
-    const { event, action } = args;
-    if (event.staff_id !== Number(authId)) {
-      setDragStart(false);
-    } else {
-      setDragStart(true);
-    }
-  }, []);
+
 
   /**
    * Drag and Drop
@@ -90,10 +81,8 @@ export const MyCalendar = (
   const onNavigate = useCallback((newDate: Date) => {
     setDisplayDate(newDate);
   }, [setDisplayDate]);
-  const [returnView, setReturnView] = useState<View>();
-  const onView = useCallback((newView: View) => {
-    setReturnView(newView);
-  }, [setReturnView]);
+  const onView = useCallback((_newView: View) => {
+  }, []);
 
   /**
    * Slot and Dialog
@@ -117,12 +106,6 @@ export const MyCalendar = (
     onSlotInfo?.(slotInfoState!);
   }, [onSelectSlot, slotInfoState]);
 
-  const [allDayEvent, setAllDayEvent] = useState<TimelineEventProps>();
-  const allowAllDay = (event: TimelineEventProps) => {
-    setAllDayEvent(event);
-    return true;
-  }
-
   /**
    * Edit form appear
    */
@@ -137,14 +120,6 @@ export const MyCalendar = (
   useEffect(() => {
     divRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [selectEvent]);
-
-  /**
-   * Wrapper component
-   */
-  const customComponents = useMemo(() => ({
-    event: CustomEventCard,
-    eventWrapper: CustomEventWrapper,
-  }), []);
 
   return (
     <>
@@ -164,14 +139,14 @@ export const MyCalendar = (
             }}
             onNavigate={onNavigate}
             eventPropGetter={eventPropGetter}
-            onEventDrop={dragStart === false ? undefined : onEventDrop}
-            onEventResize={dragStart === false ? undefined : onEventResize}
+            onEventDrop={onEventDrop}
+            onEventResize={onEventResize}
             resizable
             onSelectEvent={handleSelectEvent}
             onSelectSlot={onSelectSlot}
             selectable
             onView={onView}
-            onRangeChange={range => {
+            onRangeChange={() => {
             }}
           />
         </Box>

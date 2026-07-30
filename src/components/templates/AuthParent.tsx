@@ -1,5 +1,4 @@
-import { ReactNode, createContext } from "react";
-import { useLocation } from 'react-router-dom';
+import { ReactNode } from "react";
 
 import { AuthInfoProp } from "../../lib/TimelineType";
 import { AuthStateContext } from "../../hooks/useContextFamily";

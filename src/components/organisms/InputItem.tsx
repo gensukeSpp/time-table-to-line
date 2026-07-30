@@ -1,4 +1,4 @@
-import { useState, FormEvent, forwardRef, Ref } from 'react';
+import { useState, forwardRef, Ref } from 'react';
 import { Box, Text, TextInput, NativeSelect, Button } from '@mantine/core';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
@@ -41,7 +41,7 @@ export const AddChildForm = forwardRef(
 	  const selectedStaff = `${selectedEvent.staff_id}` as const;
 	  const { data: infoContext } = useSearchQuery('userID');
 
-	const { Dialog, open, close } = useDialog();
+	const { Dialog, close } = useDialog();
 
 		return (
 		  <>

@@ -17,7 +17,7 @@ export const EventsContextProvider = ({ children }: { children: ReactNode }) => 
     end: new Date(new Date().setHours(new Date().getHours() + 1))
   }
 
-  const { data, isPending } = useEventsQueryForTL();
+  const { data } = useEventsQueryForTL();
   const state: TimelineEventPropsList = [initialData].concat(data!);
 
   return (
