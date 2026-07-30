@@ -104,7 +104,7 @@ export const MyCalendar = (
 
   useEffect(() => {
     onSlotInfo?.(slotInfoState!);
-  }, [onSelectSlot, slotInfoState]);
+  }, [onSelectSlot, slotInfoState, onSlotInfo]);
 
   /**
    * Edit form appear

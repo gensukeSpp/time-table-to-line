@@ -26,7 +26,7 @@ export const useCallingEditForm = ({onShowFormView}: EventFormProps) => {
     countRef.current = undefined;
     
     setShowModal(true);
-  }, []);
+  }, [onShowFormView]);
 
   const closeInputForm = () => {
     setShowModal(false);

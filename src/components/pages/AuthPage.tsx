@@ -20,7 +20,7 @@ export const AuthLeavePage = () => {
       }
     }
     f();
-  }, [data]);
+  }, [data, navigate, strData]);
 
   return (
     <>

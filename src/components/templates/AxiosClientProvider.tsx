@@ -45,7 +45,7 @@ export const AuthAxios = ({children}: {children: ReactNode}) => {
       basicAxios.interceptors.request.eject(requestIntercept);
       basicAxios.interceptors.response.eject(responseIntercept);
     };
-  }, [authContext]);
+  }, [authContext, tokenContext, newAccessToken.data]);
 
   return (
     <>
