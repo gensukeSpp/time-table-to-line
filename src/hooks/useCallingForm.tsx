@@ -24,7 +24,7 @@ export const useCallingEditForm = ({onShowFormView, targetEvent}: EventFormProps
   const handleSelectEvent = useCallback((callingEvent: TimelineEventProps) => {
     onShowFormView(callingEvent);
     countRef.current = undefined;
-    console.log('切り替わりました Handle: ', countRef.current);
+    
     setShowModal(true);
   }, []);
 

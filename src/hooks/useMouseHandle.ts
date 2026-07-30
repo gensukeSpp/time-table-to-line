@@ -23,12 +23,12 @@ export const useMouseEvents = () => {
         end: new Date(end),
         isDraggable: true
       }
-      // console.log(`before: ${JSON.stringify(currentEvents)}, resize: ${JSON.stringify(resizedEvent)}`);
+      
       return [...currentEvents, resizedEvent]
     });
     prevRef.current = handleEvent;
     prevRef.current!.isDraggable = true;
-    console.log(`DnD previsious event: ${JSON.stringify(prevRef.current)}`);
+    
   // }
   }, []);
 
@@ -44,12 +44,12 @@ export const useMouseEvents = () => {
         end: new Date(end),
         isDraggable: true
       }
-      // console.log(`before: ${JSON.stringify(currentEvents)}, move: ${JSON.stringify(movedEvent)}`);
+      
       return [...currentEvents, movedEvent]
     });
     prevRef.current = handleEvent;
     prevRef.current!.isDraggable = true;
-    console.log(`DnD Previsious event: ${JSON.stringify(prevRef.current)}`);
+    
     // }
   }, []);
 
@@ -64,18 +64,16 @@ const useMouseEvent = () => {
   });
   
   const onEventResize: withDragAndDropProps<TimelineEventProps>['onEventResize'] = data => {
-    const { event: handleEvent, start, end } = data;
+      const { event: handleEvent, start, end } = data;
 
-    setEventDate({...eventDate, id: handleEvent.id, start: new Date(start), end: new Date(end)});
-    console.log(`Resize action: ${handleEvent.start}, ${handleEvent.end}, "ID ${handleEvent.id}"`);
-  }
+      setEventDate({...eventDate, id: handleEvent.id, start: new Date(start), end: new Date(end)});
+    }
 
   const onEventDrop: withDragAndDropProps<TimelineEventProps>['onEventDrop'] = data => {
-    const { event: handleEvent, start, end } = data;
+      const { event: handleEvent, start, end } = data;
   
-    setEventDate({...eventDate, id: handleEvent.id, start: new Date(start), end: new Date(end)});
-    console.log(`Drop action: ${handleEvent.start}, ${handleEvent.end}, "ID ${handleEvent.id}"`);
-  }
+      setEventDate({...eventDate, id: handleEvent.id, start: new Date(start), end: new Date(end)});
+    }
 
   return {onEventResize, onEventDrop, eventDate};
 }

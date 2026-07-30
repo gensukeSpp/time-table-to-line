@@ -17,7 +17,7 @@ export const useDialog = (): Result => {
   const [isOpen, setOpen] = useState<boolean>(false);
 
   const open = useCallback((): void => {
-    console.log('Open the Dialog');
+    
     setOpen(true);
   }, []);
 
