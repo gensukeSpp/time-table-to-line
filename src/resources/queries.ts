@@ -36,23 +36,35 @@ export const useAuthQuery = (authToken: string) => {
 
 // Data not recalculated
 // https://github.com/TanStack/query/issues/1580
-export const useEventsQuery = () => {
-  // JavaScript の分割代入で変数名を変更する
-  // https://qiita.com/masachoco/items/601b6771021bde2311f8
+type EventQueryOptions = {
+  forTimeline?: boolean;
+};
+
+export const useEventsQuery = (options?: EventQueryOptions) => {
   const { data: searchQueryToken } = useSearchQuery('token');
   
   const { data, ...queryInfo } = useQuery({
     queryKey: eventKeys.all(),
     queryFn: () => fetchEventsData(searchQueryToken!)
-  })
+  });
   return {
     ...queryInfo,
-    data: useMemo(() => data?.map(item => ({
-      ...item,
-      start: item.start = new Date(item.start ?? new Date()),
-      end: item.end = new Date(item.end ?? new Date()),
-    })), [data])
-  }
+    data: useMemo(() => Array.isArray(data) ? data.map(item => {
+      const base = {
+        ...item,
+        start: new Date(item.start ?? new Date()),
+        end: new Date(item.end ?? new Date()),
+      };
+      if (options?.forTimeline) {
+        return {
+          ...base,
+          start_time: new Date(item.start ?? new Date()),
+          end_time: new Date(item.end ?? new Date()),
+        };
+      }
+      return base;
+    }) : [], [data, options?.forTimeline])
+  };
 }
 
 export const useUserEventsQuery = () => {
@@ -69,25 +81,6 @@ export const useUserEventsQuery = () => {
       start: item.start = new Date(item.start ?? new Date()),
       end: item.end = new Date(item.end ?? new Date()),
     })), [data])
-  }
-}
-
-export const useEventsQueryForTL = () => {
-  const { data: searchQueryToken } = useSearchQuery('token');
-  
-  const { data, ...queryInfo } = useQuery({
-    queryKey: eventKeys.all(),
-    queryFn: () => fetchEventsData(searchQueryToken!)
-  });
-  return {
-    ...queryInfo,
-    data: useMemo(() => Array.isArray(data) ? data.map(item => ({
-      ...item,
-      start: item.start = new Date(item.start ?? new Date()),
-      end: item.end = new Date(item.end ?? new Date()),
-      start_time: item.start_time = new Date(item.start ?? new Date()),
-      end_time: item.end_time = new Date(item.end ?? new Date()),
-    })) : [], [data])
   }
 }
 

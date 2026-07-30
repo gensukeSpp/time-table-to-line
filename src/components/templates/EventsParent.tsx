@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { addHours } from 'date-fns';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
-import { useEventsQueryForTL } from '../../resources/queries';
+import { useEventsQuery } from '../../resources/queries';
 import { EventsStateContext, TimelineEventPropsList } from '../../hooks/useContextFamily';
 
 export const EventsContextProvider = ({ children }: { children: ReactNode }) => {
@@ -17,7 +17,7 @@ export const EventsContextProvider = ({ children }: { children: ReactNode }) => 
     end: new Date(new Date().setHours(new Date().getHours() + 1))
   }
 
-  const { data } = useEventsQueryForTL();
+  const { data } = useEventsQuery({ forTimeline: true });
   const state: TimelineEventPropsList = [initialData].concat(data!);
 
   return (
