@@ -1,7 +1,7 @@
 {
   "name": "time-table-to-line",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.7",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@emotion/is-prop-valid": "^1.4.0",
     "@mantine/core": "^7",
     "@mantine/hooks": "^7",
     "@tanstack/react-query": "^5",
