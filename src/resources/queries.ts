@@ -3,7 +3,7 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse } from "axios";
 import { useLocation } from "react-router-dom";
 
-import { TimelineEventProps, AuthInfoProp, AuthGuardContext } from "../lib/TimelineType";
+import { TimelineEventProps, AuthInfoProp } from "../lib/TimelineType";
 import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember } from "./fetch";
 import { eventKeys, authKeys, useAuthCache } from "./cache";
 import { useAuthContext } from "../hooks/useContextFamily";
