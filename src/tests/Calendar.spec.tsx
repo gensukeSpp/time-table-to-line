@@ -142,7 +142,7 @@ describe('MyCalendar (CalendarComponent)', () => {
 
     // 表示されているイベントのタイトルが正しいことを確認
     const eventTitles = Array.from(renderedEvents).map(el => el.textContent);
-    console.log(eventTitles);
+    console.log(eventTitles); // eslint-disable-line no-console
     expect(eventTitles[0]).toContain('My Event 1');
     expect(eventTitles[1]).toContain('My Event 2');
     expect(eventTitles).not.toContain('Another User Event');

@@ -25,7 +25,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
       'react-hooks/exhaustive-deps': 'off',
-      'no-console': 'off',
+      'no-console': 'warn',
     },
   },
   ...storybookFlat,
