@@ -11,7 +11,7 @@ This skill automates the process of generating high-level architecture snapshots
 1. **Identify Changes:**
    - Determine the base branch (usually `origin/main`).
    - Analyze the diff to deeply understand the changes and their impact.
-   - Identify changed Python files compared to the base branch.
+   - Identify changed ~~Python~~ source code files compared to the base branch.
    - List commits between base and current head.
 
 2. **Generate Snapshot:**

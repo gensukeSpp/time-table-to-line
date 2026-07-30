@@ -14,13 +14,9 @@ export const CustomEventWrapper: React.FC<ComponentWithChildrenProps> = (props) 
 
   const getterMaybeProp = props.getters.eventProp;
   const getterProp = getterMaybeProp && getterMaybeProp(event, event.start!, event.end!, false);
-  getterProp && console.log(`Getter prop: ${JSON.stringify(getterProp)}`);
-	// const { data } = useSearchQuery('userID');
-
   const ref = useRef<HTMLDivElement>(null);
   const elm = ref.current?.querySelector('.rbc-event');
   // view-portからの座標、今回使わない
-  // console.log(`Role button div: ${JSON.stringify(elm?.getBoundingClientRect())}`);
   // const childRefTop = elm?.getBoundingClientRect().top;
 
   const wrapperStyle: CSSProperties = {
@@ -41,7 +37,6 @@ export const CustomEventWrapper: React.FC<ComponentWithChildrenProps> = (props) 
 
   const handleCapture = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     // ID違いのフォーム表示
-    // console.log('Capture event: ', e);
     if(!(e.target instanceof HTMLButtonElement)){
       return;
     }

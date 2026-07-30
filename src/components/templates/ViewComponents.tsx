@@ -2,11 +2,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from './AuthParent';
 import { EventsContextProvider } from './EventsParent';
-import { AuthLeavePage } from '../pages/AuthLeaveComponent';
-import { AuthAxios } from "./AxiosClientProvider";
-// import { OnSelectSlot } from "../../sample/SelectSlot";
-import { CalendarWrapper } from "../pages/CalendarWrapperComponent";
-import { MyHorizonTimeline } from "../pages/TimelineComponent";
+import { AuthLeavePage } from '../pages/AuthPage';
+import { AuthAxios } from './AxiosClientProvider';
+// import { OnSelectSlot } from '../../sample/SelectSlot';
+import { CalendarWrapper } from '../pages/CalendarPage';
+import { MyHorizonTimeline } from '../pages/TimelinePage';
 
 export const RoutesComponent = () => {
   

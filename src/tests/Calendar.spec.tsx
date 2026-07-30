@@ -34,7 +34,7 @@ describe('Calendar', () => {
 import { vi, type Mock } from 'vitest';
 import { setHours, startOfDay } from 'date-fns';
 import { MantineProvider } from '@mantine/core';
-import { MyCalendar } from '../components/pages/CalendarComponent';
+import { MyCalendar } from '../components/pages/CalendarView';
 
 // Hooksをモック
 vi.mock('../hooks/useAuthGuard', () => ({
@@ -61,7 +61,7 @@ import { useSearchQuery } from '../resources/queries';
 import { useMouseEvents } from '../hooks/useMouseHandle';
 import { useCallingEditForm } from '../hooks/useCallingForm';
 
-describe('MyCalendar (CalendarComponent)', () => {
+describe('MyCalendar (CalendarView)', () => {
   // テストデータ（時刻が重複しないように修正）
   const mockEvents: TimelineEventProps[] = [
     { id: 1, title: 'My Event 1', start_time: setHours(startOfDay(new Date()), 9), end_time: setHours(startOfDay(new Date()), 10), staff_id: 1, group: 1 },
@@ -142,7 +142,7 @@ describe('MyCalendar (CalendarComponent)', () => {
 
     // 表示されているイベントのタイトルが正しいことを確認
     const eventTitles = Array.from(renderedEvents).map(el => el.textContent);
-    console.log(eventTitles);
+    console.log(eventTitles); // eslint-disable-line no-console
     expect(eventTitles[0]).toContain('My Event 1');
     expect(eventTitles[1]).toContain('My Event 2');
     expect(eventTitles).not.toContain('Another User Event');

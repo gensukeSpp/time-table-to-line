@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // const search = useLocation().search;
   // const query = new URLSearchParams(search);
   const { data } = useSearchQuery('token');
-  console.log(`Parent context token: ${data}`);
   const _auth: AuthInfoProp = { accessToken: data!, type: 'token' }
 
   return (

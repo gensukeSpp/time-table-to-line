@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { TimelineEventProps, AuthInfoProp } from "../lib/TimelineType";
 import { EventsStateContext, AuthStateContext } from "../hooks/useContextFamily";
-import { MyHorizonTimeline } from "../components/pages/TimelineComponent";
+import { MyHorizonTimeline } from '../components/pages/TimelinePage';
 import { exEvents, exGroupUsers, exItems } from "../lib/SampleState";
 
 import { eventsStateMock, groupMockMember } from "./lib/timeline.mock";

@@ -29,7 +29,7 @@ export const useTimelineDragZoom = (
     e.preventDefault();
     setIsDragging(true);
     setDragStartX(e.clientX);
-    console.log(`dragStartX down: ${dragStartX}`);
+    
   }, []);
 
   const handleMouseMove = useCallback(
@@ -52,7 +52,7 @@ export const useTimelineDragZoom = (
       // 継続的なズームのためにドラッグ開始点を更新
       // mouseMoveイベントが発生するたびにドラッグの開始位置を現在位置で上書きしてしまっている
       // setDragStartX(e.clientX);
-      console.log(`dragStartX move: ${dragStartX}`);
+      
     },
     [isDragging, dragStartX, visibleTime, timelineWidth]
   );

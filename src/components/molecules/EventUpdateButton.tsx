@@ -15,12 +15,11 @@ export const EventUpdateButtons = (indicateEvent: TimelineEventProps) => {
 		// 	payload: indicateEvent
 		// });
 		updateEvent.mutate({
-			...indicateEvent,
-			summary: indicateEvent.summary,
-			progress: indicateEvent.progress
-		});
-		console.log(`Update!: ${JSON.stringify(indicateEvent)}`);
-	}
+		      ...indicateEvent,
+		      summary: indicateEvent.summary,
+		      progress: indicateEvent.progress
+		    });
+		  }
 	const handleRemove = (e: FormEvent) => {
 		e.preventDefault();
 		deleteEvent.mutate();

@@ -53,8 +53,6 @@ MyWeek.navigate = (date: Date, action: 'PREV' | 'NEXT' | 'DATE', localizer: Date
 MyWeek.title = (date: Date, options: TitleOptions): string => {
   const [start, ...rest] = MyWeek.range(date);
   options.formats = [];
-  console.log(`TitleOptions: ${JSON.stringify(options)}`);
-  // return localizer.format({ start, end: rest.pop() }, 'dayRangeHeaderFormat')
   return options.formats.concat(start.toISOString())
     + ' — ' + options.formats.concat(rest.pop()!.toISOString());
 }

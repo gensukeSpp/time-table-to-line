@@ -97,7 +97,7 @@ export const useEventsQueryForTL = () => {
   // return { data, queryInfo }
   return {
     ...queryInfo,
-    data: useMemo(() => data?.map(item => ({
+    data: useMemo(() => Array.isArray(data) ? data.map(item => ({
       ...item,
       // 日本標準時
       start: item.start = new Date(item.start ?? new Date()),
@@ -105,7 +105,7 @@ export const useEventsQueryForTL = () => {
       start_time: item.start_time = new Date(item.start ?? new Date()),//.add(9, 'hours'),
       end_time: item.end_time = new Date(item.end ?? new Date())//.add(9, 'hours'),
       // item
-    })), [data])
+    })) : [], [data])
   }
 }
 

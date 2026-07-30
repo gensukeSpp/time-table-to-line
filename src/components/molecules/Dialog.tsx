@@ -32,16 +32,14 @@ export const Dialog: React.FC<DialogProps> = ({
         return;
       }
       dialogElement.close();
-      console.log("ダイアログ閉じました: effect");
     }
   }, [isOpen]);
 
 	const handleClickDialog = useCallback(
-		(event: React.MouseEvent<HTMLDialogElement>): void => {
-      [event];
-			onClose?.();
-      console.log("ダイアログ閉じました: click");
-		},
+	    (event: React.MouseEvent<HTMLDialogElement>): void => {
+	      [event];
+	      onClose?.();
+	    },
 		[onClose]
 	);
 

@@ -18,11 +18,9 @@ export const MyHorizonTimeline = () => {
   const tokenContext = authState.type === 'token' ? authState.accessToken : undefined;
   const { data: yourInfo } = useAuthQuery(tokenContext!);
   const strYourInfo = JSON.stringify(yourInfo?.data);
-  console.log(`Auth in timeline: ${strYourInfo}`);
 
   const stateAll = useEventsState();
   const state = getItems(stateAll);
-  // console.log(`Events in timeline: ${JSON.stringify(state)}`);
 
   // Container ref to get timeline width
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,8 +50,6 @@ export const MyHorizonTimeline = () => {
   );
 
   const onBoundsChange = (canvasTimeStart: number, canvasTimeEnd: number) => {
-    console.log(`Bounds changed: ${new Date(canvasTimeStart).toISOString()}`);
-    console.log(`Bounds changed: ${new Date(canvasTimeEnd).toISOString()}`);
     // updateVisibleTime(canvasTimeStart, canvasTimeEnd);
   };
 
@@ -97,7 +93,7 @@ export const MyHorizonTimeline = () => {
           minZoom={24 * 60 * 60 * 1000}
           maxZoom={365.24 * 86400 * 1000}
           lineHeight={60}
-          onCanvasClick={(groupId, time, e) => { console.log('Canvas clicked', groupId, time, e); }}
+          onCanvasClick={(groupId, time, e) => { }}
           onBoundsChange={onBoundsChange}
         />
       )}

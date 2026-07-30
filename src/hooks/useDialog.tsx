@@ -1,6 +1,6 @@
 import { ComponentProps, useCallback, useState } from "react";
 
-import { Dialog as Component } from "../components/organisms/Dialog";
+import { Dialog as Component } from "../components/molecules/Dialog";
 
 type UseDialogProp = Omit<
   ComponentProps<typeof Component>,
@@ -17,7 +17,7 @@ export const useDialog = (): Result => {
   const [isOpen, setOpen] = useState<boolean>(false);
 
   const open = useCallback((): void => {
-    console.log('Open the Dialog');
+    
     setOpen(true);
   }, []);
 

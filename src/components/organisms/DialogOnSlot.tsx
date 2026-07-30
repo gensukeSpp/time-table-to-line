@@ -4,7 +4,7 @@ import { SlotInfo } from "react-big-calendar";
 
 import { useDialog } from "../../hooks/useDialog";
 import { useAuthInfo } from "../../hooks/useAuthGuard";
-import { Dialog } from "./Dialog";
+import { Dialog } from "../molecules/Dialog";
 import { TitleInput } from '../organisms/InputTitleDialog';
 
 interface SlotOpenProps {
@@ -14,7 +14,6 @@ interface SlotOpenProps {
 export const DialogOnSlot = ({slotInfo}: SlotOpenProps) => {
   // const { Dialog, open, close } = useDialog();
   const guard = useAuthInfo();
-  console.log('SlotInfo in dialog: ', slotInfo);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   useEffect(() => {
     setOpenDialog(true);
