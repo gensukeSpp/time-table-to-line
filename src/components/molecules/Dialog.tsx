@@ -37,7 +37,6 @@ export const Dialog: React.FC<DialogProps> = ({
 
 	const handleClickDialog = useCallback(
 	    (event: React.MouseEvent<HTMLDialogElement>): void => {
-	      [event];
 	      onClose?.();
 	    },
 		[onClose]

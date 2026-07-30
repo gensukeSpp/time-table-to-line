@@ -15,7 +15,9 @@ export const AuthLeavePage = () => {
 
   useEffect(() => {
     const f = async () => {
-      data && navigate(`/calendar?userID=${JSON.parse(strData).staff_id}`);
+      if (data) {
+        navigate(`/calendar?userID=${JSON.parse(strData).staff_id}`);
+      }
     }
     f();
   }, [data]);
