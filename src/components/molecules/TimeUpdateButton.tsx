@@ -3,7 +3,7 @@ import { Box, Button, Text } from '@mantine/core';
 
 import { useUpdateDateListMutation } from "../../hooks/useEventMutation";
 import { ChangingButtonProp } from "../../lib/TimelineType";
-import { updateButtonArea } from "./TimeUpdateButtonComponent.css";
+import { updateButtonArea } from "./TimeUpdateButton.css";
 
 export const TimesUpdateButton = forwardRef(
   ({timeChangeEvents}: ChangingButtonProp, buttonRef: Ref<HTMLDivElement>) => {

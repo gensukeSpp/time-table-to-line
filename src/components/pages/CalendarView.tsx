@@ -17,7 +17,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import cx from 'classnames';
 import { topWidth } from '../sprinkles.responsive.css';
-import { gridArea } from './CalendarComponent.css';
+import { gridArea } from './CalendarView.css';
 
 export const MyCalendar = (
   {

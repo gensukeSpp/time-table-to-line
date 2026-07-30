@@ -6,7 +6,7 @@ import { addHours } from 'date-fns';
 import { MantineProvider } from '@mantine/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { MyCalendar } from '../components/pages/CalendarComponent';
+import { MyCalendar } from '../components/pages/CalendarView';
 import { AuthInfoProp, TimelineEventProps } from '../lib/TimelineType';
 import { AuthStateContext, EventsStateContext } from '../hooks/useContextFamily';
 import { authKeys } from '../resources/cache';

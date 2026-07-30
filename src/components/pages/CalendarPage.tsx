@@ -4,13 +4,13 @@ import { SlotInfo } from 'react-big-calendar';
 import { Box, Tabs } from '@mantine/core';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
-import { TimesUpdateButton } from '../molecules/TimeUpdateButtonComponent';
-import { MyCalendar } from './CalendarComponent';
-import { MyHorizonTimeline } from "../pages/TimelineComponent";
-import { DialogOnSlot } from '../organisms/DialogOnSlotComponent';
+import { flexXmandatory } from './CalendarView.css';
+import { TimesUpdateButton } from '../molecules/TimeUpdateButton';
+import { MyCalendar } from './CalendarView';
+import { MyHorizonTimeline } from "../pages/TimelinePage";
+import { DialogOnSlot } from '../organisms/DialogOnSlot';
 
-import { tabMenu, tabButton } from './CalendarWrapperComponent.css';
-import { flexXmandatory } from './CalendarComponent.css';
+import { tabMenu, tabButton } from './CalendarPage.css';
 // import { eventData } from '../../lib/SampleState';
 
 export const CalendarWrapper = () => {

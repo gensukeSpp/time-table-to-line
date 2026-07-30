@@ -9,7 +9,7 @@ import { useSearchQuery } from '../../resources/queries';
 
 import { boundaryTop, boundaryY, buttonPosition } from '../sprinkles.responsive.css';
 import { formParent } from './InputItem.css';
-import { EventUpdateButtons } from '../molecules/EventUpdateButtonComponent';
+import { EventUpdateButtons } from '../molecules/EventUpdateButton';
 
 interface InputEventProps {
 	selectedEvent: TimelineEventProps,
