@@ -11,7 +11,6 @@ import { MyHorizonTimeline } from "../pages/TimelinePage";
 import { DialogOnSlot } from '../organisms/DialogOnSlot';
 
 import { tabMenu, tabButton } from './CalendarPage.css';
-// import { eventData } from '../../lib/SampleState';
 
 export const CalendarWrapper = () => {
   // React コンポーネント間でデータ・イベントを受け渡す方法

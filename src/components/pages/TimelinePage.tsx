@@ -49,8 +49,7 @@ export const MyHorizonTimeline = () => {
     timelineWidth
   );
 
-  const onBoundsChange = (canvasTimeStart: number, canvasTimeEnd: number) => {
-    // updateVisibleTime(canvasTimeStart, canvasTimeEnd);
+  const onBoundsChange = (_canvasTimeStart: number, _canvasTimeEnd: number) => {
   };
 
   // onTimeChange handler to sync scrolling with our zoom state

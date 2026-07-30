@@ -26,7 +26,6 @@ export const MyCalendar = (
   }: CalendarActionProps) => {
 
   const { authId } = useAuthInfo();
-  // VSCode あてにならん
 
   const stateAll = useEventsState();
 
@@ -40,7 +39,6 @@ export const MyCalendar = (
   const { data } = useSearchQuery('userID');
   const eventPropGetter = (event: TimelineEventProps) => {
     const uncontrolStyle: CSSProperties = {
-      // pointerEvents: 'none',
       opacity: '.7'
     }
     const controlStyle: CSSProperties = {
@@ -80,19 +78,16 @@ export const MyCalendar = (
   }, [onTimeChangeEvents, eventList]);
 
   state?.map((evt, j) => {
-    // if(prevRef){
     if (prevRef.current?.isDraggable === true && prevRef.current.id === evt.id) {
       delete state[j];
       prevRef.current = undefined;
     }
-    // }
   });
   const newState = eventList ? state?.concat(eventList) : state;
 
   // Viewの切り替え調節、このまんま使える
   const [displayDate, setDisplayDate] = useState(new Date());
   const onNavigate = useCallback((newDate: Date) => {
-    // const anotherDate: Date = new Date(newDate.setDate(newDate.getDay() - 3));
     setDisplayDate(newDate);
   }, [setDisplayDate]);
   const [returnView, setReturnView] = useState<View>();
@@ -153,21 +148,14 @@ export const MyCalendar = (
 
   return (
     <>
-      {/* <TimesUpdateButton timeChangeEvents={eventList} /> */}
       <Box className={cx(gridArea, topWidth)} style={{ flexShrink: 0, scrollSnapAlign: 'start' }}>
         <p>マイタイムテーブル</p>
-        {/* 【CSS】overflowの使い方解説！要素のはみ出し解決
-        https://zero-plus.io/media/overflow/ */}
         <Box style={{ overflowX: 'hidden' }}>
           <DnDCalendar
-            // allDayAccessor={allowAllDay}
             date={displayDate}
             localizer={localizer}
             events={newState}
-            // ドラッグ・アンド・ドロップ、リサイズ後、weekに戻ります
             defaultView="week"
-            // startAccessor="start"
-            // endAccessor="end"
             startAccessor={(stateEvent: TimelineEventProps) => {
               return stateEvent.start_time;
             }}
@@ -175,24 +163,19 @@ export const MyCalendar = (
               return stateEvent.end_time;
             }}
             onNavigate={onNavigate}
-            // eventPropGetter={() => {return {'className': 'cn'}}}
             eventPropGetter={eventPropGetter}
-            // onDragStart={onDragStart}
             onEventDrop={dragStart === false ? undefined : onEventDrop}
             onEventResize={dragStart === false ? undefined : onEventResize}
             resizable
             onSelectEvent={handleSelectEvent}
-            // onDoubleClickEvent={handleSelectEvent}
             onSelectSlot={onSelectSlot}
             selectable
             onView={onView}
             onRangeChange={range => {
             }}
-          // components={customComponents}
           />
         </Box>
       </Box>
-      {/* <DialogOnSlot slotInfo={slotInfoState} /> */}
       {modal.showModal &&
         <EditForm>
           {selectEvent &&

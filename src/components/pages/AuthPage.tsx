@@ -25,7 +25,6 @@ export const AuthLeavePage = () => {
       {isPending && <div>ユーザー情報を照合しています
         <p>だいぶお待ちください</p>
       </div>}
-        {/* {data && <Link to='calendar'></Link>} */}
     </>
   );
 };
