@@ -4,10 +4,6 @@ import { Components, EventWrapperProps, EventProps } from 'react-big-calendar';
 
 import { TimelineEventProps } from "../../lib/TimelineType";
 
-
-// React component type in TypeScript
-// https://stackoverflow.com/questions/56947690/react-component-type-in-typescript
-
 type ComponentWithChildrenProps = PropsWithChildren<EventWrapperProps<TimelineEventProps>>
 export const CustomEventWrapper: React.FC<ComponentWithChildrenProps> = (props) => {
   const { event, onClick, onDoubleClick, style } = props;
@@ -16,8 +12,6 @@ export const CustomEventWrapper: React.FC<ComponentWithChildrenProps> = (props) 
   const getterProp = getterMaybeProp && getterMaybeProp(event, event.start!, event.end!, false);
   const ref = useRef<HTMLDivElement>(null);
   const elm = ref.current?.querySelector('.rbc-event');
-  // view-portからの座標、今回使わない
-  // const childRefTop = elm?.getBoundingClientRect().top;
 
   const wrapperStyle: CSSProperties = {
     width: 'fit-content',
@@ -46,7 +40,6 @@ export const CustomEventWrapper: React.FC<ComponentWithChildrenProps> = (props) 
 
   return (
       <button style={nextStyle} onClick={(e) => handleCapture(e)}>
-        {/* <button onClick={(e) => handleCapture(e)}></button> */}
         {props.children}
       </button>
   );
