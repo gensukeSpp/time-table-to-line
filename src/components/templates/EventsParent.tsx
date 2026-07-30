@@ -18,7 +18,7 @@ export const EventsContextProvider = ({ children }: { children: ReactNode }) => 
   }
 
   const { data } = useEventsQuery({ forTimeline: true });
-  const state: TimelineEventPropsList = [initialData].concat(data!);
+  const state: TimelineEventPropsList = [initialData].concat(data ?? []);
 
   return (
     <EventsStateContext.Provider value={state}>

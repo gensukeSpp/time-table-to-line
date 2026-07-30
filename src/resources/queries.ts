@@ -22,8 +22,9 @@ export const useRefreshQuery = () => {
   const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;  
   
   return useQuery({
-    queryKey: authKeys.verify(tokenContext!),
-    queryFn: () => refresh(tokenContext!)
+    queryKey: authKeys.verify(tokenContext ?? ''),
+    queryFn: () => refresh(tokenContext!),
+    enabled: !!tokenContext,
   });
 }
 
@@ -78,8 +79,8 @@ export const useUserEventsQuery = () => {
     ...queryInfo,
     data: useMemo(() => data?.map(item => ({
       ...item,
-      start: item.start = new Date(item.start ?? new Date()),
-      end: item.end = new Date(item.end ?? new Date()),
+      start: new Date(item.start ?? new Date()),
+      end: new Date(item.end ?? new Date()),
     })), [data])
   }
 }

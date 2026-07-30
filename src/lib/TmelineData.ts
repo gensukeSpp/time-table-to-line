@@ -17,9 +17,11 @@ export const getGroup = (groupQueries?: GroupUserProps[]): TimelineGroupBase[] =
 }
 
 export const getItems = (eventContextQueries: TimelineEventPropsList) => {
-  const contextState = eventContextQueries.length > 1 ? eventContextQueries.map((eventContextData: TimelineEventProps) => {
-    eventContextData.group = eventContextData.staff_id;
-    return eventContextData
-  }) : exEvents;
+  const contextState = eventContextQueries && eventContextQueries.length > 0
+    ? eventContextQueries.map((eventContextData: TimelineEventProps) => ({
+        ...eventContextData,
+        group: eventContextData.staff_id,
+      }))
+    : exEvents;
   return contextState;
 }
