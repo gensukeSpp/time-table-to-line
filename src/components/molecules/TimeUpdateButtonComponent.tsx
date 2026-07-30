@@ -7,7 +7,6 @@ import { updateButtonArea } from "./TimeUpdateButtonComponent.css";
 
 export const TimesUpdateButton = forwardRef(
   ({timeChangeEvents}: ChangingButtonProp, buttonRef: Ref<HTMLDivElement>) => {
-  console.log(`Event list =: `, timeChangeEvents);
 
   // idのだけの配列
   const timeChangeEventIds = timeChangeEvents.map(
@@ -20,20 +19,17 @@ export const TimesUpdateButton = forwardRef(
       // クラウドではこちらでOK
       // timeChangeEvents.splice(0);
       handleReset();
-      console.log('Inner setTimeout');
     }, 250);
   }
   const handleReset = () => {
     updateEvents.mutate([]);
     timeChangeEvents.splice(0);
-    console.log('Outer setTimeout');
   }
 
   const handleUpdate = () => {
     updateEvents.mutate(timeChangeEvents);
     // console.log('Updateしたつもり');
     resetAction();
-    console.log('Outer setTimeout');
   }
 
   return (

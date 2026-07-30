@@ -8,25 +8,20 @@ import { useRefreshQuery } from "../../resources/queries";
 export const AuthAxios = ({children}: {children: ReactNode}) => {
   // useContext(AuthStateContext);
   const authContext = useAuthContext();
-  console.log(`Client context: ${JSON.stringify(authContext)}`);
-  const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;  
+    const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;
 
-  const newAccessToken = useRefreshQuery();
-  console.log(`If token: ${JSON.stringify(tokenContext)}`);
+    const newAccessToken = useRefreshQuery();
 
   useEffect(() => {
     // リクエスト前に実行。headerに認証情報を付与する
     const requestIntercept = basicAxios.interceptors.request.use(
       (config) => {
         if (config.headers["Authorization"] !== `Bearer ${null}`) {
-          console.log("It's passed if!");
           config.headers["Authorization"] = `Bearer ${tokenContext}`;
         } else {
-          console.log("It's passed else!");
           config.headers["Authorization"] = `Bearer ${newAccessToken.data}`;
           // config.headers["Authorization"] = `Bearer ${tokenContext}`;
         }
-        console.log(`headers: ${config.headers}`);
         return config;
       },
       (error: AxiosError) => Promise.reject(error)
@@ -37,7 +32,6 @@ export const AuthAxios = ({children}: {children: ReactNode}) => {
       (response: AxiosResponse) => response,
       async (error: AxiosError) => {
         const prevRequest = error.config;
-        console.log(`Old token: ${prevRequest?.headers["Authorization"]}`);
         // 403認証エラー(headerにaccess_tokenがない。もしくはaccess_tokenが無効)
         if (error?.response?.status === 403/* && !prevRequest.sent*/) {
           // prevRequest.sent = true;
@@ -46,7 +40,6 @@ export const AuthAxios = ({children}: {children: ReactNode}) => {
           // if('accessToken' in authContext){
           // 新しくaccess_tokenを発行する
           // const newAccessToken = await useRefreshQuery();
-          console.log(`New token: ${newAccessToken}`);
           prevRequest!.headers["Authorization"] = await `Bearer ${newAccessToken.data}`;
           // 再度実行する
           return basicAxios(prevRequest!);

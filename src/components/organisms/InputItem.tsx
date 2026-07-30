@@ -32,16 +32,11 @@ export const AddChildForm = forwardRef(
 		childRef: Ref<HTMLDivElement>) => {
 
 	const [eventItem, setEventItem] = useState<TimelineEventProps>(selectedEvent);
-	// const [done, setDone] = useState<string | undefined>(options[0].value);
-	// 君から卒業
-	// const dispatch = useEventsDispatch();
-  console.log(`Handle event: ${JSON.stringify(selectedEvent)}`);
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLSelectElement>) => {
 		// name, valueという変数名で決まっているようだ
 		const {name, value} = e.target;
-		console.log(`event.target name: ${name}`);
-		setEventItem({...eventItem, [name]:value});
+		    setEventItem({...eventItem, [name]:value});
 	}
 
 	// const handleSelectChange = (selectedOption: SingleValue<OptionType>/*, actionMeta: ActionMeta<OptionType>*/) => {
@@ -50,11 +45,8 @@ export const AddChildForm = forwardRef(
 	// }
 
 	// リテラルタイプ化
-	const selectedStaff = `${selectedEvent.staff_id}` as const;
-	const { data: infoContext } = useSearchQuery('userID');
-	// infoContext === selectedStaff
-	// 	? console.log(`Target event staff: ${infoContext}, Passing!`)
-	// 	: console.log(`Parse staff: ${selectedStaff}, Dout!`);
+	  const selectedStaff = `${selectedEvent.staff_id}` as const;
+	  const { data: infoContext } = useSearchQuery('userID');
 
 	const { Dialog, open, close } = useDialog();
 

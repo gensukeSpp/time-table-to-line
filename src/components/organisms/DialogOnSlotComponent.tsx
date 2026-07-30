@@ -14,7 +14,6 @@ interface SlotOpenProps {
 export const DialogOnSlot = ({slotInfo}: SlotOpenProps) => {
   // const { Dialog, open, close } = useDialog();
   const guard = useAuthInfo();
-  console.log('SlotInfo in dialog: ', slotInfo);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   useEffect(() => {
     setOpenDialog(true);

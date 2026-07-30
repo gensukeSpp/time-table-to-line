@@ -27,15 +27,12 @@ export const MyCalendar = (
 
   const { authId } = useAuthInfo();
   // VSCode あてにならん
-  console.log(`Auth info: ${typeof authId}`);
 
   const stateAll = useEventsState();
-  console.log('Events are existing?: ', stateAll);
 
   const state = stateAll.length > 2 ? stateAll.filter((stateEvent) => {
     return stateEvent.staff_id === Number(authId);
   }) : undefined;
-  // console.log(`Calendar state: ${JSON.stringify(state)}`);
 
   /**
    * EventPropGetter
@@ -62,10 +59,7 @@ export const MyCalendar = (
   const [dragStart, setDragStart] = useState<boolean>();
   const onDragStart = useCallback((args: OnDragStartArgs<TimelineEventProps>) => {
     const { event, action } = args;
-    // console.log('Auth info: ', typeof authId);
-    console.log('Staff: ', event.staff_id);
     if (event.staff_id !== Number(authId)) {
-      console.log('ちがうとこ通ります', action);
       setDragStart(false);
     } else {
       setDragStart(true);
@@ -77,7 +71,6 @@ export const MyCalendar = (
    */
   const DnDCalendar = withDragAndDrop(Calendar<TimelineEventProps>);
   const { onEventResize, onEventDrop, eventList, prevRef } = useMouseEvents();
-  console.log(`Prev data: ${JSON.stringify(prevRef.current)}`);
 
   // Warning: Cannot update a component (`CalendarWrapper`) while rendering a different component (`MyCalendar`). 
   // To locate the bad setState() call inside `MyCalendar`,
@@ -89,31 +82,23 @@ export const MyCalendar = (
   state?.map((evt, j) => {
     // if(prevRef){
     if (prevRef.current?.isDraggable === true && prevRef.current.id === evt.id) {
-      console.log(`Exclude event id: ${prevRef.current?.id}, ${j}`);
       delete state[j];
       prevRef.current = undefined;
     }
     // }
   });
-  // console.log(`Old state: ${JSON.stringify(state)}`);
   const newState = eventList ? state?.concat(eventList) : state;
-  console.log(`Expect update events: ${JSON.stringify(eventList)}`)
 
   // Viewの切り替え調節、このまんま使える
   const [displayDate, setDisplayDate] = useState(new Date());
   const onNavigate = useCallback((newDate: Date) => {
     // const anotherDate: Date = new Date(newDate.setDate(newDate.getDay() - 3));
-    console.log('Navigate date: ', newDate);
     setDisplayDate(newDate);
   }, [setDisplayDate]);
   const [returnView, setReturnView] = useState<View>();
   const onView = useCallback((newView: View) => {
-    console.log('Navigate view: ', newView);
     setReturnView(newView);
   }, [setReturnView]);
-  console.log(`What rbc date: ${displayDate}`);
-
-  // console.log(`Calendar state: ${JSON.stringify(newState)}`);
 
   /**
    * Slot and Dialog
@@ -127,12 +112,10 @@ export const MyCalendar = (
     clickRef.current = window.setTimeout(() => {
       if (countRef.current === clickRef.current) {
         setSlotInfoState(slotInfo);
-        console.log('ここ通りました', slotInfo);
       }
     }, 250);
     // こっちが先になる
     countRef.current = clickRef.current;
-    // console.log('今の状態 Slot: ', countRef.current, clickRef.current);
   }, []);
 
   useEffect(() => {
@@ -142,7 +125,6 @@ export const MyCalendar = (
   const [allDayEvent, setAllDayEvent] = useState<TimelineEventProps>();
   const allowAllDay = (event: TimelineEventProps) => {
     setAllDayEvent(event);
-    console.log(allDayEvent);
     return true;
   }
 
@@ -158,7 +140,6 @@ export const MyCalendar = (
 
   const divRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    // console.log('Ref: ', divRef.current?.innerHTML);
     divRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [selectEvent]);
 
@@ -206,7 +187,6 @@ export const MyCalendar = (
             selectable
             onView={onView}
             onRangeChange={range => {
-              console.log('Range: ', range);
             }}
           // components={customComponents}
           />

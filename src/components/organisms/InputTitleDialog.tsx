@@ -16,7 +16,6 @@ export const TitleInput = ({
   authInfo, slotStartTime, closeDialog}: TitleInputProps) => {
 // export const TitleInput = (jsonAuth: JSONValue) => {
   // const objJson = safeJsonParse(jsonAuth!.toString());
-  // console.log(`In modal auth info: ${JSON.stringify(auth)}`);
   const eventsState = useEventsState();
 
   const createEvent = useCreateMutation();
@@ -28,14 +27,11 @@ export const TitleInput = ({
 
   const startDT = format(slotStartTime, "yyyy-MM-dd HH:mm:ss");
   const endDT = format(addHours(slotStartTime, 1), "yyyy-MM-dd HH:mm:ss");
-  // console.log(`end_time: ${moment(endDT)}`);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if(authInfo.type === 'auth'){
-      // createEvent.mutate(eventItem!);
-      console.log(`Create mutate: ${authInfo.authId}`);
       createEvent.mutate({
         id: Number(eventsState.slice(-1)[0].id) + 1,
         group: authInfo.code,
