@@ -74,7 +74,12 @@ describe('MyCalendar (CalendarView)', () => {
 
   // 各テストの前にフックのデフォルトの戻り値を設定
   beforeEach(() => {
-    (useAuthInfo as Mock).mockReturnValue({ authId: mockAuthId });
+    (useAuthInfo as Mock).mockReturnValue({
+      type: 'auth',
+      authId: mockAuthId,
+      code: 1,
+      group: 'group 1',
+    });
     (useSearchQuery as Mock).mockReturnValue({ data: mockAuthId.toString() });
     (useEventsState as Mock).mockReturnValue(mockEvents);
     (useMouseEvents as Mock).mockReturnValue({

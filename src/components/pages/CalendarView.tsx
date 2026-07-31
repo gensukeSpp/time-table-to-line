@@ -9,7 +9,6 @@ import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useCallingEditForm } from '../../hooks/useCallingForm';
 import localizer from '../../lib/Localization';
 import { CalendarActionProps, TimelineEventProps } from '../../lib/TimelineType';
-import { useSearchQuery } from '../../resources/queries';
 import { AddChildForm } from '../organisms/InputItem';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -24,18 +23,17 @@ export const MyCalendar = (
     onSlotInfo
   }: CalendarActionProps) => {
 
-  const { authId } = useAuthInfo();
+  const auth = useAuthInfo();
 
   const stateAll = useEventsState();
 
-  const state = stateAll.length > 2 ? stateAll.filter((stateEvent) => {
-    return stateEvent.staff_id === Number(authId);
+  const state = auth.type === 'auth' && stateAll.length > 2 ? stateAll.filter((stateEvent) => {
+    return stateEvent.staff_id === auth.authId;
   }) : undefined;
 
   /**
-   * EventPropGetter
+   * EventPropGetter — 自分のイベントのみ操作可能に
    */
-  const { data } = useSearchQuery('userID');
   const eventPropGetter = (event: TimelineEventProps) => {
     const uncontrolStyle: CSSProperties = {
       opacity: '.7'
@@ -43,7 +41,8 @@ export const MyCalendar = (
     const controlStyle: CSSProperties = {
       pointerEvents: 'auto'
     }
-    if (event.staff_id.toString() != data) {
+    const myStaffId = auth.type === 'auth' ? auth.authId : undefined;
+    if (myStaffId == null || event.staff_id !== myStaffId) {
       return { style: uncontrolStyle };
     } else {
       return { style: controlStyle };
@@ -76,12 +75,14 @@ export const MyCalendar = (
   });
   const newState = eventList ? state?.concat(eventList) : state;
 
-  // Viewの切り替え調節、このまんま使える
+  // Viewの切り替え調節
   const [displayDate, setDisplayDate] = useState(new Date());
+  const [currentView, setCurrentView] = useState<View>('week');
   const onNavigate = useCallback((newDate: Date) => {
     setDisplayDate(newDate);
   }, [setDisplayDate]);
-  const onView = useCallback((_newView: View) => {
+  const onView = useCallback((newView: View) => {
+    setCurrentView(newView);
   }, []);
 
   /**
@@ -128,6 +129,7 @@ export const MyCalendar = (
         <Box style={{ overflowX: 'hidden' }}>
           <DnDCalendar
             date={displayDate}
+            view={currentView}
             localizer={localizer}
             events={newState}
             defaultView="week"

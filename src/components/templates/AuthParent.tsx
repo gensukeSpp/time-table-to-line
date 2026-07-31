@@ -1,16 +1,33 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { AuthInfoProp } from "../../lib/TimelineType";
 import { AuthStateContext } from "../../hooks/useContextFamily";
-import { useSearchQuery } from "../../resources/queries";
+
+const TOKEN_STORAGE_KEY = 'accessToken';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [params] = useSearchParams();
+  const urlToken = params.get('token');
 
-  const { data } = useSearchQuery('token');
-  const _auth: AuthInfoProp = { accessToken: data!, type: 'token' }
+  const [accessToken, setAccessToken] = useState(
+    () =>
+      urlToken ??
+      (typeof window !== 'undefined' ? localStorage.getItem(TOKEN_STORAGE_KEY) : null) ??
+      ''
+  );
+
+  useEffect(() => {
+    if (urlToken) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, urlToken);
+      setAccessToken(urlToken);
+    }
+  }, [urlToken]);
+
+  const auth = useMemo(() => ({ accessToken, type: 'token' as const }), [accessToken]);
 
   return (
-    <AuthStateContext.Provider value={_auth}>
+    <AuthStateContext.Provider value={auth}>
       {children}
     </AuthStateContext.Provider>
   );

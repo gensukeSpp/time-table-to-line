@@ -12,8 +12,9 @@ export const useSearchQuery = (searchKey: string) => {
   const query = new URLSearchParams(search);
 
   return useQuery({
-    queryKey: authKeys.search(searchKey),
-    queryFn: () => query.get(searchKey)
+    // search を key に含めないと、別 URL の値がキャッシュで残る
+    queryKey: [...authKeys.search(searchKey), search],
+    queryFn: () => query.get(searchKey),
   });
 }
 
@@ -32,6 +33,13 @@ export const useAuthQuery = (authToken: string) => {
   return useQuery({
     queryKey: authKeys.verify(authToken),
     queryFn: () => fetchAuthResponse(authToken),
+    enabled: !!authToken,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 }
 

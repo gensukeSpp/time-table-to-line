@@ -25,10 +25,15 @@ export const MyHorizonTimeline = () => {
   const [timelineWidth, setTimelineWidth] = useState(0);
 
   useEffect(() => {
-    if (containerRef.current) {
-      setTimelineWidth(containerRef.current.offsetWidth);
-    }
-  }, []); // Runs once on mount
+    const handleResize = () => {
+      if (containerRef.current) {
+        setTimelineWidth(containerRef.current.offsetWidth);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const defaultTimeStart = addHours(new Date(), -12).getTime();
   const defaultTimeEnd = addHours(new Date(), 12).getTime();

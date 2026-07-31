@@ -3,7 +3,7 @@ import { Box, Text, TextInput, NativeSelect, Button } from '@mantine/core';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
 import { useDialog } from '../../hooks/useDialog';
-import { useSearchQuery } from '../../resources/queries';
+import { useAuthInfo } from '../../hooks/useAuthGuard';
 
 import { boundaryTop, boundaryY, buttonPosition } from '../sprinkles.responsive.css';
 import { formParent } from './InputItem.css';
@@ -38,8 +38,8 @@ export const AddChildForm = forwardRef(
 	}
 
 	// リテラルタイプ化
-	  const selectedStaff = `${selectedEvent.staff_id}` as const;
-	  const { data: infoContext } = useSearchQuery('userID');
+	const auth = useAuthInfo();
+	const authId = auth.type === 'auth' ? auth.authId : undefined;
 
 	const { Dialog, close } = useDialog();
 
@@ -64,7 +64,7 @@ export const AddChildForm = forwardRef(
 		          ]}
 		        />
 		      </section>
-		      {infoContext === selectedStaff ?
+		      {authId === selectedEvent.staff_id ?
 		        <section className={boundaryY}>
 		          <EventUpdateButtons {...eventItem}></EventUpdateButtons>
 		        </section> : <Box></Box>

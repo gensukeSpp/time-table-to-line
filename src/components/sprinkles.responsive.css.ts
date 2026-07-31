@@ -44,6 +44,6 @@ export const buttonPosition = atoms({
 	position: {
 		mobile: 'static',
 		tablet: 'static',
-		desktop: 'fixed'
+		desktop: 'static'
 	}
 });
