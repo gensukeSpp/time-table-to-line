@@ -2,12 +2,12 @@
 
 ## E-1: 11PM 問題
 
-**原因:** react-big-calendar で 23:00 のスロットをクリックすると、`SlotInfo.end` が翌日 00:00 になる。この「日をまたぐ」期間を react-big-calendar が allDay として解釈する可能性が高い。
+**原因:** react-big-calendar で 23:00 のスロットをクリックすると、`SlotInfo.end` が**同日の 12:00AM**（当日 00:00:00）を返す。`start`(23:00) より `end`(00:00) の方が早い時刻であり、`start` と `end` の日付部分が同じであるため、react-big-calendar のデフォルト `allDayAccessor` が allDay として解釈する。
 
 **再現手順:**
 1. カレンダーの週表示で 23:00 のスロットをクリック
-2. `onSelectSlot` が受け取る `SlotInfo` の `start`=23:00, `end`=00:00(翌日)
-3. react-big-calendar がこのスロットを allDay 扱いにする
+2. `onSelectSlot` が受け取る `SlotInfo` の `start` = 当日 23:00:00, `end` = 当日 00:00:00（同日 midnight、翌日ではない）
+3. `end < start` で時間幅が -23 時間（逆行）。日付部分は同一のため、react-big-calendar がこのスロットを allDay 扱いにする
 
 **コード上の問題箇所:**
 - `CalendarView.tsx:94` - `onSelectSlot` は `SlotInfo` をそのまま受け取っている
@@ -15,15 +15,15 @@
 - ただし、CalendarView.tsx には `allDayAccessor` が未設定（デフォルト動作に依存）
 
 **仮説:**
-- 仮説 A（最も可能性が高い）: react-big-calendar のデフォルト `allDayAccessor` が 23:00〜00:00 を allDay と判定
-- 仮説 B: `onSelectSlot` の `action` が `'click'` の場合、スロットが 1 時間単位で選択されるが、23:00 は翌日 00:00 が end になるため日跨ぎ判定
+- react-big-calendar のデフォルト `allDayAccessor` は `start` と `end` の日付部分が同一かで allDay を判定する。23:00 スロットの `end` が同日 00:00 を指すため日付部分が同一となり、allDay 判定を受ける。
+- `onSelectSlot` の `action` が `'click'` の場合、スロットが 1 時間単位で選択されるが、23:00 スロットだけ `end` が同日 midnight（00:00:00）になり、`start > end` の逆行区间となる。
 
 **修正案:**
 1. `allDayAccessor` を明示的に設定し、allDay イベントを無効化する
    ```tsx
    allDayAccessor={() => false}
    ```
-2. または `onSelectSlot` で `slotInfo.end` が翌日の場合、`end` を当日 23:59 に丸める
+2. または `onSelectSlot` で `slotInfo.end` が `slotInfo.start` より早い場合、`end` を `start + 1h` に補正する
 
 **影響ファイル:**
 - `src/components/pages/CalendarView.tsx`
