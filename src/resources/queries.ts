@@ -1,10 +1,11 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { AxiosError, AxiosResponse } from "axios";
 import { useLocation } from "react-router-dom";
 
-
+import { TimelineEventProps, AuthInfoProp, AuthGuardContext } from "../lib/TimelineType";
 import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember } from "./fetch";
-import { eventKeys, authKeys } from "./cache";
+import { eventKeys, authKeys, useAuthCache } from "./cache";
 import { useAuthContext } from "../hooks/useContextFamily";
 
 export const useSearchQuery = (searchKey: string) => {
@@ -22,9 +23,8 @@ export const useRefreshQuery = () => {
   const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;  
   
   return useQuery({
-    queryKey: authKeys.verify(tokenContext ?? ''),
-    queryFn: () => refresh(tokenContext!),
-    enabled: !!tokenContext,
+    queryKey: authKeys.verify(tokenContext!),
+    queryFn: () => refresh(tokenContext!)
   });
 }
 
@@ -34,38 +34,37 @@ export const useAuthQuery = (authToken: string) => {
     queryFn: () => fetchAuthResponse(authToken),
   });
 }
+    // 以下は恐ろしいことに…
+  // const [tokenState, setTokenState] = useState<TokenProp>();
+  // setTokenState({...tokenContext, accessToken: query.get('token')!});
+  // const [state, dispatch] = useReducer((state: TokenProp, newState: Partial<TokenProp>) => ({ ...state, ...newState }),
+  //   { accessToken: '' }
+  // );
+  // dispatch({accessToken: query.get('token')!});
 
-// Data not recalculated
+// Data not recalculated when select function changes #1580
 // https://github.com/TanStack/query/issues/1580
-type EventQueryOptions = {
-  forTimeline?: boolean;
-};
-
-export const useEventsQuery = (options?: EventQueryOptions) => {
+export const useEventsQuery = () => {
+  // JavaScript の分割代入で変数名を変更する
+  // https://qiita.com/masachoco/items/601b6771021bde2311f8
   const { data: searchQueryToken } = useSearchQuery('token');
   
   const { data, ...queryInfo } = useQuery({
     queryKey: eventKeys.all(),
     queryFn: () => fetchEventsData(searchQueryToken!)
-  });
+  })
   return {
     ...queryInfo,
-    data: useMemo(() => Array.isArray(data) ? data.map(item => {
-      const base = {
-        ...item,
-        start: new Date(item.start ?? new Date()),
-        end: new Date(item.end ?? new Date()),
-      };
-      if (options?.forTimeline) {
-        return {
-          ...base,
-          start_time: new Date(item.start ?? new Date()),
-          end_time: new Date(item.end ?? new Date()),
-        };
-      }
-      return base;
-    }) : [], [data, options?.forTimeline])
-  };
+    data: useMemo(() => data?.map(item => ({
+      ...item,
+      // That's point! "="
+      // 日本標準時
+      start: item.start = new Date(item.start ?? new Date()),
+      end: item.end = new Date(item.end ?? new Date()),
+      // summary: item.summary = 'sheep',
+      // ...item
+    })), [data])
+  }
 }
 
 export const useUserEventsQuery = () => {
@@ -79,9 +78,34 @@ export const useUserEventsQuery = () => {
     ...queryInfo,
     data: useMemo(() => data?.map(item => ({
       ...item,
-      start: new Date(item.start ?? new Date()),
-      end: new Date(item.end ?? new Date()),
+      // 日本標準時
+      start: item.start = new Date(item.start ?? new Date()),
+      end: item.end = new Date(item.end ?? new Date()),
+      // summary: item.summary = 'sheep',
+      // ...item
     })), [data])
+  }
+}
+
+export const useEventsQueryForTL = () => {
+  const { data: searchQueryToken } = useSearchQuery('token');
+  
+  const { data, ...queryInfo } = useQuery({
+    queryKey: eventKeys.all(),
+    queryFn: () => fetchEventsData(searchQueryToken!)
+  });
+  // return { data, queryInfo }
+  return {
+    ...queryInfo,
+    data: useMemo(() => Array.isArray(data) ? data.map(item => ({
+      ...item,
+      // 日本標準時
+      start: item.start = new Date(item.start ?? new Date()),
+      end: item.end = new Date(item.end ?? new Date()),
+      start_time: item.start_time = new Date(item.start ?? new Date()),//.add(9, 'hours'),
+      end_time: item.end_time = new Date(item.end ?? new Date())//.add(9, 'hours'),
+      // item
+    })) : [], [data])
   }
 }
 
@@ -104,3 +128,42 @@ export const useGroupNameQuery = () => {
     queryFn: () => requestGroup(tokenContext!)
   })
 }
+
+// const useAllQuery = <TData = TimelineEventProps[]>(
+//   options?: Omit<
+//     UseQueryOptions<TimelineEventProps[], AxiosError, TData, typeof eventKeys.all>,
+//     "queryKey" | "queryFn"
+//   >
+// ) => {
+//   return useQuery({queryKey: eventKeys.all, queryFn: fetchEventsData, ...options});
+// };
+
+type UtilOption<TData = TimelineEventProps[]> = {
+  options?: Omit<
+    UseQueryOptions<TimelineEventProps[], AxiosError, TData, [string, (Record<string, unknown> | string)?]>,
+    "queryKey" | "queryFn"
+  >
+}
+
+// export const useApi = <
+//   TQueryKey extends [string, (Record<string, unknown> | string)?],
+//   TQueryFnData,
+//   TError,
+//   TData = TQueryFnData,
+// >(
+//   queryKey: TQueryKey,
+//   fetcher: (params: TQueryKey[1], token: string) => Promise<TQueryFnData>,
+//   options?: Omit<
+//     UseQueryOptions<unknown, TError, TData, TQueryKey>,
+//     'queryKey' | 'queryFn'
+//   >,
+// ) => {
+//   // accessTokenを何らかの形で取得する
+//   const { accessToken } = useAuthGuardContext();
+
+//   return useQuery({
+//     queryKey,
+//     queryFn: async () => fetcher(queryKey[1], accessToken || ''),
+//     ...options,
+//   });
+// };

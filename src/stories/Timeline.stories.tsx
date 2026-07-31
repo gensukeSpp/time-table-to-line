@@ -1,11 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { expect, within } from '@storybook/test';
+import { expect, within, userEvent, fn } from '@storybook/test';
+import { Timeline } from 'react-calendar-timeline';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { AuthInfoProp } from "../lib/TimelineType";
+import { TimelineEventProps, AuthInfoProp } from "../lib/TimelineType";
 import { EventsStateContext, AuthStateContext } from "../hooks/useContextFamily";
 import { MyHorizonTimeline } from '../components/pages/TimelinePage';
-import { exEvents } from "../lib/SampleState";
+import { exEvents, exGroupUsers, exItems } from "../lib/SampleState";
+
+import { eventsStateMock, groupMockMember } from "./lib/timeline.mock";
+import { useEventsState } from "../hooks/useContextFamily";
 
 import "react-calendar-timeline/style.css";
 
@@ -39,6 +43,11 @@ const meta: Meta<typeof MyHorizonTimeline> = {
 };
 export default meta;
 type Story = StoryObj<typeof MyHorizonTimeline>;
+
+const groups = [
+  { id: 1, title: "group 1" },
+  { id: 2, title: "group 2" },
+];
 
 export const Standard: Story = {
   beforeEach: async () => {

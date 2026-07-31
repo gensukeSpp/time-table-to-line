@@ -27,9 +27,7 @@ dist-ssr
 yarn.lock
 package-lock.json
 bun.lock
-storybook-static/
 env/
-.env
 
 # 開発にあたっての設定ほか
 .serena/

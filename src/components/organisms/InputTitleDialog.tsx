@@ -14,6 +14,8 @@ interface TitleInputProps {
 
 export const TitleInput = ({
   authInfo, slotStartTime, closeDialog}: TitleInputProps) => {
+// export const TitleInput = (jsonAuth: JSONValue) => {
+  // const objJson = safeJsonParse(jsonAuth!.toString());
   const eventsState = useEventsState();
 
   const createEvent = useCreateMutation();

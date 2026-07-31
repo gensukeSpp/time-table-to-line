@@ -14,23 +14,32 @@ export const exItems: TimelineItemBase<Date>[] = [
   {
     id: 1,
     group: 2,
+    // staff_id: 500,
     title: 'item 1',
     start_time: new Date(),
     end_time: addHours(new Date(), 1),
+    // start: new Date(),
+    // end: new Date(new Date().setHours(new Date().getHours() + 1))
   },
   {
     id: 2,
     group: 1,
+    // staff_id: 501,
     title: 'item 2',
     start_time: addHours(new Date(), -0.5),
     end_time: addHours(new Date(), 0.5),
+    // start: new Date(),
+    // end: new Date(new Date().setHours(new Date().getHours() + 1))
   },
   {
     id: 3,
     group: 1,
+    // staff_id: 500,
     title: 'item 3',
     start_time: addHours(new Date(), 2),
     end_time: addHours(new Date(), 3),
+    // start: new Date(),
+    // end: new Date(new Date().setHours(new Date().getHours() + 1))
   }
 ]
 

@@ -1,8 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import basicAxios from "../lib/AuthInfo";
-import { TimelineEventProps } from "../lib/TimelineType";
+import { PickDate, TimelineEventProps } from "../lib/TimelineType";
 import { eventKeys, useEventCache } from "../resources/cache";
+
+// ⑦ mutationFn
+// export const mutation = {
+//   createTodo: (request: PostTodoRequest) => {
+//     return todoApi.postTodo(request);
+//   },
+// };
 
 export const useCreateMutation = () => {
   const eventCache = useEventCache();
@@ -63,10 +70,29 @@ export const useUpdateDateListMutation = (targetIds: string[]) => {
       );
       return { prevEvents };
     },
-    onSettled: () => {
+    onSettled: (data, error) => {
+      
       eventCache.invalidateList();
     }
   });
 }
 
+const useUpdateDateMutation = (targetId: number | string) => {
+  const queryClient = useQueryClient();
+  const eventCache = useEventCache();
 
+  return useMutation({
+    mutationFn: (timeBelt: PickDate) => 
+      basicAxios.post(`/date/update/${targetId}`, timeBelt),
+    onMutate: (newDate) => {
+      const prevEvents = queryClient.getQueryData(eventKeys.detail(targetId));
+      queryClient.setQueryData(eventKeys.detail(targetId),
+        newDate
+      );
+      return { prevEvents };
+    },
+    onSuccess: () => {
+      eventCache.invalidateDetail(targetId);
+    }
+  });
+}
