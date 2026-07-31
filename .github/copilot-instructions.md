@@ -1,162 +1,91 @@
-# Copilot Instructions for time-table-to-line
+# Copilot instructions for time-table-to-line
 
-A React + TypeScript + Vite project for timeline/calendar-based event management, featuring drag-and-drop event scheduling and Storybook component documentation.
+This file collects repository-specific instructions that help future Copilot/assistant sessions start quickly and produce high-quality results. It consolidates verified commands, architecture notes, and conventions found in the codebase (package.json, src/, resources/, tasks/).
 
-## Build & Development
+---
 
-**Install dependencies:**
-```bash
-yarn install
-```
+## Quick commands (from package.json)
+Use the project's package scripts. The project uses Bun for package management and scripts.
 
-**Local development (HMR enabled):**
-```bash
-yarn dev
-```
-Runs Vite dev server with ESLint and TypeScript checking overlays.
+Install
+- bun: bun install
 
-**Build for production:**
-```bash
-yarn build
-```
-Runs TypeScript compiler first, then Vite bundle. Outputs to `/dist`.
+Dev (HMR)
+- bun: bun run dev
 
-**Preview production build locally:**
-```bash
-yarn preview
-```
+Build (production)
+- bun: bun run build
 
-## Testing & Linting
+Preview
+- bun: bun run preview
 
-**Run tests (watch mode):**
-```bash
-yarn test
-```
+Lint
+- bun: bun run lint
 
-**Run tests once (CI mode):**
-```bash
-yarn testrun
-```
+Tests
+- Watch mode (dev): bun run test
+- Single-run (CI): bun run testrun
+- Run a single test file: bun run test -- path/to/file.spec.tsx
+- Run tests matching a name: bun run test -- -t "Test name pattern"
 
-Tests use Vitest with jsdom environment and Testing Library. Configuration in `vite.config.ts` under the `test` section.
+Storybook
+- bun run storybook
+- Build static: bun run build-storybook
 
-**Lint code:**
-```bash
-yarn lint
-```
-Runs ESLint on `src/**/*.{ts,tsx}` with `--max-warnings 0` enforced. See `.eslintrc.cjs` for rules.
+Notes
+- package.json scripts: `dev`, `build` (runs `tsc && vite build`), `lint` (eslint with --max-warnings 0), `test` (vitest), `testrun` (vitest run).
 
-**Storybook (component documentation & visual testing):**
-```bash
-yarn storybook
-```
-Runs Storybook dev server on port 6006. Stories use Storybook Vitest integration.
+---
 
-## Architecture & Patterns
+## High-level architecture (big picture)
+- React 19 + TypeScript + Vite front-end app exposing two primary views:
+  - Calendar view (react-big-calendar) — date-grid UI for day/week operations and drag-and-drop.
+  - Timeline view (react-calendar-timeline) — horizontal timeline (Gantt-like) for staff resources.
+- State layers:
+  - Client context: Context API via useContextFamily for local global state (EventsStateContext, Auth contexts).
+  - Server state: @tanstack/react-query (resources/*) — queries live in `src/resources` and cache keys in `resources/cache`.
+  - Mutations: useEventMutation pattern (React Query) centralizes create/update/delete semantics.
+- Styling: Vanilla Extract with per-component `.css.ts` files and Sprinkles for responsive utilities.
+- UI toolkit: Mantine v7 (project migrated from Chakra/Radix), Framer Motion for interactions.
+- Dates: Project standard is date-fns (some legacy code still references moment/dayjs; prefer date-fns in new work).
+- Networking: Axios instance at `src/lib/AuthInfo.ts` used throughout; authentication logic and interceptors live in templates (`AxiosClientProvider.tsx`).
 
-### Component Organization
+---
 
-Components follow an **Atomic Design** pattern in `src/components/`:
+## Key codebase conventions (non-obvious)
+- Atomic component organization: `src/components/{molecules,organisms,pages,templates}`. Look under templates for global providers (AuthParent, EventsParent).
+- Timeline event shape: `TimelineEventProps` (src/lib/TimelineType.ts). Many components expect both `start`/`end` (Date) and `start_time`/`end_time` for timeline-compat.
+- React Query keys: defined in `src/resources/cache.ts`. Use these helpers for invalidation.
+- Avoid mutating fetched objects: queries often transform server payloads into Date instances — prefer non-mutating map to avoid shared-reference bugs (see `src/resources/queries.ts`).
+- Token/auth flow: prefer reading from the auth context (useAuthContext) first, then refresh query, then localStorage fallback. Interceptor code was recently fixed to follow this order; follow that pattern when adding network logic.
+- No build artifacts in repo: storybook static files should not be committed. If you find build artifacts included, prefer removing them and adding to .gitignore.
+- ESLint setup: repo enforces `--max-warnings 0`. Fix lint issues before pushing.
+- Keep `console.log` removed — security and noise policy; CI may fail if logs are too noisy.
 
-- **`molecules/`** - Simple composed components (e.g., `TimeUpdateButtonComponent`, `EventUpdateButtonComponent`)
-- **`organisms/`** - Complex, stateful components (e.g., `Dialog`, `InputItem`)
-- **`pages/`** - Full page components (e.g., `CalendarComponent`)
-- **`templates/`** - Layout wrappers and providers (e.g., `AuthParent`, `AxiosClientProvider`, `EventsParent`)
+---
 
-### State Management & Hooks
+## Where to look first when debugging
+- Authentication/token issues: `src/components/templates/AxiosClientProvider.tsx`, `src/lib/AuthInfo.ts`, `src/resources/fetch.ts` (API wrappers).
+- Events / timeline issues: `src/hooks/useContextFamily.tsx`, `src/resources/queries.ts`, `src/lib/TmelineData.ts` (watch for typo in filename), `src/lib/TimelineType.ts`.
+- Drag & drop / interactions: `src/hooks/useMouseHandle.ts`, `src/hooks/useTimelineDragZoom.ts`.
 
-- **Context API** - Used for global state via `useContextFamily` hook
-- **React Query** - Integrated via `@tanstack/react-query` for server state (`useSearchQuery`)
-- **Custom hooks in `src/hooks/`** - Business logic separation:
-  - `useAuthGuard` / `useAuthInfo` - Authentication state
-  - `useEventMutation` - Event CRUD operations
-  - `useMouseHandle` - Drag-and-drop event handling
-  - `useCallingForm` - Dialog/form state management
-  - `useTimelineDragZoom` - Timeline interaction utilities
+---
 
-### Styling
+## Automation, CI and tests
+- CI should run: `lint`, `testrun`, and `build`. Ensure `eslint` and `tsc` are green.
+- Vitest is configured in vite.config.ts; use `vite`-based runner (scripts already wired).
 
-- **Vanilla Extract** - CSS-in-JS with zero-runtime via `@vanilla-extract/css` and Sprinkles for utility generation
-- CSS files are colocated: `ComponentName.css.ts` next to `ComponentName.tsx`
-- Responsive utilities in `src/components/sprinkles.responsive.css.ts`
-- Global styles in `src/index.css` and `src/App.css`
+---
 
-### UI Library & Animation
+## Files from other AI assistants (checked)
+No Claude/Cursor/Aider/Cline/Windsurf assistant configs detected in repo root.
 
-- **Chakra UI** - Component library for modals, buttons, boxes, text
-- **Framer Motion** - Animations and interactions
-- **React Big Calendar** - Main calendar component with drag-and-drop addon
-- **React Calendar Timeline** - Alternative timeline visualization
+---
 
-### Calendar Utilities
+## Suggested additions for future Copilot sessions
+- Add a short top-level README fragment that lists the canonical commands and the main contexts (Auth, Events, Timeline) — Copilot sessions use these to prioritize files.
+- Add `docs/architecture/quick-glossary.md` with the canonical shapes (TimelineEventProps) and React Query keys.
 
-- **Moment.js** - Date manipulation (used as localizer for React Big Calendar)
-- **Day.js** - Lighter alternative for some date parsing
-- **date-fns** - Utility functions for date operations
-- Localization setup in `src/lib/Localization.ts`
+---
 
-### Type Definitions
-
-- Event type: `TimelineEventProps` in `src/lib/TimelineType.ts`
-- Sample events for development: `src/lib/SampleState.ts`
-- All components properly typed with TypeScript (strict: true in `tsconfig.json`)
-
-## Key Conventions
-
-### Testing Patterns
-
-1. **Unit tests** - Test individual hooks and utility functions
-2. **Component tests** - Use Storybook Vitest integration via `composeStories()`
-3. **Mocking hooks** - Use `vi.mock()` to mock API/context hooks (see `Calendar.spec.tsx` for examples)
-4. **Setup files** - Test utilities imported in `src/tests/vitest-setup.ts`
-
-Test file pattern: `ComponentName.spec.tsx` colocated in `/tests` directory.
-
-### Component Export Pattern
-
-- Functional components with `forwardRef` when ref access needed (see `TimesUpdateButton`)
-- Use default exports (ESLint allows via config)
-- Components exported from `src/components/index.tsx` for convenience
-
-### Event Mutation & Side Effects
-
-- `useEventMutation` returns a mutation object with `.mutate()` method (React Query pattern)
-- Batch operations: Pass arrays of event IDs or full event objects
-- Reset operations use `setTimeout` for async queue flushing (see `TimeUpdateButtonComponent` pattern)
-
-### Development Environment
-
-- Environment variables loaded from `env/` directory (via Vite `envDir` config)
-- `.npmrc` specifies yarn instead of npm
-- Yarn v4.3.1 required (enforced in `package.json` engines)
-
-## ESLint Rules & Overrides
-
-- `react-refresh/only-export-components` - Warn only, allows `allowConstantExport`
-- `@typescript-eslint/no-unused-vars` - Disabled (watch TypeScript compiler instead)
-- `react-hooks/exhaustive-deps` - Disabled (review manually when needed)
-- `import/no-default-export` - Disabled (default exports allowed)
-- Comments in Japanese allowed and encouraged (matches codebase style)
-
-## Storybook
-
-- Story files: `*.stories.tsx` or `*.stories.mdx`
-- Plugins: `@storybook/addon-essentials`, `@storybook/addon-interactions`, `@storybook/addon-onboarding`
-- Static output: `storybook-static/`
-
-## Common Dependencies
-
-- Axios for HTTP requests
-- classnames for conditional CSS classes
-- Interact.js for gesture recognition
-- prop-types for runtime prop validation (legacy, alongside TypeScript)
-- interactjs for complex drag-and-drop scenarios
-
-## TypeScript Configuration
-
-- **Target:** ES2020
-- **JSX:** react-jsx (new JSX transform)
-- **Module resolution:** bundler mode
-- **Strict mode:** Enabled
-- **`noUnusedLocals` / `noUnusedParameters`:** Disabled (let ESLint and TypeScript report separately)
-- See `tsconfig.json` and `tsconfig.node.json` for full config
+Created/updated by an automated assistant. Want me to add this file to the repo now? If yes, will write the updated `.github/copilot-instructions.md`. Also: configure an MCP server for Playwright/Browser testing or Storybook visual testing? (yes/no)

@@ -1,86 +1,41 @@
 import { AxiosResponse } from "axios";
 
 import { AuthInfoProp, GroupUserProps, TimelineEventProps } from "../lib/TimelineType";
-// import { AuthGuardContext } from "../components/templates/AuthParent";
 import basicAxios from "../lib/AuthInfo";
 
-export const fetchEventsData = async (postToken: string): Promise<TimelineEventProps[]> => {
+export const fetchEventsData = async (_postToken: string): Promise<TimelineEventProps[]> => {
 	const { data } = await basicAxios.request<TimelineEventProps[]>({
 		url: '/event/all',
 		method: 'GET',
-		headers: {
-			'Access-Control-Allow-Origin': '*',
-			'Authorization': `Bearer ${postToken}`,
-			'credentials': 'include' // ここを追加。
-		}
 	});
 		return data;
 }
 
-export const fetchEventsDataForTT = async (postToken: string): Promise<TimelineEventProps[]> => {
+export const fetchEventsDataForTT = async (_postToken: string): Promise<TimelineEventProps[]> => {
 	const { data } = await basicAxios.request<TimelineEventProps[]>({
 		url: '/event/user',
 		method: 'GET',
-		headers: {
-			'Access-Control-Allow-Origin': '*',
-			'Authorization': `Bearer ${postToken}`,
-			'credentials': 'include' // ここを追加。
-		}
 	});
 		return data;
 }
 
-// とりあえず、値が取れるからこっち採用
-const cache = new Map();
-
 export const fetchAuthResponse = async (postToken: string): Promise<AxiosResponse<AuthInfoProp>> => {
-  const authResponse = await basicAxios.post<AuthInfoProp>('/timetable/inquiry', postToken,
-		{
-			headers: {
-			'Access-Control-Allow-Origin': '*',
-			'Authorization': `Bearer ${postToken}`,
-			'credentials': 'include' // ここを追加。
-			}
-		});
-	// if (!cache.has(postToken)) {
-  //   cache.set(postToken, authResponse);
-  // }
-  // const authCacheData: AuthInfoProp = cache.get(authResponse);
+  const authResponse = await basicAxios.post<AuthInfoProp>('/timetable/inquiry', postToken);
 	return authResponse;
 };
 
-export const refresh = async (prev: string): Promise<AxiosResponse<string>> => {
-  const response = await basicAxios.post<string>('/refresh', {
-    headers: {
-			'Access-Control-Allow-Origin': '*',
-			'Authorization': `Bearer ${prev}`,
-			'credentials': 'include' // ここを追加。
-		}
-  });
+export const refresh = async (_prev: string): Promise<AxiosResponse<string>> => {
+  const response = await basicAxios.post<string>('/refresh');
   return response;
 };
 
 export const requestGroup = async (postToken: string)
 	: Promise<AxiosResponse<string[]>> =>	{
-  const groupNameResp = await basicAxios.post<string[]>('/group-names', postToken,
-		{
-			headers: {
-				'Access-Control-Allow-Origin': '*',
-				'Authorization': `Bearer ${postToken}`,
-				'credentials': 'include'
-			}
-		});
+  const groupNameResp = await basicAxios.post<string[]>('/group-names', postToken);
 		return groupNameResp;
 }
 
 export const requestGroupMember = async (postToken: string): Promise<AxiosResponse<GroupUserProps[]>> => {
-  const groupUsers = await basicAxios.post<GroupUserProps[]>('/group/users', postToken,
-		{
-			headers: {
-			'Access-Control-Allow-Origin': '*',
-			'Authorization': `Bearer ${postToken}`,
-			'credentials': 'include'
-		}
-	});
+  const groupUsers = await basicAxios.post<GroupUserProps[]>('/group/users', postToken);
 		return groupUsers;
 }

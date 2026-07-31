@@ -1,4 +1,4 @@
-import { addHours, addDays } from 'date-fns';
+import { addHours } from 'date-fns';
 import React, { useRef, useEffect, useState } from 'react'; // Import useRef, useEffect, useState
 import { Timeline, TimelineGroupBase } from "react-calendar-timeline";
 
@@ -8,7 +8,6 @@ import { useTimelineDragZoom } from '../../hooks/useTimelineDragZoom'; // Import
 import { getGroup, getItems } from '../../lib/TmelineData';
 
 import 'react-calendar-timeline/style.css';
-import { TimelineEventProps } from '../../lib/TimelineType';
 
 export const MyHorizonTimeline = () => {
   const { data: groupUsers, isPending } = useGroupUsersQuery();
@@ -16,8 +15,7 @@ export const MyHorizonTimeline = () => {
 
   const authState = useAuthContext();
   const tokenContext = authState.type === 'token' ? authState.accessToken : undefined;
-  const { data: yourInfo } = useAuthQuery(tokenContext!);
-  const strYourInfo = JSON.stringify(yourInfo?.data);
+  useAuthQuery(tokenContext!);
 
   const stateAll = useEventsState();
   const state = getItems(stateAll);
@@ -49,9 +47,7 @@ export const MyHorizonTimeline = () => {
     timelineWidth
   );
 
-  const onBoundsChange = (canvasTimeStart: number, canvasTimeEnd: number) => {
-    // updateVisibleTime(canvasTimeStart, canvasTimeEnd);
-  };
+  const onBoundsChange = () => {};
 
   // onTimeChange handler to sync scrolling with our zoom state
   const handleTimeChange = (
@@ -93,7 +89,7 @@ export const MyHorizonTimeline = () => {
           minZoom={24 * 60 * 60 * 1000}
           maxZoom={365.24 * 86400 * 1000}
           lineHeight={60}
-          onCanvasClick={(groupId, time, e) => { }}
+          onCanvasClick={() => { }}
           onBoundsChange={onBoundsChange}
         />
       )}

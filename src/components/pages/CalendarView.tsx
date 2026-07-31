@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useMemo, useEffect, CSSProperties } from 'react';
-import { Calendar, Views, View, SlotInfo } from 'react-big-calendar'
-import withDragAndDrop, { OnDragStartArgs } from 'react-big-calendar/lib/addons/dragAndDrop'
+import { useState, useCallback, useRef, useEffect, CSSProperties } from 'react';
+import { Calendar, View, SlotInfo } from 'react-big-calendar'
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import { Box } from '@mantine/core';
 
 import { useEventsState } from '../../hooks/useContextFamily';
@@ -10,7 +10,6 @@ import { useCallingEditForm } from '../../hooks/useCallingForm';
 import localizer from '../../lib/Localization';
 import { CalendarActionProps, TimelineEventProps } from '../../lib/TimelineType';
 import { useSearchQuery } from '../../resources/queries';
-import { CustomEventWrapper, CustomEventCard } from '../molecules/WrapComponent';
 import { AddChildForm } from '../organisms/InputItem';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -26,7 +25,6 @@ export const MyCalendar = (
   }: CalendarActionProps) => {
 
   const { authId } = useAuthInfo();
-  // VSCode あてにならん
 
   const stateAll = useEventsState();
 
@@ -40,7 +38,6 @@ export const MyCalendar = (
   const { data } = useSearchQuery('userID');
   const eventPropGetter = (event: TimelineEventProps) => {
     const uncontrolStyle: CSSProperties = {
-      // pointerEvents: 'none',
       opacity: '.7'
     }
     const controlStyle: CSSProperties = {
@@ -56,15 +53,7 @@ export const MyCalendar = (
   /**
    * onDragStart and prevent
    */
-  const [dragStart, setDragStart] = useState<boolean>();
-  const onDragStart = useCallback((args: OnDragStartArgs<TimelineEventProps>) => {
-    const { event, action } = args;
-    if (event.staff_id !== Number(authId)) {
-      setDragStart(false);
-    } else {
-      setDragStart(true);
-    }
-  }, []);
+
 
   /**
    * Drag and Drop
@@ -80,25 +69,20 @@ export const MyCalendar = (
   }, [onTimeChangeEvents, eventList]);
 
   state?.map((evt, j) => {
-    // if(prevRef){
     if (prevRef.current?.isDraggable === true && prevRef.current.id === evt.id) {
       delete state[j];
       prevRef.current = undefined;
     }
-    // }
   });
   const newState = eventList ? state?.concat(eventList) : state;
 
   // Viewの切り替え調節、このまんま使える
   const [displayDate, setDisplayDate] = useState(new Date());
   const onNavigate = useCallback((newDate: Date) => {
-    // const anotherDate: Date = new Date(newDate.setDate(newDate.getDay() - 3));
     setDisplayDate(newDate);
   }, [setDisplayDate]);
-  const [returnView, setReturnView] = useState<View>();
-  const onView = useCallback((newView: View) => {
-    setReturnView(newView);
-  }, [setReturnView]);
+  const onView = useCallback((_newView: View) => {
+  }, []);
 
   /**
    * Slot and Dialog
@@ -120,13 +104,7 @@ export const MyCalendar = (
 
   useEffect(() => {
     onSlotInfo?.(slotInfoState!);
-  }, [onSelectSlot, slotInfoState]);
-
-  const [allDayEvent, setAllDayEvent] = useState<TimelineEventProps>();
-  const allowAllDay = (event: TimelineEventProps) => {
-    setAllDayEvent(event);
-    return true;
-  }
+  }, [onSelectSlot, slotInfoState, onSlotInfo]);
 
   /**
    * Edit form appear
@@ -143,31 +121,16 @@ export const MyCalendar = (
     divRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [selectEvent]);
 
-  /**
-   * Wrapper component
-   */
-  const customComponents = useMemo(() => ({
-    event: CustomEventCard,
-    eventWrapper: CustomEventWrapper,
-  }), []);
-
   return (
     <>
-      {/* <TimesUpdateButton timeChangeEvents={eventList} /> */}
       <Box className={cx(gridArea, topWidth)} style={{ flexShrink: 0, scrollSnapAlign: 'start' }}>
         <p>マイタイムテーブル</p>
-        {/* 【CSS】overflowの使い方解説！要素のはみ出し解決
-        https://zero-plus.io/media/overflow/ */}
         <Box style={{ overflowX: 'hidden' }}>
           <DnDCalendar
-            // allDayAccessor={allowAllDay}
             date={displayDate}
             localizer={localizer}
             events={newState}
-            // ドラッグ・アンド・ドロップ、リサイズ後、weekに戻ります
             defaultView="week"
-            // startAccessor="start"
-            // endAccessor="end"
             startAccessor={(stateEvent: TimelineEventProps) => {
               return stateEvent.start_time;
             }}
@@ -175,24 +138,19 @@ export const MyCalendar = (
               return stateEvent.end_time;
             }}
             onNavigate={onNavigate}
-            // eventPropGetter={() => {return {'className': 'cn'}}}
             eventPropGetter={eventPropGetter}
-            // onDragStart={onDragStart}
-            onEventDrop={dragStart === false ? undefined : onEventDrop}
-            onEventResize={dragStart === false ? undefined : onEventResize}
+            onEventDrop={onEventDrop}
+            onEventResize={onEventResize}
             resizable
             onSelectEvent={handleSelectEvent}
-            // onDoubleClickEvent={handleSelectEvent}
             onSelectSlot={onSelectSlot}
             selectable
             onView={onView}
-            onRangeChange={range => {
+            onRangeChange={() => {
             }}
-          // components={customComponents}
           />
         </Box>
       </Box>
-      {/* <DialogOnSlot slotInfo={slotInfoState} /> */}
       {modal.showModal &&
         <EditForm>
           {selectEvent &&

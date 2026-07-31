@@ -16,8 +16,6 @@ export const TimesUpdateButton = forwardRef(
   const updateEvents = useUpdateDateListMutation(timeChangeEventIds);
   const resetAction = () => {
     setTimeout(() => {
-      // クラウドではこちらでOK
-      // timeChangeEvents.splice(0);
       handleReset();
     }, 250);
   }

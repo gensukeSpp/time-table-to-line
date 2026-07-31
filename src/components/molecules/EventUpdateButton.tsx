@@ -10,10 +10,6 @@ export const EventUpdateButtons = (indicateEvent: TimelineEventProps) => {
 
 	const handleUpdate = (e: FormEvent) => {
 		e.preventDefault();
-		// dispatch({
-		// 	type: 'UPDATE',
-		// 	payload: indicateEvent
-		// });
 		updateEvent.mutate({
 		      ...indicateEvent,
 		      summary: indicateEvent.summary,

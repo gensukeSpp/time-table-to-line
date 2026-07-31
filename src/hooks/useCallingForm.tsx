@@ -4,7 +4,7 @@ import { Box } from '@mantine/core';
 import { TimelineEventProps, EventFormProps } from "../lib/TimelineType";
 import { topWidth } from "../components/sprinkles.responsive.css";
 
-export const useCallingEditForm = ({onShowFormView, targetEvent}: EventFormProps) => {
+export const useCallingEditForm = ({onShowFormView}: EventFormProps) => {
 
   /**
    * Issue summary & progress
@@ -26,7 +26,7 @@ export const useCallingEditForm = ({onShowFormView, targetEvent}: EventFormProps
     countRef.current = undefined;
     
     setShowModal(true);
-  }, []);
+  }, [onShowFormView]);
 
   const closeInputForm = () => {
     setShowModal(false);

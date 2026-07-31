@@ -1,8 +1,6 @@
-import { useState, FormEvent, forwardRef, Ref } from 'react';
+import { useState, forwardRef, Ref } from 'react';
 import { Box, Text, TextInput, NativeSelect, Button } from '@mantine/core';
-// import Select, { ActionMeta, SingleValue } from 'react-select';
 
-// import { EventItem } from '../../lib/EventItem';
 import { TimelineEventProps } from '../../lib/TimelineType';
 import { useDialog } from '../../hooks/useDialog';
 import { useSearchQuery } from '../../resources/queries';
@@ -39,15 +37,11 @@ export const AddChildForm = forwardRef(
 		    setEventItem({...eventItem, [name]:value});
 	}
 
-		// const handleSelectChange = (selectedOption: SingleValue<OptionType>/*, actionMeta: ActionMeta<OptionType>*/) => {
-		// 	setDone(selectedOption?.label);
-		// }
-
 	// リテラルタイプ化
 	  const selectedStaff = `${selectedEvent.staff_id}` as const;
 	  const { data: infoContext } = useSearchQuery('userID');
 
-	const { Dialog, open, close } = useDialog();
+	const { Dialog, close } = useDialog();
 
 		return (
 		  <>
@@ -85,7 +79,3 @@ export const AddChildForm = forwardRef(
 		  </>
 		);
 });
-
-// export const AddSideForm = forwardRef<HTMLDivElement, selectedEvent>((prop, _ref) => {
-// 	return <AddChildForm {...prop} ref />}
-// );
