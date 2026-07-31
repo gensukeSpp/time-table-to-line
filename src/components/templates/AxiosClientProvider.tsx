@@ -15,12 +15,20 @@ export const AuthAxios = ({children}: {children: ReactNode}) => {
     // リクエスト前に実行。headerに認証情報を付与する
     const requestIntercept = basicAxios.interceptors.request.use(
       (config) => {
-        const token = tokenContext ?? newAccessToken.data?.data?.access_token ?? newAccessToken.data?.accessToken ?? (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : undefined);
+        // derive token from various possible shapes
+        let token: string | undefined;
+        if (tokenContext) token = tokenContext;
+        else if (newAccessToken.data?.data) {
+          const d = newAccessToken.data.data as any;
+          token = typeof d === 'string' ? d : d.access_token ?? d.accessToken;
+        } else if (typeof window !== 'undefined') {
+          token = localStorage.getItem('accessToken') ?? undefined;
+        }
+
         if (token) {
-          config.headers = {
-            ...config.headers,
-            Authorization: `Bearer ${token}`,
-          };
+          const headers = (config.headers as Record<string, any> | undefined) ?? {};
+          headers['Authorization'] = `Bearer ${token}`;
+          (config.headers as any) = headers;
         }
         return config;
       },
@@ -38,12 +46,19 @@ export const AuthAxios = ({children}: {children: ReactNode}) => {
           prevRequest._retry = true;
           try {
             await newAccessToken.refetch?.();
-            const refreshed = newAccessToken.data?.data?.access_token ?? newAccessToken.data?.accessToken ?? (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : undefined);
+
+            let refreshed: string | undefined;
+            if (newAccessToken.data?.data) {
+              const d = newAccessToken.data.data as any;
+              refreshed = typeof d === 'string' ? d : d.access_token ?? d.accessToken;
+            } else if (typeof window !== 'undefined') {
+              refreshed = localStorage.getItem('accessToken') ?? undefined;
+            }
+
             if (refreshed) {
-              prevRequest.headers = {
-                ...prevRequest.headers,
-                Authorization: `Bearer ${refreshed}`,
-              };
+              const headers = (prevRequest.headers as Record<string, any> | undefined) ?? {};
+              headers['Authorization'] = `Bearer ${refreshed}`;
+              (prevRequest.headers as any) = headers;
               // 再度実行する
               return basicAxios(prevRequest);
             }

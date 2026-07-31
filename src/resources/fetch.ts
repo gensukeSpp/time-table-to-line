@@ -24,8 +24,8 @@ export const fetchAuthResponse = async (postToken: string): Promise<AxiosRespons
 	return authResponse;
 };
 
-export const refresh = async (_prev: string): Promise<AxiosResponse<string>> => {
-  const response = await basicAxios.post<string>('/refresh');
+export const refresh = async (_prev: string): Promise<AxiosResponse<AuthInfoProp>> => {
+  const response = await basicAxios.post<AuthInfoProp>('/refresh');
   return response;
 };
 
