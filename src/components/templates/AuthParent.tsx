@@ -3,10 +3,15 @@ import { useSearchParams } from "react-router-dom";
 
 import { AuthInfoProp } from "../../lib/TimelineType";
 import { AuthStateContext } from "../../hooks/useContextFamily";
+import { useSearchQuery } from "../../resources/queries";
 
 const TOKEN_STORAGE_KEY = 'accessToken';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // 余計なレンダリングが起こるため不採用
+  // const { data } = useSearchQuery('token');
+  // const auth: AuthInfoProp = { accessToken: data!, type: 'token' }
+  
   const [params] = useSearchParams();
   const urlToken = params.get('token');
 

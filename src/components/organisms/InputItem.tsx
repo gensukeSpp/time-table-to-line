@@ -53,11 +53,11 @@ export const AddChildForm = forwardRef(
 		      <Text style={{ fontSize: '2rem' }} fw={700} className={boundaryTop}>{selectedEvent.title}</Text>
 		      <section className={boundaryTop}>
 		        <Text>内容：</Text>
-		        <TextInput name="summary" onChange={handleChange} value={eventItem.summary} />
+		        <TextInput name="summary" onChange={handleChange} value={eventItem.summary ?? ''} />
 		      </section>
 		      <section className={boundaryTop}>
 		        <Text>どんな感じ：</Text>
-		        <NativeSelect name="progress" value={eventItem.progress} onChange={handleChange}
+		        <NativeSelect name="progress" value={eventItem.progress ?? ''} onChange={handleChange}
 		          data={[
 		            '---進捗を選んでください---',
 		            ...options.map((option) => option.label),
@@ -66,7 +66,7 @@ export const AddChildForm = forwardRef(
 		      </section>
 		      {authId === selectedEvent.staff_id ?
 		        <section className={boundaryY}>
-		          <EventUpdateButtons {...eventItem}></EventUpdateButtons>
+		          <EventUpdateButtons indicateEvent={eventItem} closeInputForm={closeClick}></EventUpdateButtons>
 		        </section> : <Box></Box>
 		      }
 		    </Box>

@@ -10,13 +10,14 @@ export const AuthLeavePage = () => {
   const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;
 
   const { data, isPending, isError, error, isFetching } = useAuthQuery(tokenContext ?? '');
-  console.log(`とりあえず結果のID: ${JSON.stringify(data?.data)}`);
-  console.log(`とりあえず結果のerr: ${error}`);
+  // console.log(`とりあえず結果のID: ${JSON.stringify(data?.data)}`);
+  // console.log(`とりあえず結果のerr: ${error}`);
 
   const navigate = useNavigate();
 
   const payload = normalizeAuthPayload(data?.data);
 
+  // URL にトークンがのこるため、(一時)不採用
   // useEffect(() => {
   //   if (!payload || !tokenContext) return;
 
@@ -28,14 +29,10 @@ export const AuthLeavePage = () => {
   //   navigate(`/calendar?${params.toString()}`);
   // }, [payload, tokenContext, navigate]);
 
-  const strData = JSON.stringify(data?.data);
-
   useEffect(() => {
-    const f = async () => {
-      data && navigate(`/calendar?userID=${JSON.parse(strData).staff_id}`);
-    }
-    f();
-  }, [data]);
+    if (!payload) return;
+    navigate(`/calendar?userID=${payload.staff_id}`);
+  }, [payload, navigate]);
 
   if (!tokenContext) {
     return (

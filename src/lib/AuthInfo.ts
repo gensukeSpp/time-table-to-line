@@ -10,4 +10,13 @@ const basicAxios = axios.create({
   withCredentials: true,
 });
 
+export const postHeaders = async (postToken: string) => {
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Origin': '*',
+    'Authorization': `Bearer ${postToken}`,
+    'credentials': 'include' // ここを追加。
+  };
+  return headers;
+};
+
 export default basicAxios;
