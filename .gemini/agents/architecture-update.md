@@ -11,6 +11,7 @@ This skill automates the process of generating high-level architecture snapshots
 1. **Identify Changes:**
    - Use `invoke_agent` with the `codebase_investigator` to:
      - Determine the base branch (usually `origin/main`).
+     - Run `gh pr view` to fetch PR details if the current branch is part of a Pull Request.
      - Analyze the diff to deeply understand the changes and their impact.
      - Identify changed source code files compared to the base branch.
      - List commits between base and current head.

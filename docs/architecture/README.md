@@ -6,3 +6,4 @@
 | 2026-07-30 | Code cleanup and ESLint config update |
 | 2026-07-30 | Component reorganization and naming cleanup |
 | 2026-07-30-03 | Phase A–F refactoring (unused code removal, ESLint recovery, query consolidation, type safety, bug investigation, quality gate) |
+| 2026-08-03 | Event fixes, view switching, timeline zoom, and auth security improvements |

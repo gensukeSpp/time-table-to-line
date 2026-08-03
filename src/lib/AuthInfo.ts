@@ -7,16 +7,14 @@ const BASE_URL = import.meta.env.VITE_LOCAL;
 const basicAxios = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json; charset=utf-8" },
-  withCredentials: true,
 });
 
-export const postHeaders = async (postToken: string) => {
-  const headers: Record<string, string> = {
-    'Access-Control-Allow-Origin': '*',
+export const postHeaders = async (postToken: string) => ({
+  headers: {
+    'Content-Type': 'application/json; charset=utf-8',
     'Authorization': `Bearer ${postToken}`,
-    'credentials': 'include' // ここを追加。
-  };
-  return headers;
-};
+  },
+  withCredentials: true,
+});
 
 export default basicAxios;

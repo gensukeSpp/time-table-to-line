@@ -21,7 +21,6 @@ export const fetchEventsDataForTT = async (_postToken: string): Promise<Timeline
 
 export const fetchAuthResponse = async (postToken: string): Promise<AxiosResponse<AuthInfoProp>> => {
   const authResponse = await basicAxios.post<AuthInfoProp>('/timetable/inquiry', postToken, await postHeaders(postToken));
-	console.log(`Auth header: ${JSON.stringify(authResponse)}`);
 	return authResponse;
 };
 

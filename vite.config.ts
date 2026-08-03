@@ -13,14 +13,7 @@ export default defineConfig({
   server: {
     watch: {
       usePolling: true,
-    },
-    // proxy: {
-    //   '/event': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-    //   '/date': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-    //   '/timetable': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-    //   '/refresh': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-    //   '/group': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-    // },
+    }
   },
   test: {
     globals: true,

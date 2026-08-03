@@ -1,9 +1,7 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { AuthInfoProp } from "../../lib/TimelineType";
 import { AuthStateContext } from "../../hooks/useContextFamily";
-import { useSearchQuery } from "../../resources/queries";
 
 const TOKEN_STORAGE_KEY = 'accessToken';
 
