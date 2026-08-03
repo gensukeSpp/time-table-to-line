@@ -4,7 +4,12 @@ import { Button } from '@mantine/core';
 import { useDeleteMutation, useUpdateEventMutation } from '../../hooks/useEventMutation';
 import { TimelineEventProps } from '../../lib/TimelineType';
 
-export const EventUpdateButtons = (indicateEvent: TimelineEventProps) => {
+interface EventUpdateButtonsProps {
+  indicateEvent: TimelineEventProps;
+  closeInputForm: () => void;
+}
+
+export const EventUpdateButtons = ({ indicateEvent, closeInputForm }: EventUpdateButtonsProps) => {
 	const updateEvent = useUpdateEventMutation(indicateEvent.id);
 	const deleteEvent = useDeleteMutation(indicateEvent.id);
 
@@ -14,11 +19,15 @@ export const EventUpdateButtons = (indicateEvent: TimelineEventProps) => {
 		      ...indicateEvent,
 		      summary: indicateEvent.summary,
 		      progress: indicateEvent.progress
+		    }, {
+		      onSuccess: closeInputForm
 		    });
-		  }
+	  }
 	const handleRemove = (e: FormEvent) => {
 		e.preventDefault();
-		deleteEvent.mutate();
+		deleteEvent.mutate(undefined, {
+			onSuccess: closeInputForm
+		});
 	}
 
   return (

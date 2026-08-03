@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 // OnItemDragObjectResize 型は react-calendar-timeline の型定義に存在しないため削除
 
 import { calculateZoomedTimeRange } from '../lib/timelineZoomUtils';
@@ -18,18 +18,21 @@ export const useTimelineDragZoom = (
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
 
+  // useRef で最新の visibleTime を保持し、handleMouseMove の依存配列から外す
+  const visibleTimeRef = useRef(visibleTime);
+  visibleTimeRef.current = visibleTime;
+
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    // Check if the drag started on an item
-    const itemElement = (e.target as HTMLElement).closest('.rct-items');
-    if (!itemElement) {
-      // If not on an item, don't start the zoom drag
+    // イベントアイテム上でのクリックはズーム開始しない
+    const itemElement = (e.target as HTMLElement).closest('.rct-item');
+    if (itemElement) {
       return;
     }
 
     e.preventDefault();
     setIsDragging(true);
     setDragStartX(e.clientX);
-    
+
   }, []);
 
   const handleMouseMove = useCallback(
@@ -41,8 +44,9 @@ export const useTimelineDragZoom = (
       // 小さな動きでは更新しない
       if (Math.abs(dragDistance) < DRAG_SENSITIVITY) return;
 
+      const { start, end } = visibleTimeRef.current;
       const newTimes = calculateZoomedTimeRange(
-        { start: visibleTime.start, end: visibleTime.end },
+        { start, end },
         dragDistance,
         timelineWidth,
         -DRAG_SENSITIVITY
@@ -50,11 +54,10 @@ export const useTimelineDragZoom = (
 
       setVisibleTime(newTimes);
       // 継続的なズームのためにドラッグ開始点を更新
-      // mouseMoveイベントが発生するたびにドラッグの開始位置を現在位置で上書きしてしまっている
-      // setDragStartX(e.clientX);
-      
+      setDragStartX(e.clientX);
+
     },
-    [isDragging, dragStartX, visibleTime, timelineWidth]
+    [isDragging, dragStartX, timelineWidth]
   );
 
   const handleMouseUp = useCallback(() => {

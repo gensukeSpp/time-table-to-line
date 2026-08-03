@@ -3,7 +3,7 @@ import { Box, Text, TextInput, NativeSelect, Button } from '@mantine/core';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
 import { useDialog } from '../../hooks/useDialog';
-import { useSearchQuery } from '../../resources/queries';
+import { useAuthInfo } from '../../hooks/useAuthGuard';
 
 import { boundaryTop, boundaryY, buttonPosition } from '../sprinkles.responsive.css';
 import { formParent } from './InputItem.css';
@@ -38,8 +38,8 @@ export const AddChildForm = forwardRef(
 	}
 
 	// リテラルタイプ化
-	  const selectedStaff = `${selectedEvent.staff_id}` as const;
-	  const { data: infoContext } = useSearchQuery('userID');
+	const auth = useAuthInfo();
+	const authId = auth.type === 'auth' ? auth.authId : undefined;
 
 	const { Dialog, close } = useDialog();
 
@@ -53,20 +53,20 @@ export const AddChildForm = forwardRef(
 		      <Text style={{ fontSize: '2rem' }} fw={700} className={boundaryTop}>{selectedEvent.title}</Text>
 		      <section className={boundaryTop}>
 		        <Text>内容：</Text>
-		        <TextInput name="summary" onChange={handleChange} value={eventItem.summary} />
+		        <TextInput name="summary" onChange={handleChange} value={eventItem.summary ?? ''} />
 		      </section>
 		      <section className={boundaryTop}>
 		        <Text>どんな感じ：</Text>
-		        <NativeSelect name="progress" value={eventItem.progress} onChange={handleChange}
+		        <NativeSelect name="progress" value={eventItem.progress ?? ''} onChange={handleChange}
 		          data={[
 		            '---進捗を選んでください---',
 		            ...options.map((option) => option.label),
 		          ]}
 		        />
 		      </section>
-		      {infoContext === selectedStaff ?
+		      {authId === selectedEvent.staff_id ?
 		        <section className={boundaryY}>
-		          <EventUpdateButtons {...eventItem}></EventUpdateButtons>
+		          <EventUpdateButtons indicateEvent={eventItem} closeInputForm={closeClick}></EventUpdateButtons>
 		        </section> : <Box></Box>
 		      }
 		    </Box>
