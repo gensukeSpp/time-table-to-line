@@ -1,29 +1,28 @@
 import { describe, expect, it } from 'vitest';
-import { setHours, setMinutes, startOfDay } from 'date-fns';
-import { SlotInfo } from 'react-big-calendar';
-import { normalizeSlotInfo } from '../lib/slot';
+import { addHours, endOfDay, setHours, startOfDay } from 'date-fns';
+import { resolveSlotEnd } from '../lib/slot';
 
-describe('normalizeSlotInfo', () => {
-  it('end > start の通常スロットはそのまま返す', () => {
+describe('resolveSlotEnd', () => {
+  it('通常スロット（例: 9:00）は start + 1h を返す', () => {
     const start = setHours(startOfDay(new Date()), 9);
-    const end = setHours(startOfDay(new Date()), 10);
-    const result = normalizeSlotInfo({ start, end } as SlotInfo);
-    expect(result.start).toBe(start);
-    expect(result.end).toBe(end);
+    expect(resolveSlotEnd(start)).toEqual(addHours(start, 1));
   });
 
-  it('23:00 スロットの逆走 end（同刻 or 前刻）を start + 1h に補正する', () => {
+  it('23:00 スロットは日跨ぎせずに同日 endOfDay に丸める', () => {
     const start = setHours(startOfDay(new Date()), 23);
-    const badEnd = startOfDay(new Date()); // 同日 00:00 / end <= start
-    const result = normalizeSlotInfo({ start, end: badEnd } as SlotInfo);
-    expect(result.end.getTime()).toBe(start.getTime() + 60 * 60 * 1000); // 1 時間後
-    expect(result.end).not.toBe(badEnd);
+    expect(resolveSlotEnd(start)).toEqual(endOfDay(start));
   });
 
-  it('end が start より前の時刻でも start + 1h に補正する', () => {
+  it('22:00 スロットは日跨ぎしないため start + 1h のまま', () => {
+    const start = setHours(startOfDay(new Date()), 22);
+    expect(resolveSlotEnd(start)).toEqual(addHours(start, 1));
+  });
+
+  it('endOfDay を超えず、かつ翌日 0:00 より前の値になる', () => {
+    // どの開始時刻でも end は同日内（翌日 0:00 より前）
     const start = setHours(startOfDay(new Date()), 23);
-    const before = setMinutes(startOfDay(new Date()), 30); // 00:30（逆走）
-    const result = normalizeSlotInfo({ start, end: before } as SlotInfo);
-    expect(result.end.getTime()).toBe(start.getTime() + 60 * 60 * 1000);
+    const end = resolveSlotEnd(start);
+    expect(end.getTime()).toBeLessThan(addHours(start, 1).getTime());
+    expect(end).toEqual(endOfDay(start));
   });
 });

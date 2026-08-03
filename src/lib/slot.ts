@@ -1,16 +1,13 @@
-import { isBefore } from 'date-fns';
-import { SlotInfo } from 'react-big-calendar';
+import { addHours, endOfDay, min } from 'date-fns';
 
 /**
- * 11PM 問題対策: 23:00 等の末端スロット選択で react-big-calendar が
- * 逆走する end（end <= start）を返すのを正規化する。
- * 単一スロット選択は常に「start から 1 時間」として扱う。
+ * 11PM 問題対策: スロット開始時刻からイベント終了時刻を求める。
+ *
+ * react-big-calendar は end が「ちょうど 0:00 翌日（日跨ぎ）」のイベントを
+ * all-day / multi-day バンドに描画する。23:00 スロットのように end が日付を
+ * 跨ぐ場合は同日 endOfDay（23:59:59.999）に丸めることで、
+ * 通常の時間列（23:00 列）に表示させ、allDay 扱いを防ぐ。
  */
-export function normalizeSlotInfo(slotInfo: SlotInfo): SlotInfo {
-  const start = slotInfo.start;
-  const end = slotInfo.end;
-  if (!end || isBefore(end, start) || end.getTime() === start.getTime()) {
-    return { ...slotInfo, end: new Date(start.getTime() + 60 * 60 * 1000) };
-  }
-  return { ...slotInfo, start, end };
+export function resolveSlotEnd(slotStartTime: Date): Date {
+  return min([addHours(slotStartTime, 1), endOfDay(slotStartTime)]);
 }

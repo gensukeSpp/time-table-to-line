@@ -8,7 +8,6 @@ import { useMouseEvents } from '../../hooks/useMouseHandle';
 import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useCallingEditForm } from '../../hooks/useCallingForm';
 import localizer from '../../lib/Localization';
-import { normalizeSlotInfo } from '../../lib/slot';
 import { CalendarActionProps, TimelineEventProps } from '../../lib/TimelineType';
 import { AddChildForm } from '../organisms/InputItem';
 
@@ -94,11 +93,10 @@ export const MyCalendar = (
   const clickRef = useRef<number | undefined>(undefined);
   const [slotInfoState, setSlotInfoState] = useState<SlotInfo>();
   const onSelectSlot = useCallback((slotInfo: SlotInfo) => {
-    const normalized = normalizeSlotInfo(slotInfo);
     window.clearTimeout(clickRef?.current);
     clickRef.current = window.setTimeout(() => {
       if (countRef.current === clickRef.current) {
-        setSlotInfoState(normalized);
+        setSlotInfoState(slotInfo);
       }
     }, 250);
     // こっちが先になる
@@ -135,6 +133,7 @@ export const MyCalendar = (
             localizer={localizer}
             events={newState}
             defaultView="week"
+            allDayAccessor={() => false}
             startAccessor={(stateEvent: TimelineEventProps) => {
               return stateEvent.start_time;
             }}
