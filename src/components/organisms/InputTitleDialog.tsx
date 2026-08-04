@@ -1,10 +1,10 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { Box, Text, TextInput, Button } from '@mantine/core';
-import { addHours, format } from 'date-fns';
 
 import { useEventsState } from '../../hooks/useContextFamily';
 import { useCreateMutation } from '../../hooks/useEventMutation';
 import { AuthInfoProp } from '../../lib/TimelineType';
+import { resolveSlotEnd } from '../../lib/slot';
 
 interface TitleInputProps {
   authInfo: AuthInfoProp,
@@ -23,8 +23,9 @@ export const TitleInput = ({
     setTitle(e.target.value);
   };
 
-  const startDT = format(slotStartTime, "yyyy-MM-dd HH:mm:ss");
-  const endDT = format(addHours(slotStartTime, 1), "yyyy-MM-dd HH:mm:ss");
+  // 23:00 スロット等、日跨ぎになる場合は同日 endOfDay に丸めて通常イベントとして表示する
+  const startTime = slotStartTime;
+  const endTime = resolveSlotEnd(slotStartTime);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -35,8 +36,8 @@ export const TitleInput = ({
         group: authInfo.code,
         staff_id: authInfo.authId,
         title: title,
-        start_time: new Date(startDT),
-        end_time: new Date(endDT)
+        start_time: startTime,
+        end_time: endTime
       });
     }
     closeDialog();

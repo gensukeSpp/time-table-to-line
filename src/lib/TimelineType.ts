@@ -43,3 +43,9 @@ export interface CalendarActionProps {
 	onTimeChangeEvents?: (movedEvents: TimelineEventProps[]) => void
 	onSlotInfo?: (selectedSlot: SlotInfo) => void
 }
+
+// type alias を定義するか
+export type TimelineStackItem = Omit<TimelineEventProps, 'start_time' | 'end_time'> & {
+	start_time: number;
+	end_time: number;
+};

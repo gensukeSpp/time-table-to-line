@@ -133,6 +133,7 @@ export const MyCalendar = (
             localizer={localizer}
             events={newState}
             defaultView="week"
+            allDayAccessor={() => false}
             startAccessor={(stateEvent: TimelineEventProps) => {
               return stateEvent.start_time;
             }}

@@ -1,6 +1,6 @@
 ---
 created: 2026-07-17T11:54
-updated: 2026-07-23T15:43
+updated: 2026-08-04T11:46
 ---
 ## 概要
 かつての [タイムテーブル & タイムライン](https://github.com/Manabu-Aihara/time-table4)アプリのリファクタリング -> 機能追加
@@ -17,11 +17,11 @@ updated: 2026-07-23T15:43
 - UI ライブラリを統一します。
 	└ 現在 chakra, radix-ui はほぼ同機能で、どちらかに一本化、また別の選択肢があれば提案してください。
 - コンポーネントテストを行いたいため、Storybook は入れておきたいのですが、Playwright で包括できるなら、その限りではありません。 
-- コンポーネントテストは、 vitest 及び Jest では **行いません** 。
+- コンポーネントテストは、 ~~vitest 及び Jest では 行いません 。~~ vitest や Test Library を内部的に使用する Storybook による **インタラクションテスト** で行います。
 - 認証機能は、今のところそのまま(別認証サイトから、トークン認証)にします。
 
 ## リファクタリング
-**前提**: タイムテーブル(react-big-calendar)、タイムライン(react-calendar-timeline)に表示・追加する予定は、今後 **イベント** と表記します。当アプリの中心的なところです。-> `src/lib/TimelineTypes.ts` の `TimelineEventProps`
+**前提**: タイムテーブル(react-big-calendar)、タイムライン(react-calendar-timeline)に表示・追加する予定は、今後 **イベント** と表記します。当アプリの中心的なところです。-> `src/lib/TimelineType.ts` の `TimelineEventProps`
 
 **主な構造**
 - `src/components/` 以下の4ディレクトリでは、コンポーネント `tsx` の集まりです。古いタイプのフォルダ分けかもしれません(... 知らんけど)。
@@ -48,7 +48,7 @@ updated: 2026-07-23T15:43
 	3. データベース上のテーブルに、保存されるイベント(`TimelineEventProps` の `start_time` `end_time`)の時刻が、日本時間ではない -> UI では、期待する時刻に挿入される(PM 11:00 を除く)
 
 - タイムライン: タイムテーブルと連動し、タイムテーブルで追加したイベントが表示できる
-	1. イベントの「重なり」が表示できない
+	1. ~~イベントの「重なり」が表示できない~~ → **解消済み**（task-09 / E-2: `stackItems` + `toTimelineStackItems()`）
 
 ### ついでのお願い
 - こちらは **リファクタリングの過程** で(例: 11:00 PM の問題について、 Calendar コンポーネントの最中)、もしくは、 **別の機会** に問題提起して行っても良いです。
@@ -59,4 +59,4 @@ updated: 2026-07-23T15:43
 - [react-calendar-timeline](https://github.com/namespace-ee/react-calendar-timeline)
 
 ---
-予告: `requirement-02.md` では、既存ライブラリで使いこなせなかった箇所(`allDayAccessor` プロパティなど)を利用した機能を目的とします。
+予告: ~~`requirement-02.md` では、~~ 追加のテーマとしては、タイムラインでの「フォーム」の表示、既存ライブラリで使いこなせなかった箇所(`allDayAccessor` プロパティなど)や、 "month", "day" ビューでイベントを追加できるか(month なら、日またぎ。 day なら、15分区切り)を目的とします。
