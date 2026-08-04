@@ -5,7 +5,7 @@ import { Timeline, TimelineGroupBase } from "react-calendar-timeline";
 import { useGroupUsersQuery, useAuthQuery } from "../../resources/queries";
 import { useAuthContext, useEventsState } from "../../hooks/useContextFamily";
 import { useTimelineDragZoom } from '../../hooks/useTimelineDragZoom'; // Import the new custom hook
-import { getGroup, getItems } from '../../lib/TmelineData';
+import { getGroup, getItems, toTimelineStackItems } from '../../lib/TmelineData';
 
 import 'react-calendar-timeline/style.css';
 
@@ -79,11 +79,7 @@ export const MyHorizonTimeline = () => {
       {isPending ? <p>Loading...</p> : (
         <Timeline
           groups={groupMember}
-          items={state.map((item) => {
-            return {
-              ...item,
-            }
-          })}
+          items={toTimelineStackItems(state)}
           defaultTimeStart={defaultTimeStart}
           defaultTimeEnd={defaultTimeEnd}
           visibleTimeStart={visibleTimeStart} // Use state from hook
@@ -94,6 +90,7 @@ export const MyHorizonTimeline = () => {
           minZoom={24 * 60 * 60 * 1000}
           maxZoom={365.24 * 86400 * 1000}
           lineHeight={60}
+          stackItems={true} // Stack overlapping items vertically
           onCanvasClick={() => { }}
           onBoundsChange={onBoundsChange}
         />

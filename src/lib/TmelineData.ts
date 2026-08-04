@@ -25,3 +25,13 @@ export const getItems = (eventContextQueries: TimelineEventPropsList) => {
     : exEvents;
   return contextState;
 }
+
+// react-calendar-timeline の stackItems は native Date では動作しない
+// （ミリ秒の number が必須）。Timeline へ渡す直前に start_time/end_time を
+// .getTime() の数値へ変換する（アプリ全体の Date は維持する）。
+export const toTimelineStackItems = (items: TimelineEventProps[]) =>
+  items.map((item) => ({
+    ...item,
+    start_time: item.start_time.getTime(),
+    end_time: item.end_time.getTime(),
+  }));

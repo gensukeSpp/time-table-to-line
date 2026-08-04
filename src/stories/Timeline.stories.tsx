@@ -2,8 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from '@storybook/test';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
+import { addHours } from "date-fns";
 
-import { AuthInfoProp, GroupUserProps } from "../lib/TimelineType";
+import { AuthInfoProp, GroupUserProps, TimelineEventProps } from "../lib/TimelineType";
 import { EventsStateContext, AuthStateContext } from "../hooks/useContextFamily";
 import { MyHorizonTimeline } from '../components/pages/TimelinePage';
 import { exEvents } from "../lib/SampleState";
@@ -40,8 +41,8 @@ const mockAuthResponse = {
 
 // グループメンバー（/group/users）用モックレスポンス
 const mockGroupMembers: GroupUserProps[] = [
-  { staff_id: 1, family_kana: "group 1", last_kana: "last1" },
-  { staff_id: 2, family_kana: "group 2", last_kana: "last2" },
+  { staff_id: 500, family_kana: "group 1", last_kana: "last1" },
+  { staff_id: 501, family_kana: "group 2", last_kana: "last2" },
 ];
 const mockGroupResponse = {
   data: mockGroupMembers,
@@ -56,6 +57,22 @@ const mockGroupResponse = {
 queryClient.setQueryData(authKeys.verify(authParam.accessToken), mockAuthResponse);
 queryClient.setQueryData(eventKeys.userList(), mockGroupResponse);
 
+// E-2 検証用: 同一ユーザー（staff_id 500）で時間が重複するイベントを追加。
+// グループ行 = ユーザー（staff_id）単位のため、重なりが起きるのは「同一 staff_id・同一時間帯」のみ。
+const timelineOverlapEvents: TimelineEventProps[] = [
+  ...exEvents,
+  {
+    id: 4,
+    group: 500,
+    staff_id: 500,
+    title: 'item 4 (same-user overlap)',
+    start_time: addHours(new Date(), 0.5),
+    end_time: addHours(new Date(), 1.5),
+    start: addHours(new Date(), 0.5),
+    end: addHours(new Date(), 1.5),
+  },
+];
+
 const meta: Meta<typeof MyHorizonTimeline> = {
   title: "MyTimeline",
   component: MyHorizonTimeline,
@@ -66,7 +83,7 @@ const meta: Meta<typeof MyHorizonTimeline> = {
       return (
         <QueryClientProvider client={queryClient}>
           <AuthStateContext.Provider value={authParam}>
-            <EventsStateContext.Provider value={exEvents}>
+            <EventsStateContext.Provider value={timelineOverlapEvents}>
               <div style={{ border: '2px solid purple' }}>
                 <Story />
               </div>
