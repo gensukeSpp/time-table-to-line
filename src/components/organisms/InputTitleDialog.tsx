@@ -35,6 +35,7 @@ export const TitleInput = ({
         id: Number(eventsState.slice(-1)[0].id) + 1,
         group: authInfo.code,
         staff_id: authInfo.authId,
+        admin: false,
         title: title,
         start_time: startTime,
         end_time: endTime

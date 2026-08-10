@@ -61,6 +61,7 @@ export const useEventsQuery = (options?: EventQueryOptions) => {
     data: useMemo(() => Array.isArray(data) ? data.map(item => {
       const base = {
         ...item,
+        admin: item.admin ?? false,
         start: new Date(item.start ?? new Date()),
         end: new Date(item.end ?? new Date()),
       };
@@ -87,6 +88,7 @@ export const useUserEventsQuery = () => {
     ...queryInfo,
     data: useMemo(() => data?.map(item => ({
       ...item,
+      admin: item.admin ?? false,
       start: new Date(item.start ?? new Date()),
       end: new Date(item.end ?? new Date()),
     })), [data])

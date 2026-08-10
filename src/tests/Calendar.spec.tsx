@@ -64,9 +64,9 @@ import { useCallingEditForm } from '../hooks/useCallingForm';
 describe('MyCalendar (CalendarView)', () => {
   // テストデータ（時刻が重複しないように修正）
   const mockEvents: TimelineEventProps[] = [
-    { id: 1, title: 'My Event 1', start_time: setHours(startOfDay(new Date()), 9), end_time: setHours(startOfDay(new Date()), 10), staff_id: 1, group: 1 },
-    { id: 2, title: 'Another User Event', start_time: setHours(startOfDay(new Date()), 11), end_time: setHours(startOfDay(new Date()), 12), staff_id: 2, group: 2 },
-    { id: 3, title: 'My Event 2', start_time: setHours(startOfDay(new Date()), 13), end_time: new Date(), staff_id: 1, group: 1 },
+    { id: 1, title: 'My Event 1', start_time: setHours(startOfDay(new Date()), 9), end_time: setHours(startOfDay(new Date()), 10), staff_id: 1, group: 1, admin: false },
+    { id: 2, title: 'Another User Event', start_time: setHours(startOfDay(new Date()), 11), end_time: setHours(startOfDay(new Date()), 12), staff_id: 2, group: 2, admin: false },
+    { id: 3, title: 'My Event 2', start_time: setHours(startOfDay(new Date()), 13), end_time: new Date(), staff_id: 1, group: 1, admin: false },
   ];
   const mockAuthId = 1;
   const { Default, WithEventClick } = composeStories<typeof import('../stories/Calendar.stories')>(stories);
