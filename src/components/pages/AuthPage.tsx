@@ -34,6 +34,13 @@ export const AuthLeavePage = () => {
     navigate(`/calendar?userID=${payload.staff_id}`);
   }, [payload, navigate]);
 
+  // 認証失敗時（401 等）は古いトークンが localStorage に残り、
+  // 再アクセス時にフォールバックで使い続けてしまうのを防ぐ。
+  useEffect(() => {
+    if (!isError) return;
+    localStorage.removeItem('accessToken');
+  }, [isError]);
+
   if (!tokenContext) {
     return (
       <div>
