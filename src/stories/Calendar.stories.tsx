@@ -15,9 +15,9 @@ import { MemoryRouter } from 'react-router-dom';
 
 // 1. Mock Data
 const mockEvents: TimelineEventProps[] = [
-  { id: 1, title: 'My Event 1', start_time: addHours(new Date(), -2), end_time: addHours(new Date(), -1), staff_id: 1, group: 1 },
-  { id: 2, title: 'Another User Event', start_time: new Date(), end_time: addHours(new Date(), 1), staff_id: 2, group: 2 },
-  { id: 3, title: 'My Event 2', start_time: addHours(new Date(), 2), end_time: addHours(new Date(), 3), staff_id: 1, group: 1 },
+  { id: 1, title: 'My Event 1', start_time: addHours(new Date(), -2), end_time: addHours(new Date(), -1), staff_id: 1, group: 1, admin: false },
+  { id: 2, title: 'Another User Event', start_time: new Date(), end_time: addHours(new Date(), 1), staff_id: 2, group: 2, admin: false },
+  { id: 3, title: 'My Event 2', start_time: addHours(new Date(), 2), end_time: addHours(new Date(), 3), staff_id: 1, group: 1, admin: false },
 ];
 
 const mockAuthToken: AuthInfoProp = { type: 'token', accessToken: '0123456789abcdef' };

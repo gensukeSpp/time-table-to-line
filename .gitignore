@@ -33,3 +33,4 @@ env/
 
 # 開発にあたっての設定ほか
 .serena/
+.playwright-mcp/

@@ -2,13 +2,21 @@ import { AxiosResponse } from "axios";
 
 import { AuthInfoProp, GroupUserProps, TimelineEventProps } from "../lib/TimelineType";
 import basicAxios, { postHeaders } from "../lib/AuthInfo";
+// import { _ } from "vitest/dist/chunks/reporters.d.BuRON0I0.js";
 
 export const fetchEventsData = async (_postToken: string): Promise<TimelineEventProps[]> => {
 	const { data } = await basicAxios.request<TimelineEventProps[]>({
 		url: '/event/all',
 		method: 'GET',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Authorization': `Bearer ${_postToken}`,
+    },
+    withCredentials: true,
 	});
   return data;
+  // const response = await basicAxios.post<TimelineEventProps[]>('/event/all', await postHeaders(_postToken));
+  // return response;
 }
 
 export const fetchEventsDataForTT = async (_postToken: string): Promise<TimelineEventProps[]> => {
@@ -21,7 +29,7 @@ export const fetchEventsDataForTT = async (_postToken: string): Promise<Timeline
 
 export const fetchAuthResponse = async (postToken: string): Promise<AxiosResponse<AuthInfoProp>> => {
   const authResponse = await basicAxios.post<AuthInfoProp>('/timetable/inquiry', postToken, await postHeaders(postToken));
-	return authResponse;
+  return authResponse;
 };
 
 export const refresh = async (_prev: string): Promise<AxiosResponse<AuthInfoProp>> => {

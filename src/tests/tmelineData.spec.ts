@@ -7,6 +7,7 @@ describe('toTimelineStackItems', () => {
     id: 1,
     group: 500,
     staff_id: 500,
+    admin: false,
     title: 'x',
     start_time: new Date('2026-08-04T00:00:00.000Z'),
     end_time: new Date('2026-08-04T01:00:00.000Z'),

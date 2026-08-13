@@ -65,6 +65,7 @@ const timelineOverlapEvents: TimelineEventProps[] = [
     id: 4,
     group: 500,
     staff_id: 500,
+    admin: false,
     title: 'item 4 (same-user overlap)',
     start_time: addHours(new Date(), 0.5),
     end_time: addHours(new Date(), 1.5),

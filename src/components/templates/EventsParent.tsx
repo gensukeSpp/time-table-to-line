@@ -10,6 +10,7 @@ export const EventsContextProvider = ({ children }: { children: ReactNode }) => 
     id: 0,
     staff_id: 1000,
     group: 7,
+    admin: false,
     title: 'Learn cool stuff',
     start_time: new Date(),
     end_time: addHours(new Date(), 1),

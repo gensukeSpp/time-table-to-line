@@ -17,6 +17,7 @@ export type TimelineEventProps = Merge<NewTimelineItem, {
 	start_time: Date;
 	end_time: Date;
 	isDraggable?: boolean;
+	admin: boolean;
 }>;
 
 export type GroupUserProps = {
