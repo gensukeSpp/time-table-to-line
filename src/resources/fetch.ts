@@ -11,7 +11,6 @@ export const fetchEventsData = async (_postToken: string): Promise<TimelineEvent
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Authorization': `Bearer ${_postToken}`,
-      // 'credentials': 'include' // ここを追加。
     },
     withCredentials: true,
 	});
