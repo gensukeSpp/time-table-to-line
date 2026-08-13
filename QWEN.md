@@ -188,6 +188,9 @@ bun run build-storybook
 ### タイムライン（react-calendar-timeline）
 1. **イベントの「重なり」表示ができない**
 
+### 認証（401）
+- ~~`/event/all`・`/refresh` への GET が繰り返し 401~~ → **解消済み**（task-10: 原因はフロントのトークン未送信。リクエスト共通処理に `Authorization: Bearer {token}` を付与して両方解消。backend 側の実装は仕様どおり正常）
+
 ### コード品質
 - `console.log` の残存（セキュリティリスク）
 - コメントアウトされた不要コード
@@ -204,6 +207,11 @@ bun run build-storybook
 2. **ライブラリ更新**: 全依存を最新に一括インストール（React 19, Vite 6, Mantine v7, TanStack Query 5, 等）
 3. **不要コード削除**: `src/DnDApp.tsx`, `src/lib/ClickOrDouble.js` 削除、vite.config.ts 整理
 
+### 完了（2026-08-10 時点）
+4. **バグ修正**: 11PM 問題（task-08 / E-1）、タイムライン重なり表示（task-09 / E-2）
+5. **認証 401 調査**: task-10（原因はフロントのトークン未送信。backend 修正不要）
+6. **RBAC 土台**: `TimelineEventProps` に `admin: boolean` 追加（PR #9 / commit `71a9ae1`）
+
 ### 今後必要なコード修正タスク（順次実施）
 1. **ESLint フラット設定**: `.eslintrc.cjs` → `eslint.config.js` 移行（ESLint 9 対応）
 2. **Mantine 移行**: Chakra UI / Radix UI → Mantine v7 コンポーネント置き換え（import 修正含む）
@@ -218,6 +226,17 @@ bun run build-storybook
 ### 備考
 - インストール段階で削除した旧依存パッケージの一覧はプロジェクトメモリー参照
 - 各コード修正タスクは `tasks/` ディレクトリ配下に計画を保存する
+
+## アーキテクチャスナップショット
+
+| Date | Purpose |
+|---|---|
+| 2026-07-28 | Migration to Mantine v7 and date-fns |
+| 2026-07-30 | Code cleanup and ESLint config update |
+| 2026-07-30 | Component reorganization and naming cleanup |
+| 2026-07-30-03 | Phase A–F refactoring (unused code removal, ESLint recovery, query consolidation, type safety, bug investigation, quality gate) |
+| 2026-08-04 | Fix 11PM issue, refactor date handling, and implement timeline overlapping (PR #8 & Task 9) |
+| 2026-08-10 | Add admin property to TimelineEventProps for future RBAC (PR #9) |
 
 ## 参考リンク
 

@@ -35,12 +35,14 @@
    - **Phase F** — 品質ゲート（lint / build / test 最終確認）
    - 詳細は [`tasks/task-07/README.md`](./tasks/task-07/README.md) を参照
 8. バグ修正 → **完了**（E-1 11PM 問題: task-08 / E-2 タイムライン重なり: task-09）。E-3 タイムゾーンは調査済みで通常は正しく動作するため保留
-9. 機能追加（requirement-02.md で別途定義）
+9. 機能追加（requirement-02.md で別途定義）— **RBAC 土台の型追加は完了済み**（PR #9 / commit `71a9ae1`: `TimelineEventProps` に `admin: boolean` を追加、型定義・コンポーネント・モック・Stories・テストに波及）。より細かなロール（'viewer' / 'editor' 等）が必要になったら enum / union 型へのリファクタを検討
+10. 認証 401 調査 → **完了**（task-10）。原因はフロントのトークン未送信であり、backend 側の実装は仕様どおり正常
 
 ### 既知のバグ
 - ~~**タイムテーブル**: PM 11:00 にイベント追加不可（allDay 扱いになる）~~ → **解消済み**（task-08 / E-1: `resolveSlotEnd` で end を endOfDay に丸め）
 - **タイムテーブル**: DB 保存時刻が日本時間ではない（UTC の可能性）※未対応（E-3 調査済み・通常は正しく動作）
 - ~~**タイムライン**: イベントの重なり表示ができない~~ → **解消済み**（task-09 / E-2: `stackItems` + `toTimelineStackItems()` の Date→ms 変換）
+- ~~**認証**: `/event/all`・`/refresh` への GET が繰り返し 401 → **解消済み**（task-10: 原因はフロントのトークン未送信。リクエスト共通処理に `Authorization: Bearer {token}` を付与して両方解消）~~
 
 ### コード品質上の問題
 - セキュリティリスクになる `console.log` の残存 → 削除
@@ -48,6 +50,7 @@
 - 未使用の型・モジュール（`Theme.ts` 等）→ 整理
 - 3 つの日付ライブラリ混在（moment / date-fns / dayjs）→ date-fns 統一
 - 2 つの UI ライブラリ混在（Chakra UI / Radix UI）→ Mantine 統一
+- backend `light_token_server/tokens.py` に `print(...)` 残存（26, 57, 64, 80, 86, 90, 93, 96 行目）。一部はトークン先頭 10 文字（64）／シークレット先頭 5 文字（26）を出力しており console.log 削除方針と同様のセキュリティ観点あり（task-10 備考・動作には影響なし、backend 整理時の作業候補）
 
 ---
 
@@ -181,6 +184,7 @@ src/
 - トークンは URL クエリパラメータ `?token=xxx` で受け取り、Context に保存
 - Axios インターセプターで全リクエストに Authorization ヘッダーを付与
 - トークン期限切れ時は自動リフレッシュ
+- backend のトークン探索は **Bearer ヘッダー → Cookie** の順（`tokens.py`）。別オリジンからの呼び出しでは httpOnly Cookie フォールバック（同一オリジンかつ `credentials` 込みの fetch 時のみ有効）が効かないため、**`Authorization: Bearer {token}` を明示的に送る**のが正しい契約（task-10 の裏付け）
 
 ### 作業の進め方
 - タスクは `tasks/` ディレクトリに計画を保存してから開始する
