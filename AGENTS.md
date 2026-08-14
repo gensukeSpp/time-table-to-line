@@ -37,12 +37,15 @@
 8. バグ修正 → **完了**（E-1 11PM 問題: task-08 / E-2 タイムライン重なり: task-09）。E-3 タイムゾーンは調査済みで通常は正しく動作するため保留
 9. 機能追加（requirement-02.md で別途定義）— **RBAC 土台の型追加は完了済み**（PR #9 / commit `71a9ae1`: `TimelineEventProps` に `admin: boolean` を追加、型定義・コンポーネント・モック・Stories・テストに波及）。より細かなロール（'viewer' / 'editor' 等）が必要になったら enum / union 型へのリファクタを検討
 10. 認証 401 調査 → **完了**（task-10）。原因はフロントのトークン未送信であり、backend 側の実装は仕様どおり正常
+11. バグ修正（Issue #11）→ **完了**。Issue 1（時・分・秒欠落）は backend `/event/add` の受信解釈と照合し送信形式を確定して解決。Issue 2（タイムライン表示破綻）は `TimelinePage.tsx` を **ResizeObserver + ライブラリ `resizeDetector`** 方式に変更し、非表示マウント（Mantine Tabs `keepMounted`）時の幅を表示時に確実に再測定するよう修正、`toTimelineStackItems` に NaN/Infinity 除外の防御を追加。調査用 console.log 削除も含む。詳細は [`tasks/issue-11/README.md`](./tasks/issue-11/README.md)
 
 ### 既知のバグ
 - ~~**タイムテーブル**: PM 11:00 にイベント追加不可（allDay 扱いになる）~~ → **解消済み**（task-08 / E-1: `resolveSlotEnd` で end を endOfDay に丸め）
 - **タイムテーブル**: DB 保存時刻が日本時間ではない（UTC の可能性）※未対応（E-3 調査済み・通常は正しく動作）
 - ~~**タイムライン**: イベントの重なり表示ができない~~ → **解消済み**（task-09 / E-2: `stackItems` + `toTimelineStackItems()` の Date→ms 変換）
-- ~~**認証**: `/event/all`・`/refresh` への GET が繰り返し 401 → **解消済み**（task-10: 原因はフロントのトークン未送信。リクエスト共通処理に `Authorization: Bearer {token}` を付与して両方解消）~~
+- ~~**認証**: `/event/all`・`/refresh` への GET が繰り返し 401 → **解消済み**（task-10: 原因はフロントのトークン未送信。リクエスト共通処理に `Authorization: Bearer *** を付与して両方解消）~~
+- ~~**タイムテーブル**: 新規イベントの時刻が「時・分・秒」欠落（DB 保存が `00:00:00.000Z` になる）~~ → **解消済み**（Issue #11 Issue 1: backend `/event/add` の受信解釈と照合し送信形式を確定）
+- ~~**タイムライン**: 表示が壊れる（行 `rct-hl-*` が 3000px 超え。DevTools 開閉で修復、タブ再切替で再発）~~ → **解消済み**（Issue #11 Issue 2: 実因は非表示マウント時の幅未再測定。`TimelinePage.tsx` を ResizeObserver + `resizeDetector` 方式に変更し表示時に再測定。`toTimelineStackItems` に NaN/Infinity 除外の防御も追加）
 
 ### コード品質上の問題
 - セキュリティリスクになる `console.log` の残存 → 削除

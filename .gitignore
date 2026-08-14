@@ -34,3 +34,17 @@ env/
 # 開発にあたっての設定ほか
 .serena/
 .playwright-mcp/
+
+# For release
+docker-compose.yml
+.gemini/
+.github/
+.hermes/
+.qwen/
+.roo/
+docs/
+tasks/
+AGENT.md
+GEMINI.md
+QWEN.md
+requirement-01.md

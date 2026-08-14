@@ -8,7 +8,7 @@ export const useCreateMutation = () => {
   const eventCache = useEventCache();
 
   return useMutation({
-    mutationFn: (timelineEvent: TimelineEventProps) =>
+    mutationFn: (timelineEvent: TimelineEventProps) => 
       basicAxios.post('/event/add', timelineEvent),
     onSuccess: () => {
       eventCache.invalidateList();
