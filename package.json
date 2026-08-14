@@ -7,11 +7,12 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
+    "preview": "bun run build && wrangler dev",
     "test": "vitest",
     "testrun": "vitest run",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "deploy": "bun run build && wrangler deploy"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
@@ -27,6 +28,7 @@
     "react-router-dom": "^7.0.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.52.1",
     "@eslint/js": "^10.0.1",
     "@storybook/addon-essentials": "^8",
     "@storybook/addon-interactions": "^8",
@@ -54,6 +56,7 @@
     "typescript": "~5.7.0",
     "typescript-eslint": "^8",
     "vite": "^6.0.0",
-    "vitest": "^3"
+    "vitest": "^3",
+    "wrangler": "^4.123.0"
   }
 }
