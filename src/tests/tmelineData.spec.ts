@@ -29,4 +29,30 @@ describe('toTimelineStackItems', () => {
     expect(out.group).toBe(500);
     expect(out.title).toBe('x');
   });
+
+  it('Invalid Date / NaN の時刻を持つアイテムは除外する（描画ジオメトリ保護）', () => {
+    const invalidStart: TimelineEventProps = {
+      ...base,
+      id: 2,
+      start_time: new Date('not-a-date'),
+    };
+    const invalidEnd: TimelineEventProps = {
+      ...base,
+      id: 3,
+      end_time: new Date('not-a-date'),
+    };
+    const out = toTimelineStackItems([base, invalidStart, invalidEnd]);
+    // 正常な base だけが残り、NaN を含まない
+    expect(out).toHaveLength(1);
+    expect(out[0].id).toBe(1);
+    expect(Number.isFinite(out[0].start_time)).toBe(true);
+    expect(Number.isFinite(out[0].end_time)).toBe(true);
+  });
+
+  it('start_time / end_time は常に有限の number を返す', () => {
+    for (const item of toTimelineStackItems([base])) {
+      expect(Number.isFinite(item.start_time)).toBe(true);
+      expect(Number.isFinite(item.end_time)).toBe(true);
+    }
+  });
 });

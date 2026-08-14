@@ -1,5 +1,5 @@
 import { addHours } from 'date-fns';
-import React, { useRef, useEffect, useState } from 'react'; // Import useRef, useEffect, useState
+import React, { useRef, useLayoutEffect, useMemo, useState } from 'react';
 import { Timeline, TimelineGroupBase } from "react-calendar-timeline";
 
 import { useGroupUsersQuery, useAuthQuery } from "../../resources/queries";
@@ -23,17 +23,50 @@ export const MyHorizonTimeline = () => {
   // Container ref to get timeline width
   const containerRef = useRef<HTMLDivElement>(null);
   const [timelineWidth, setTimelineWidth] = useState(0);
+  // <Timeline> の resize() を非表示→表示の切り替え(タブ切替)時に呼ぶための把持。
+  // react-calendar-timeline は window resize 時のみ幅を再測定するため、Mantine Tabs の
+  // keepMounted で非表示のままマウントされると canvas 幅(buffer込み)が初期値=1000*3=3000px 等に
+  // 固定され、DevTools 開き(実 resize)まで修復されない(引用: Issue#11 Issue 2)。
+  const timelineRef = useRef<{ resize?: () => void } | null>(null);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        setTimelineWidth(containerRef.current.offsetWidth);
-      }
+  // コンテナ幅(ドラッグズーム用)とライブラリ幅を確実に再測定する。
+  // ResizeObserver は display:none→block などコンテナのサイズ変化(0→実値)を検知するため、
+  // タブを開いた瞬間に width を更新し、<Timeline>.resize() で canvas を再計算させる。
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return undefined;
+
+    const update = () => {
+      setTimelineWidth(el.offsetWidth);
+      timelineRef.current?.resize?.();
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    update();
+
+    const observer =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+    observer?.observe(el);
+
+    window.addEventListener('resize', update);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', update);
+    };
   }, []);
+
+  // ライブラリの resizeDetector 契約: addListener(インスタンス)/removeListener()。
+  // addListener で受け取ったインスタンスの .resize() が実レイアウト幅を再測定する。
+  const resizeDetector = useMemo(
+    () => ({
+      addListener: (instance: unknown) => {
+        timelineRef.current = instance as { resize?: () => void };
+      },
+      removeListener: () => {
+        timelineRef.current = null;
+      },
+    }),
+    []
+  );
 
   const defaultTimeStart = addHours(new Date(), -12).getTime();
   const defaultTimeEnd = addHours(new Date(), 12).getTime();
@@ -93,9 +126,9 @@ export const MyHorizonTimeline = () => {
           stackItems={true} // Stack overlapping items vertically
           onCanvasClick={() => { }}
           onBoundsChange={onBoundsChange}
+          resizeDetector={resizeDetector}
         />
       )}
     </div>
   )
 }
-
