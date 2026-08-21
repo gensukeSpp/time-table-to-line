@@ -37,17 +37,18 @@ env/
 
 # For release
 # docker-compose.yml
-# .gemini/
-# .github/
-# .hermes/
-# .qwen/
-# .roo/
-# docs/
-# tasks/
-# AGENT.md
-# GEMINI.md
-# QWEN.md
-# requirement-01.md
+.gemini/
+.github/
+.hermes/
+.qwen/
+.roo/
+docs/
+tasks/
+AGENT.md
+GEMINI.md
+QWEN.md
+requirement-01.md
+requirement-03.md
 
 # wrangler files
 .wrangler
