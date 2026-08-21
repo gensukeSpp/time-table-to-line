@@ -86,7 +86,7 @@ describe('MyCalendar (CalendarView)', () => {
       onEventResize: vi.fn(),
       onEventDrop: vi.fn(),
       eventList: [],
-      prevRef: { current: undefined },
+      // prevRef: { current: undefined }, pr-13-review
     });
     (useCallingEditForm as Mock).mockReturnValue({
       handleSelectEvent: vi.fn(),
