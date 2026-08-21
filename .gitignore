@@ -36,15 +36,21 @@ env/
 .playwright-mcp/
 
 # For release
-docker-compose.yml
-.gemini/
-.github/
-.hermes/
-.qwen/
-.roo/
-docs/
-tasks/
-AGENT.md
-GEMINI.md
-QWEN.md
-requirement-01.md
+# docker-compose.yml
+# .gemini/
+# .github/
+# .hermes/
+# .qwen/
+# .roo/
+# docs/
+# tasks/
+# AGENT.md
+# GEMINI.md
+# QWEN.md
+# requirement-01.md
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

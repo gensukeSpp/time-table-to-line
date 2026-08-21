@@ -5,7 +5,7 @@ import { EventsContextProvider } from './EventsParent';
 import { AuthLeavePage } from '../pages/AuthPage';
 import { AuthAxios } from './AxiosClientProvider';
 import { CalendarWrapper } from '../pages/CalendarPage';
-import { MyHorizonTimeline } from '../pages/TimelinePage';
+import { GroupHorizonTimeline } from '../pages/TimelinePage';
 
 export const RoutesComponent = () => {
   
@@ -17,7 +17,7 @@ export const RoutesComponent = () => {
               <Routes>
                 <Route path="/auth" element={<AuthLeavePage />} />
                 <Route path="/calendar"	element={<CalendarWrapper />} />
-                <Route path="/timeline" element={<MyHorizonTimeline />} />
+                <Route path="/timeline" element={<GroupHorizonTimeline />} />
               </Routes>
           </EventsContextProvider>
         </AuthAxios>

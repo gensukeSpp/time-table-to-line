@@ -58,7 +58,7 @@ export const MyCalendar = (
    * Drag and Drop
    */
   const DnDCalendar = withDragAndDrop(Calendar<TimelineEventProps>);
-  const { onEventResize, onEventDrop, eventList, prevRef } = useMouseEvents();
+  const { onEventResize, onEventDrop, eventList } = useMouseEvents();
 
   // Warning: Cannot update a component (`CalendarWrapper`) while rendering a different component (`MyCalendar`). 
   // To locate the bad setState() call inside `MyCalendar`,
@@ -67,13 +67,12 @@ export const MyCalendar = (
     onTimeChangeEvents?.(eventList);
   }, [onTimeChangeEvents, eventList]);
 
-  state?.map((evt, j) => {
-    if (prevRef.current?.isDraggable === true && prevRef.current.id === evt.id) {
-      delete state[j];
-      prevRef.current = undefined;
-    }
-  });
-  const newState = eventList ? state?.concat(eventList) : state;
+  // ドラッグ/リサイズ済みイベント (eventList) と同名 id の元イベントを除外して再構築する。
+  // これにより元イベントと移動後イベントの二重表示を防ぐ（prevRef による破壊的 delete を廃止）。
+  const resentEventIds = new Set(eventList.map(evt => evt.id));
+  const newState = eventList.length > 0
+    ? state?.filter(evt => !resentEventIds.has(evt.id)).concat(eventList)
+    : state;
 
   // Viewの切り替え調節
   const [displayDate, setDisplayDate] = useState(new Date());
