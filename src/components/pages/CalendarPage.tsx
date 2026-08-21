@@ -7,7 +7,7 @@ import { TimelineEventProps } from '../../lib/TimelineType';
 import { flexXmandatory } from './CalendarView.css';
 import { TimesUpdateButton } from '../molecules/TimeUpdateButton';
 import { MyCalendar } from './CalendarView';
-import { GroupHorizonTimeline } from "../pages/TimelinePage";
+import { MyHorizonTimeline } from "../pages/TimelinePage";
 import { DialogOnSlot } from '../organisms/DialogOnSlot';
 
 import { tabMenu, tabButton } from './CalendarPage.css';
@@ -36,7 +36,7 @@ export const CalendarWrapper = () => {
         </Box>
       </Tabs.Panel>
       <Tabs.Panel value='tab2'>
-        <GroupHorizonTimeline />
+        <MyHorizonTimeline />
       </Tabs.Panel>
     </Tabs>
   );

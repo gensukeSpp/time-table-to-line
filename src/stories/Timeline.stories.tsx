@@ -6,7 +6,7 @@ import { addHours } from "date-fns";
 
 import { AuthInfoProp, GroupUserProps, TimelineEventProps } from "../lib/TimelineType";
 import { EventsStateContext, AuthStateContext } from "../hooks/useContextFamily";
-import { GroupHorizonTimeline } from '../components/pages/TimelinePage';
+import { MyHorizonTimeline } from '../components/pages/TimelinePage';
 import { exEvents } from "../lib/SampleState";
 import { authKeys, eventKeys } from "../resources/cache";
 
@@ -74,9 +74,9 @@ const timelineOverlapEvents: TimelineEventProps[] = [
   },
 ];
 
-const meta: Meta<typeof GroupHorizonTimeline> = {
-  title: "GroupTimeline",
-  component: GroupHorizonTimeline,
+const meta: Meta<typeof MyHorizonTimeline> = {
+  title: "MyTimeline",
+  component: MyHorizonTimeline,
   decorators: [
     (Story) => {
       // "Error: No QueryClient set, use QueryClientProvider to set one"
@@ -96,7 +96,7 @@ const meta: Meta<typeof GroupHorizonTimeline> = {
   ],
 };
 export default meta;
-type Story = StoryObj<typeof GroupHorizonTimeline>;
+type Story = StoryObj<typeof MyHorizonTimeline>;
 
 export const Standard: Story = {
   args: {

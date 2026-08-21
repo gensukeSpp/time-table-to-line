@@ -200,52 +200,43 @@ bun run build-storybook
 
 ## リファクタリングロードマップ
 
-→ 詳細は [`REFACTORING_ROADMAP.md`](./.qwen/rules/REFACTORING_ROADMAP.md) を参照
+リファクタリングは **コンポーネント単位で細かくタスク分割し、順序立てて進める**。
+
+### 完了（2026-07-24）
+1. **パッケージ管理**: yarn → bun 移行（完了）
+2. **ライブラリ更新**: 全依存を最新に一括インストール（React 19, Vite 6, Mantine v7, TanStack Query 5, 等）
+3. **不要コード削除**: `src/DnDApp.tsx`, `src/lib/ClickOrDouble.js` 削除、vite.config.ts 整理
+
+### 完了（2026-08-10 時点）
+4. **バグ修正**: 11PM 問題（task-08 / E-1）、タイムライン重なり表示（task-09 / E-2）
+5. **認証 401 調査**: task-10（原因はフロントのトークン未送信。backend 修正不要）
+6. **RBAC 土台**: `TimelineEventProps` に `admin: boolean` 追加（PR #9 / commit `71a9ae1`）
+
+### 今後必要なコード修正タスク（順次実施）
+1. **ESLint フラット設定**: `.eslintrc.cjs` → `eslint.config.js` 移行（ESLint 9 対応）
+2. **Mantine 移行**: Chakra UI / Radix UI → Mantine v7 コンポーネント置き換え（import 修正含む）
+3. **date-fns 統一**: moment / dayjs → date-fns に書き換え（サブパス import の修正含む）
+4. **react-calendar-timeline import 修正**: `react-calendar-timeline-v3` → `react-calendar-timeline`
+5. **React 19 互換性修正**: `useRef` の引数なし呼び出し修正、他 API 変更対応
+6. **TypeScript 型エラー修正**: 上記修正に伴う型エラーの解消
+7. **コンポーネントリファクタリング**: `molecules/` → `templates/` の順序等、提案ベースで決定
+8. **バグ修正**: 11PM 問題、タイムライン重なり表示
+9. **機能追加**: requirement-02.md で別途定義
+
+### 備考
+- インストール段階で削除した旧依存パッケージの一覧はプロジェクトメモリー参照
+- 各コード修正タスクは `tasks/` ディレクトリ配下に計画を保存する
 
 ## アーキテクチャスナップショット
 
-→ 詳細は [`ARCHITECTURE_SNAPSHOT.md`](./.qwen/rules/ARCHITECTURE_SNAPSHOT.md) を参照
-
-## 機能要件（マイルストーン）
-
-イベントに対し、**長めのスパンでのタスク** を意味する「マイルストーン」を設置する。Github Issues の milestone + label（色分け）に近い概念。詳細は [`requirement-03.md`](./requirement-03.md) を参照。
-
-### 概念
-- 1 つのマイルストーンに複数のイベントが属する（属さないイベントもある）
-- **グループのもの** と位置づけ、グループをまたいで共有する場合も考慮し **Timeline での操作** とする
-- Calendar は個人用、Timeline はグループ用
-
-### 権限
-- マイルストーンの作成・close は **グループ管理者のみ**
-- イベントからの所属選択は一般ユーザーも可能
-
-### 色
-- 10 固定パターン: `#9c27b0 #009688 #795548 #607d8b #e91e63 #3f51b5 #00bcd4 #ff5722 #8bc34a #ff9800`
-- 10 件超え時は 1 つ目から **同順でサイクル**
-- デフォルトイベント色 `#2196f3` / クリック後色 `#ffc107` に近い色は避ける
-- completed またはマイルストーン削除されたイベントはデフォルト色 `#2196f3` に戻す
-
-### 状態
-- open / closed。closed は `accomplished_date` を入力して確定。一度 closed なら再 open 不可
-- `completed` は closed に連動して自動 True
-
-### テーブル定義
-- `M_MILESTONE`: id, staff_id(FK), title(100), description(256, nullable), color(10), status(bool, default=True), created_at, guidline_end_date(Date?, nullable), accomplished_date(Date?, nullable)
-- `T_TIMELINE_EVENT` に追加: `milestone_id`(FK, nullable), `completed`(bool, default=False)
-
-### UI 操作（Timeline 画面）
-1. 管理者右上「マイルストーン作成」→ タイトル + 目安日付入力
-2. タイムライン左上にカラーバー付きタイトル一覧表示
-3. タイトルクリック → 詳細モーダル（作成者名, 説明(50文字折畳), 作成日, グループ名, 達成日）
-4. 達成日入力・決定 → closed 表示。削除ボタンも追加（作成ミス用）
-
-### 実装範囲
-| カテゴリ | やること |
+| Date | Purpose |
 |---|---|
-| バックエンド | `app/models.py`, `app/schemas.py`, `app/routers/timetable.py` に `/milestone/*` CRUD 追加。既存スキーマに `milestone_id` optional 追加 |
-| フロント共通 | `TimelineType.ts` に Milestone 型定義 + `TimelineEventProps` 変更。TanStack Query: `/milestone/add`, `/milestone/all`, `/milestone/update`, `/milestone/remove` |
-| フロント Calendar | イベント追加フォームに open なマイルストーン選択セレクト追加 |
-| フロント Timeline | マイルストーン作成ボタン/フォーム、所属イベントの色指定、open 一覧配置、詳細モーダル |
+| 2026-07-28 | Migration to Mantine v7 and date-fns |
+| 2026-07-30 | Code cleanup and ESLint config update |
+| 2026-07-30 | Component reorganization and naming cleanup |
+| 2026-07-30-03 | Phase A–F refactoring (unused code removal, ESLint recovery, query consolidation, type safety, bug investigation, quality gate) |
+| 2026-08-04 | Fix 11PM issue, refactor date handling, and implement timeline overlapping (PR #8 & Task 9) |
+| 2026-08-10 | Add admin property to TimelineEventProps for future RBAC (PR #9) |
 
 ## 参考リンク
 

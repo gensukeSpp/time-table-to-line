@@ -9,7 +9,7 @@ import { getGroup, getItems, toTimelineStackItems } from '../../lib/TmelineData'
 
 import 'react-calendar-timeline/style.css';
 
-export const GroupHorizonTimeline = () => {
+export const MyHorizonTimeline = () => {
   const { data: groupUsers, isPending } = useGroupUsersQuery();
   const groupMember: TimelineGroupBase[] = getGroup(groupUsers?.data);
 
@@ -107,7 +107,7 @@ export const GroupHorizonTimeline = () => {
       onMouseUpCapture={handleMouseUp}
       onMouseLeave={handleMouseLeave}
     >
-      <p>グループタイムライン</p>
+      <p>マイタイムライン</p>
       {/* Remove ZoomControl */}
       {isPending ? <p>Loading...</p> : (
         <Timeline
