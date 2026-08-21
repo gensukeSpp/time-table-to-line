@@ -13,39 +13,12 @@
 2. パフォーマンス低下や余分な負荷を生まないよう注意する
 3. コンポーネント単位で細かくタスクを分割し、順序立ててゆっくり確実に進める
 
-### リファクタリング前の前提作業（完了済み）
-- パッケージ管理: yarn → **bun** 移行（完了）
-- 全ライブラリを現時点の最新版に更新（完了）
-- 未使用ファイル削除: `src/DnDApp.tsx`, `src/lib/ClickOrDouble.js`（完了）
-- `vite.config.ts` 整理（完了）
+詳細は [`TASKS.md`](./.hermes/rules/TASKS.md) を参照。
 
-### 今後必要なコード修正タスク（順次実施）
-1. ESLint フラット設定: `.eslintrc.cjs` → `eslint.config.js` 移行
-2. UI ライブラリ統一: Chakra UI / Radix UI → **Mantine v7** に置き換え
-3. 日付ライブラリ統一: moment / dayjs → **date-fns** に書き換え
-4. `react-calendar-timeline` import 修正: `react-calendar-timeline-v3` → `react-calendar-timeline`
-5. React 19 互換性修正: useRef の引数なし呼び出し等
-6. TypeScript 型エラー修正（`Theme.ts` 削除, `console.log` 一掃）
-7. コンポーネントリファクタリング（molecules / organisms / pages / templates 再配置）
-   - **Phase A** — コードベースクレンジング（未使用ファイル・型・コメントアウト一掃）
-   - **Phase B** — ESLint 安全性回復（no-console / no-unused-vars / exhaustive-deps 段階的有効化）
-   - **Phase C** — クエリ層重複排除（useEventsQuery 統合）
-   - **Phase D** — 型安全性向上（ESLint error 化 / fetch ヘッダー共通化）
-   - **Phase E** — バグ調査（11PM / 重なり / タイムゾーン）
-   - **Phase F** — 品質ゲート（lint / build / test 最終確認）
-   - 詳細は [`tasks/task-07/README.md`](./tasks/task-07/README.md) を参照
-8. バグ修正 → **完了**（E-1 11PM 問題: task-08 / E-2 タイムライン重なり: task-09）。E-3 タイムゾーンは調査済みで通常は正しく動作するため保留
-9. 機能追加（requirement-02.md で別途定義）— **RBAC 土台の型追加は完了済み**（PR #9 / commit `71a9ae1`: `TimelineEventProps` に `admin: boolean` を追加、型定義・コンポーネント・モック・Stories・テストに波及）。より細かなロール（'viewer' / 'editor' 等）が必要になったら enum / union 型へのリファクタを検討
-10. 認証 401 調査 → **完了**（task-10）。原因はフロントのトークン未送信であり、backend 側の実装は仕様どおり正常
-11. バグ修正（Issue #11）→ **完了**。Issue 1（時・分・秒欠落）は backend `/event/add` の受信解釈と照合し送信形式を確定して解決。Issue 2（タイムライン表示破綻）は `TimelinePage.tsx` を **ResizeObserver + ライブラリ `resizeDetector`** 方式に変更し、非表示マウント（Mantine Tabs `keepMounted`）時の幅を表示時に確実に再測定するよう修正、`toTimelineStackItems` に NaN/Infinity 除外の防御を追加。調査用 console.log 削除も含む。詳細は [`tasks/issue-11/README.md`](./tasks/issue-11/README.md)
-
-### 既知のバグ
-- ~~**タイムテーブル**: PM 11:00 にイベント追加不可（allDay 扱いになる）~~ → **解消済み**（task-08 / E-1: `resolveSlotEnd` で end を endOfDay に丸め）
-- **タイムテーブル**: DB 保存時刻が日本時間ではない（UTC の可能性）※未対応（E-3 調査済み・通常は正しく動作）
-- ~~**タイムライン**: イベントの重なり表示ができない~~ → **解消済み**（task-09 / E-2: `stackItems` + `toTimelineStackItems()` の Date→ms 変換）
-- ~~**認証**: `/event/all`・`/refresh` への GET が繰り返し 401 → **解消済み**（task-10: 原因はフロントのトークン未送信。リクエスト共通処理に `Authorization: Bearer *** を付与して両方解消）~~
-- ~~**タイムテーブル**: 新規イベントの時刻が「時・分・秒」欠落（DB 保存が `00:00:00.000Z` になる）~~ → **解消済み**（Issue #11 Issue 1: backend `/event/add` の受信解釈と照合し送信形式を確定）
-- ~~**タイムライン**: 表示が壊れる（行 `rct-hl-*` が 3000px 超え。DevTools 開閉で修復、タブ再切替で再発）~~ → **解消済み**（Issue #11 Issue 2: 実因は非表示マウント時の幅未再測定。`TimelinePage.tsx` を ResizeObserver + `resizeDetector` 方式に変更し表示時に再測定。`toTimelineStackItems` に NaN/Infinity 除外の防御も追加）
+- リファクタリング前の前提作業（完了済み）
+- 今後必要なコード修正タスク（順次実施）
+- 完了したタスク / バグ修正の履歴
+- 既知のバグ（解消済み / 未対応）
 
 ### コード品質上の問題
 - セキュリティリスクになる `console.log` の残存 → 削除
@@ -54,6 +27,39 @@
 - 3 つの日付ライブラリ混在（moment / date-fns / dayjs）→ date-fns 統一
 - 2 つの UI ライブラリ混在（Chakra UI / Radix UI）→ Mantine 統一
 - backend `light_token_server/tokens.py` に `print(...)` 残存（26, 57, 64, 80, 86, 90, 93, 96 行目）。一部はトークン先頭 10 文字（64）／シークレット先頭 5 文字（26）を出力しており console.log 削除方針と同様のセキュリティ観点あり（task-10 備考・動作には影響なし、backend 整理時の作業候補）
+
+---
+
+## 機能要件
+
+### requirement-03: マイルストーン機能
+
+グループ共通の長スパンタスクとして「マイルストーン」を設置する。Github Issues の milestone + label に近い概念。
+
+- **概念**: 1 つのマイルストーンに複数のイベントが属する（属さないイベントもある）。グループを跨いで共有されるため Timeline での操作とする。Calendar は個人用、Timeline はグループ用。
+- **権限**: マイルストーンの作成・close は**グループ管理者のみ**。イベントからの所属選択は一般ユーザーも可能。
+- **色**: 10 固定パターン `#9c27b0 #009688 #795548 #607d8b #e91e63 #3f51b5 #00bcd4 #ff5722 #8bc34a #ff9800`。重複時はサイクル。デフォルトイベント色 `#2196f3` / クリック後色 `#ffc107` に近い色は避ける。
+- **状態**: open / closed。closed は `accomplished_date` を入力して確定。1 度 closed なら再 open 不可。`completed` は closed に連動して自動 True。
+
+**テーブル定義**
+- `M_MILESTONE`: id, staff_id(FK), title(100), description(256), color(10), status(bool), created_at, guidline_end_date(Date?), accomplished_date(Date?)
+- `T_TIMELINE_EVENT` に追加: `milestone_id`(FK, nullable), `completed`(bool, auto)
+
+**UI 操作（Timeline 画面）**
+1. 管理者右上「マイルストーン作成」→ タイトル + 目安日付入力
+2. タイムライン左上にカラーバー付きタイトル一覧表示
+3. タイトルクリック → 詳細モーダル（作成者名, 説明(50文字折畳), 作成日, グループ名, 達成日）
+4. 達成日入力・決定 → closed 表示。削除ボタンも追加（作成ミス用）
+
+**実装範囲**
+| カテゴリ | やること |
+|---|---|
+| バックエンド | `app/models.py`, `app/schemas.py`, `app/routers/timetable.py` に `/milestone/*` CRUD 追加。既存スキーマに `milestone_id` optional 追加 |
+| フロント共通 | `TimelineType.ts` に Milestone 型定義 + `TimelineEventProps` 変更。TanStack Query: `/milestone/add`, `/milestone/all`, `/milestone/update`, `/milestone/remove` |
+| フロント Calendar | イベント追加フォームに open なマイルストーン選択セレクト追加 |
+| フロント Timeline | マイルストーン作成ボタン/フォーム、所属イベントの色指定、open 一覧配置、詳細モーダル |
+
+→ 詳細は [`requirement-03.md`](./requirement-03.md) を参照
 
 ---
 
