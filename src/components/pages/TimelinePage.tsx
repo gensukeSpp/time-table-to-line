@@ -2,10 +2,14 @@ import { addHours } from 'date-fns';
 import React, { useRef, useLayoutEffect, useMemo, useState } from 'react';
 import { Timeline, TimelineGroupBase } from "react-calendar-timeline";
 
-import { useGroupUsersQuery, useAuthQuery } from "../../resources/queries";
-import { useAuthContext, useEventsState } from "../../hooks/useContextFamily";
+import { useGroupUsersQuery } from "../../resources/queries";
+import { useEventsState } from "../../hooks/useContextFamily";
+import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useTimelineDragZoom } from '../../hooks/useTimelineDragZoom'; // Import the new custom hook
 import { getGroup, getItems, toTimelineStackItems } from '../../lib/TmelineData';
+import { MilestoneList } from '../organisms/MilestoneList';
+import { MilestoneAddButton } from '../organisms/MilestoneAddButton';
+import { toolbar } from './TimelinePage.css';
 
 import 'react-calendar-timeline/style.css';
 
@@ -13,12 +17,12 @@ export const GroupHorizonTimeline = () => {
   const { data: groupUsers, isPending } = useGroupUsersQuery();
   const groupMember: TimelineGroupBase[] = getGroup(groupUsers?.data);
 
-  const authState = useAuthContext();
-  const tokenContext = authState.type === 'token' ? authState.accessToken : undefined;
-  useAuthQuery(tokenContext!);
-
   const stateAll = useEventsState();
   const state = getItems(stateAll);
+
+  // グループ管理者かどうかは /timetable/inquiry のレスポンス（JWT クレーム由来）の admin で判定する。
+  const authInfo = useAuthInfo();
+  const isAdmin = authInfo.type === 'auth' ? authInfo.admin : false;
 
   // Container ref to get timeline width
   const containerRef = useRef<HTMLDivElement>(null);
@@ -99,36 +103,43 @@ export const GroupHorizonTimeline = () => {
 
 
   return (
-    // Add a container div with a ref and mouse event handlers
-    <div
-      ref={containerRef}
-      onMouseDownCapture={handleMouseDown}
-      onMouseMoveCapture={handleMouseMove}
-      onMouseUpCapture={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
-    >
-      <p>グループタイムライン</p>
-      {/* Remove ZoomControl */}
-      {isPending ? <p>Loading...</p> : (
-        <Timeline
-          groups={groupMember}
-          items={toTimelineStackItems(state)}
-          defaultTimeStart={defaultTimeStart}
-          defaultTimeEnd={defaultTimeEnd}
-          visibleTimeStart={visibleTimeStart} // Use state from hook
-          visibleTimeEnd={visibleTimeEnd}     // Use state from hook
-          onTimeChange={handleTimeChange} // Use our combined handler
-          canMove={false} // Disable item move
-          canResize={false} // Disable item resize
-          minZoom={24 * 60 * 60 * 1000}
-          maxZoom={365.24 * 86400 * 1000}
-          lineHeight={60}
-          stackItems={true} // Stack overlapping items vertically
-          onCanvasClick={() => { }}
-          onBoundsChange={onBoundsChange}
-          resizeDetector={resizeDetector}
-        />
-      )}
-    </div>
+    <>
+      {/* マイルストーン操作エリア（タイムライン本体の外に置き、幅測定に影響させない） */}
+      <div className={toolbar}>
+        <MilestoneList />
+        <MilestoneAddButton admin={isAdmin} />
+      </div>
+      {/* Add a container div with a ref and mouse event handlers */}
+      <div
+        ref={containerRef}
+        onMouseDownCapture={handleMouseDown}
+        onMouseMoveCapture={handleMouseMove}
+        onMouseUpCapture={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      >
+        <p>グループタイムライン</p>
+        {/* Remove ZoomControl */}
+        {isPending ? <p>Loading...</p> : (
+          <Timeline
+            groups={groupMember}
+            items={toTimelineStackItems(state)}
+            defaultTimeStart={defaultTimeStart}
+            defaultTimeEnd={defaultTimeEnd}
+            visibleTimeStart={visibleTimeStart} // Use state from hook
+            visibleTimeEnd={visibleTimeEnd}     // Use state from hook
+            onTimeChange={handleTimeChange} // Use our combined handler
+            canMove={false} // Disable item move
+            canResize={false} // Disable item resize
+            minZoom={24 * 60 * 60 * 1000}
+            maxZoom={365.24 * 86400 * 1000}
+            lineHeight={60}
+            stackItems={true} // Stack overlapping items vertically
+            onCanvasClick={() => { }}
+            onBoundsChange={onBoundsChange}
+            resizeDetector={resizeDetector}
+          />
+        )}
+      </div>
+    </>
   )
 }

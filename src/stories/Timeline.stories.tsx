@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, within } from '@storybook/test';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MantineProvider } from "@mantine/core";
 import { AxiosResponse } from "axios";
 import { addHours } from "date-fns";
 
-import { AuthInfoProp, GroupUserProps, TimelineEventProps } from "../lib/TimelineType";
+import { AuthInfoProp, GroupUserProps, MilestoneProps, TimelineEventProps } from "../lib/TimelineType";
 import { EventsStateContext, AuthStateContext } from "../hooks/useContextFamily";
 import { GroupHorizonTimeline } from '../components/pages/TimelinePage';
 import { exEvents } from "../lib/SampleState";
-import { authKeys, eventKeys } from "../resources/cache";
+import { authKeys, eventKeys, milestoneKeys } from "../resources/cache";
 
 import "react-calendar-timeline/style.css";
 
@@ -57,6 +58,22 @@ const mockGroupResponse = {
 queryClient.setQueryData(authKeys.verify(authParam.accessToken), mockAuthResponse);
 queryClient.setQueryData(eventKeys.userList(), mockGroupResponse);
 
+// マイルストーン一覧（/milestone/all）用モック。MilestoneList が useMilestonesQuery で参照する。
+const mockMilestones: MilestoneProps[] = [
+  {
+    id: 1,
+    staff_id: 500,
+    title: "マイルストーン 1",
+    description: null,
+    color: "#9c27b0",
+    status: true,
+    created_at: "2026-08-24",
+    guidline_end_date: null,
+    accomplished_date: null,
+  },
+];
+queryClient.setQueryData(milestoneKeys.all(), mockMilestones);
+
 // E-2 検証用: 同一ユーザー（staff_id 500）で時間が重複するイベントを追加。
 // グループ行 = ユーザー（staff_id）単位のため、重なりが起きるのは「同一 staff_id・同一時間帯」のみ。
 const timelineOverlapEvents: TimelineEventProps[] = [
@@ -82,15 +99,17 @@ const meta: Meta<typeof GroupHorizonTimeline> = {
       // "Error: No QueryClient set, use QueryClientProvider to set one"
       // https://stackoverflow.com/questions/65590195/error-no-queryclient-set-use-queryclientprovider-to-set-one
       return (
-        <QueryClientProvider client={queryClient}>
-          <AuthStateContext.Provider value={authParam}>
-            <EventsStateContext.Provider value={timelineOverlapEvents}>
-              <div style={{ border: '2px solid purple' }}>
-                <Story />
-              </div>
-            </EventsStateContext.Provider>
-          </AuthStateContext.Provider>
-        </QueryClientProvider>
+        <MantineProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthStateContext.Provider value={authParam}>
+              <EventsStateContext.Provider value={timelineOverlapEvents}>
+                <div style={{ border: '2px solid purple' }}>
+                  <Story />
+                </div>
+              </EventsStateContext.Provider>
+            </AuthStateContext.Provider>
+          </QueryClientProvider>
+        </MantineProvider>
       )
     },
   ],
@@ -106,6 +125,6 @@ export const Standard: Story = {
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     // canvas.getByRole
-    expect(canvas.getByText("マイタイムライン")).toBeInTheDocument();
+    expect(canvas.getByText("グループタイムライン")).toBeInTheDocument();
   },
 };

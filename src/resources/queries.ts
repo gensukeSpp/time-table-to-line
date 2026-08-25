@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 
 
-import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember } from "./fetch";
-import { eventKeys, authKeys } from "./cache";
+import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember, fetchMilestones } from "./fetch";
+import { eventKeys, authKeys, milestoneKeys } from "./cache";
 import { useAuthContext } from "../hooks/useContextFamily";
 
 export const useSearchQuery = (searchKey: string) => {
@@ -113,4 +113,11 @@ export const useGroupNameQuery = () => {
     queryKey: eventKeys.groupNames(),
     queryFn: () => requestGroup(tokenContext!)
   })
+}
+
+export const useMilestonesQuery = () => {
+  return useQuery({
+    queryKey: milestoneKeys.all(),
+    queryFn: fetchMilestones,
+  });
 }

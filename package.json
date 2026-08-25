@@ -12,11 +12,12 @@
     "testrun": "vitest run",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "deploy": "bun run build && wrangler deploy"
+    "deploy": "bun run build && npx wrangler deploy"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
     "@mantine/core": "^7",
+    "@mantine/dates": "^7",
     "@mantine/hooks": "^7",
     "@tanstack/react-query": "^5",
     "axios": "^1",
