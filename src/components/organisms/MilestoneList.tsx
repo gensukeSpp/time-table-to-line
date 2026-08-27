@@ -1,15 +1,24 @@
-import { Box, Text, Loader } from '@mantine/core';
+import { Box, Text, Loader, Button } from '@mantine/core';
 
 import { useMilestonesQuery } from '../../resources/queries';
 import { list, item, colorBar } from './MilestoneList.css';
 
 export const MilestoneList = () => {
-  const { data, isPending } = useMilestonesQuery();
+  const { data, isPending, isError, error } = useMilestonesQuery();
 
   if (isPending) {
     return (
       <Box>
         <Loader size="sm" />
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box>
+        <Text>{error?.message || 'マイルストーンの取得に失敗しました'}</Text>
+        <Button onClick={() => window.location.reload()}>再試行</Button>
       </Box>
     );
   }
