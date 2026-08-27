@@ -13,6 +13,7 @@
 4. **バグ修正**: 11PM 問題（task-08 / E-1）、タイムライン重なり表示（task-09 / E-2）
 5. **認証 401 調査**: task-10（原因はフロントのトークン未送信。backend 修正不要）
 6. **RBAC 土台**: `TimelineEventProps` に `admin: boolean` 追加（PR #9 / commit `71a9ae1`）
+7. **マイルストーン追加・表示**: PR #17（Issue #16）。admin 判定を `useAuthInfo().admin`（実データ）に修正。更新/削除・子イベント紐付け・配色は未実装（→ `.qwen/rules/MILESTONE.md` 参照）
 
 ## 今後必要なコード修正タスク（順次実施）
 

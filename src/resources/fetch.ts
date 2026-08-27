@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 
-import { AuthInfoProp, GroupUserProps, TimelineEventProps } from "../lib/TimelineType";
+import { AuthInfoProp, GroupUserProps, MilestoneProps, TimelineEventProps } from "../lib/TimelineType";
 import basicAxios, { postHeaders } from "../lib/AuthInfo";
 // import { _ } from "vitest/dist/chunks/reporters.d.BuRON0I0.js";
 
@@ -47,3 +47,8 @@ export const requestGroupMember = async (postToken: string): Promise<AxiosRespon
   const groupUsers = await basicAxios.post<GroupUserProps[]>('/group/users', postToken, await postHeaders(postToken));
   return groupUsers;
 }
+
+export const fetchMilestones = async (): Promise<MilestoneProps[]> => {
+	const { data } = await basicAxios.get<MilestoneProps[]>('/milestone/all');
+	return data;
+};

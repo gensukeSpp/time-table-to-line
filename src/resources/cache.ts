@@ -49,3 +49,15 @@ export const useAuthCache = () => {
       queryClient.invalidateQueries({queryKey: authKeys.verify(token)})
   }), [queryClient]);
 }
+
+export const milestoneKeys = {
+  all: () => ["milestone", "all"] as const,
+};
+
+export function useMilestoneCache() {
+  const queryClient = useQueryClient();
+  return useMemo(() => ({
+    invalidateMilestoneList: () =>
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all() }),
+  }), [queryClient]);
+}

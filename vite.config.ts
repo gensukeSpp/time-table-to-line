@@ -3,8 +3,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 
+// import { cloudflare } from '@cloudflare/vite-plugin';
+// 本番環境ならこっち、削除しないでね ↑
+
 // https://vitejs.dev/config/
 export default defineConfig({
+  // 本番環境ならこっち、削除しないでね
+  // plugins: [vanillaExtractPlugin(), react(), cloudflare()],
+  // ローカルならこっち、削除しないでね
   plugins: [vanillaExtractPlugin(), react()],
   // Vite はデフォルトで VITE_ プレフィックス付きの env しか import.meta.env に
   // 露出しないため、非 VITE_ 変数 SERVER_ON_RENDER をビルド時に焼き込む。

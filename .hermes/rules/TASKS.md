@@ -40,6 +40,7 @@
 | 9 | 機能追加 — RBAC 土台の型追加（`TimelineEventProps` に `admin: boolean`） | **完了** | PR #9 / commit `71a9ae1` |
 | 10 | 認証 401 調査 | **完了** | `tasks/task-10/README.md`。原因はフロントのトークン未送信。backend 側の実装は仕様どおり正常 |
 | 11 | バグ修正（Issue #11）Issue 1: 時・分・秒欠落, Issue 2: タイムライン表示破綻 | **完了** | `tasks/issue-11/README.md` |
+| 16 | 機能追加（Issue #16）マイルストーンの追加処理と表示 | **完了** | `tasks/issue-16/README.md` |
 
 ---
 

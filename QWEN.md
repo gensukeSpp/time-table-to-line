@@ -19,7 +19,7 @@
 | **状態管理** | Context API + @tanstack/react-query 5 |
 | **カレンダー** | react-big-calendar (with dragAndDrop) |
 | **タイムライン** | react-calendar-timeline |
-| **UI ライブラリ** | Mantine v7（Chakra UI / Radix UI から移行） |
+| **UI ライブラリ** | Mantine v7（Chakra UI / Radix UI から移行済み） |
 | **スタイリング** | Vanilla Extract (CSS-in-JS, zero-runtime) |
 | **HTTP クライアント** | Axios 1 |
 | **日付操作** | date-fns（moment / dayjs から統一予定） |
@@ -28,7 +28,6 @@
 | **リンター** | ESLint 9 + Prettier 3 |
 
 ## アーキテクチャ
-
 ### コンポーネント階層（Atomic Design ベース）
 
 ```
@@ -46,7 +45,8 @@ src/main.tsx
                       │                   │    ├── MyCalendar (react-big-calendar + DnD)
                       │                   │    ├── TimesUpdateButton
                       │                   │    └── DialogOnSlot
-                      │                   └── /timeline → MyHorizonTimeline
+                      │                   └── /timeline → GroupHorizonTimeline
+                      │                        ├── MilestoneList / MilestoneAddButton (admin)
                       │                        └── react-calendar-timeline
 ```
 
@@ -62,10 +62,12 @@ src/
 │   ├── organisms/       # 複合コンポーネント
 │   │   ├── Dialog.tsx / DialogOnSlotComponent.tsx  # <dialog> モーダル
 │   │   ├── InputItem.tsx / InputTitleDialog.tsx     # イベント入力フォーム
-│   │   └── DaysComponent.tsx
+│   │   ├── MilestoneAddButton.tsx          # マイルストーン作成ボタン（admin のみ）
+│   │   ├── MilestoneCreateDialog.tsx       # マイルストーン作成モーダル
+│   │   └── MilestoneList.tsx               # open マイルストーン一覧
 │   ├── pages/           # ページコンポーネント
 │   │   ├── CalendarComponent.tsx / CalendarWrapperComponent.tsx
-│   │   ├── TimelineComponent.tsx
+│   │   ├── TimelinePage.tsx                # GroupHorizonTimeline
 │   │   └── AuthLeaveComponent.tsx
 │   └── templates/       # レイアウト/プロバイダー
 │       ├── ViewComponents.tsx       # ルーティング
@@ -74,41 +76,40 @@ src/
 │       └── AxiosClientProvider.tsx  # Axios インターセプター
 ├── hooks/               # カスタムフック
 │   ├── useContextFamily.ts          # Context 定義
-│   ├── useAuthGuard.ts              # 認証情報取得
+│   ├── useAuthGuard.ts              # 認証情報取得（admin 含む）
 │   ├── useEventMutation.ts          # イベント CRUD mutation
+│   ├── useMilestoneMutation.ts      # マイルストーン mutation（useAddMilestoneMutation）
 │   ├── useMouseHandle.ts            # カレンダー DnD ハンドル
 │   ├── useTimelineDragZoom.ts       # タイムラインズーム
 │   ├── useCallingForm.tsx           # 編集フォーム制御
 │   └── useDialog.tsx                # ダイアログ制御
 ├── lib/                 # 型とユーティリティ
-│   ├── TimelineType.ts              # 中心的な型定義
+│   ├── TimelineType.ts              # 中心的な型定義（MilestoneProps 含む）
 │   ├── AuthInfo.ts                  # Axios インスタンス
+│   ├── authPayload.ts               # /timetable/inquiry の admin 正規化
 │   ├── Localization.ts              # date-fns ローカライザー
 │   ├── SampleState.ts               # モックデータ
 │   ├── TmelineData.ts               # タイムラインデータ変換
 │   ├── timelineZoomUtils.ts         # ズーム計算
-│   └── Theme.ts                     # (未使用/古いコード)
 ├── resources/           # データフェッチ & キャッシュ
-│   ├── fetch.ts                     # API 呼び出し
-│   ├── queries.ts                   # TanStack Query フック
-│   └── cache.ts                     # クエリーキー & キャッシュ操作
+│   ├── fetch.ts                     # API 呼び出し（fetchMilestones 含む）
+│   ├── queries.ts                   # TanStack Query フック（useMilestonesQuery 含む）
+│   └── cache.ts                     # クエリーキー & キャッシュ操作（milestoneKeys 含む）
 ├── stories/             # Storybook ストーリー
 │   ├── Calendar.stories.tsx
-│   ├── Timeline.stories.tsx
-│   └── Button.stories.ts / Header.stories.ts / Page.stories.ts (デフォルト)
+│   └── Timeline.stories.tsx
 └── tests/               # Vitest テスト
     ├── Calendar.spec.tsx
     ├── Timeline.spec.tsx
-    ├── timelineZoomUtils.spec.ts
-    └── vitest-setup.ts
+    └── timelineZoomUtils.spec.ts
 ```
 
 ### データフロー
-
-1. **認証**: URL クエリパラメータ `?token=xxx` でトークンを受け取り → `AuthProvider` が Context に保存 → `AuthAxios` が Axios インターセプターで全リクエストに Authorization ヘッダーを付与 → トークン期限切れ時は自動リフレッシュ
+1. **認証**: URL クエリパラメータ `?token=xxx` でトークンを受け取り → `AuthProvider` が Context に保存 → `AuthAxios` が Axios インターセプターで全リクエストに Authorization ヘッダーを付与 → トークン期限切れ時は自動リフレッシュ。管理者判定は `/timetable/inquiry` の `admin` を `useAuthInfo().admin` で参照
 2. **イベント取得**: `EventsContextProvider` が `useEventsQueryForTL` (TanStack Query) で全イベントを取得 → Context に保存 → 各コンポーネントが `useEventsState()` で参照
 3. **イベント操作**: カレンダー上で DnD → `useMouseHandle` が新旧時刻を `eventList` に蓄積 → `TimesUpdateButton` が一括更新 (`useUpdateDateListMutation`)
 4. **新規作成**: カレンダーのスロットをクリック → `DialogOnSlot` がモーダル表示 → `InputTitleDialog` でタイトル入力 → `useCreateMutation` で POST
+5. **マイルストーン**: `useMilestonesQuery` で一覧取得 → `MilestoneList` が open 一覧表示。`MilestoneAddButton`（admin のみ）→ `MilestoneCreateDialog` → `useAddMilestoneMutation` で POST `/milestone/add`
 
 ### バックエンド API（推測）
 
@@ -121,13 +122,16 @@ src/
 | `/event/update/:id` | POST | イベント更新（タイトル/進捗） |
 | `/date/update` | POST | 日時一括更新 |
 | `/date/update/:id` | POST | 個別日時更新 |
-| `/timetable/inquiry` | POST | 認証情報照会 |
+| `/timetable/inquiry` | POST | 認証情報照会（admin 含む） |
 | `/refresh` | POST | トークンリフレッシュ |
 | `/group-names` | POST | グループ名一覧 |
 | `/group/users` | POST | グループメンバー一覧 |
+| `/milestone/all` | GET | マイルストーン一覧取得 |
+| `/milestone/add` | POST | マイルストーン追加 |
+| `/milestone/update/:id` | POST | マイルストーン更新（backend 実装済み・フロント未実装） |
+| `/milestone/remove/:id` | DELETE | マイルストーン削除（backend 実装済み・フロント未実装） |
 
 ## ビルド & 実行
-
 ```bash
 # 開発サーバー起動
 bun run dev
@@ -178,74 +182,14 @@ bun run build-storybook
 - クライアント状態: **Context API**（認証情報、イベントリスト）
 - コンポーネントローカル: `useState` / `useReducer`
 
-## 既知の問題点（requirement-01.md より）
+## 詳細ドキュメント（.qwen/rules/）
 
-### タイムテーブル（react-big-calendar）
-1. **PM 11:00 にイベントが追加できない** → allDay 扱いになってしまう
-2. **allDay が期待する箇所で 12:00 AM に追加される**
-3. **DB 保存時刻が日本時間ではない**（UI 上は期待通りに見えるが、DB テーブルの値が UTC 等になっている可能性）
+更新頻度の高い詳細は `.qwen/rules/` 配下に分離している。
 
-### タイムライン（react-calendar-timeline）
-1. **イベントの「重なり」表示ができない**
-
-### 認証（401）
-- ~~`/event/all`・`/refresh` への GET が繰り返し 401~~ → **解消済み**（task-10: 原因はフロントのトークン未送信。リクエスト共通処理に `Authorization: Bearer {token}` を付与して両方解消。backend 側の実装は仕様どおり正常）
-
-### コード品質
-- `console.log` の残存（セキュリティリスク）
-- コメントアウトされた不要コード
-- 未使用の型・モジュール（`Theme.ts` など）
-- 3 つの日付ライブラリ（moment / date-fns / dayjs）が混在 → date-fns に統一予定
-- 2 つの UI ライブラリ（Chakra UI / Radix UI）が混在 → Mantine v7 に統一予定
-
-## リファクタリングロードマップ
-
-→ 詳細は [`REFACTORING_ROADMAP.md`](./.qwen/rules/REFACTORING_ROADMAP.md) を参照
-
-## アーキテクチャスナップショット
-
-→ 詳細は [`ARCHITECTURE_SNAPSHOT.md`](./.qwen/rules/ARCHITECTURE_SNAPSHOT.md) を参照
-
-## 機能要件（マイルストーン）
-
-イベントに対し、**長めのスパンでのタスク** を意味する「マイルストーン」を設置する。Github Issues の milestone + label（色分け）に近い概念。詳細は [`requirement-03.md`](./requirement-03.md) を参照。
-
-### 概念
-- 1 つのマイルストーンに複数のイベントが属する（属さないイベントもある）
-- **グループのもの** と位置づけ、グループをまたいで共有する場合も考慮し **Timeline での操作** とする
-- Calendar は個人用、Timeline はグループ用
-
-### 権限
-- マイルストーンの作成・close は **グループ管理者のみ**
-- イベントからの所属選択は一般ユーザーも可能
-
-### 色
-- 10 固定パターン: `#9c27b0 #009688 #795548 #607d8b #e91e63 #3f51b5 #00bcd4 #ff5722 #8bc34a #ff9800`
-- 10 件超え時は 1 つ目から **同順でサイクル**
-- デフォルトイベント色 `#2196f3` / クリック後色 `#ffc107` に近い色は避ける
-- completed またはマイルストーン削除されたイベントはデフォルト色 `#2196f3` に戻す
-
-### 状態
-- open / closed。closed は `accomplished_date` を入力して確定。一度 closed なら再 open 不可
-- `completed` は closed に連動して自動 True
-
-### テーブル定義
-- `M_MILESTONE`: id, staff_id(FK), title(100), description(256, nullable), color(10), status(bool, default=True), created_at, guidline_end_date(Date?, nullable), accomplished_date(Date?, nullable)
-- `T_TIMELINE_EVENT` に追加: `milestone_id`(FK, nullable), `completed`(bool, default=False)
-
-### UI 操作（Timeline 画面）
-1. 管理者右上「マイルストーン作成」→ タイトル + 目安日付入力
-2. タイムライン左上にカラーバー付きタイトル一覧表示
-3. タイトルクリック → 詳細モーダル（作成者名, 説明(50文字折畳), 作成日, グループ名, 達成日）
-4. 達成日入力・決定 → closed 表示。削除ボタンも追加（作成ミス用）
-
-### 実装範囲
-| カテゴリ | やること |
-|---|---|
-| バックエンド | `app/models.py`, `app/schemas.py`, `app/routers/timetable.py` に `/milestone/*` CRUD 追加。既存スキーマに `milestone_id` optional 追加 |
-| フロント共通 | `TimelineType.ts` に Milestone 型定義 + `TimelineEventProps` 変更。TanStack Query: `/milestone/add`, `/milestone/all`, `/milestone/update`, `/milestone/remove` |
-| フロント Calendar | イベント追加フォームに open なマイルストーン選択セレクト追加 |
-| フロント Timeline | マイルストーン作成ボタン/フォーム、所属イベントの色指定、open 一覧配置、詳細モーダル |
+- **既知の問題点** → [`KNOWN_ISSUES.md`](./.qwen/rules/KNOWN_ISSUES.md)
+- **リファクタリングロードマップ** → [`REFACTORING_ROADMAP.md`](./.qwen/rules/REFACTORING_ROADMAP.md)
+- **アーキテクチャスナップショット** → [`ARCHITECTURE_SNAPSHOT.md`](./.qwen/rules/ARCHITECTURE_SNAPSHOT.md)
+- **機能要件（マイルストーン）** → [`MILESTONE.md`](./.qwen/rules/MILESTONE.md)
 
 ## 参考リンク
 

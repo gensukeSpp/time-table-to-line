@@ -18,7 +18,21 @@ export type TimelineEventProps = Merge<NewTimelineItem, {
 	end_time: Date;
 	isDraggable?: boolean;
 	admin: boolean;
+	milestone_id?: number | null;
+	completed?: boolean;
 }>;
+
+export interface MilestoneProps {
+	id: number;
+	staff_id: number;
+	title: string;
+	description?: string | null;
+	color: string;
+	status: boolean;
+	created_at: string | null;
+	guidline_end_date?: string | null;
+	accomplished_date?: string | null;
+}
 
 export type GroupUserProps = {
 	staff_id: number;
@@ -28,7 +42,7 @@ export type GroupUserProps = {
 
 // ここから、認証Prop
 export type AuthInfoProp =
-	{ type: 'auth'; authId: number; code: number; group: string }
+	{ type: 'auth'; authId: number; code: number; group: string; admin: boolean }
 	| { type: 'token'; accessToken: string };
 
 export interface EventFormProps {
