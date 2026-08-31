@@ -22,15 +22,17 @@ export type TimelineEventProps = Merge<NewTimelineItem, {
 	completed?: boolean;
 }>;
 
+export type MilestoneStatus = 'open' | 'waiting' | 'closed';
+
 export interface MilestoneProps {
 	id: number;
 	staff_id: number;
 	title: string;
 	description?: string | null;
 	color: string;
-	status: boolean;
+	status: MilestoneStatus;
 	created_at: string | null;
-	guidline_end_date?: string | null;
+	guideline_end_date?: string | null;
 	accomplished_date?: string | null;
 }
 

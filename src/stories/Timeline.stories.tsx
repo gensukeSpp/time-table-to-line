@@ -66,9 +66,9 @@ const mockMilestones: MilestoneProps[] = [
     title: "マイルストーン 1",
     description: null,
     color: "#9c27b0",
-    status: true,
+    status: "open",
     created_at: "2026-08-24",
-    guidline_end_date: null,
+    guideline_end_date: null,
     accomplished_date: null,
   },
 ];

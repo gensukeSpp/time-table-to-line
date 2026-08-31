@@ -1,8 +1,8 @@
 ---
 created: 2026-08-17T15:47
-updated: 2026-08-20T13:15
+updated: 2026-08-20T13:09
 ---
-この文書は、バックエンド(`cd ../light_token_server`)とフロントエンド(当アプリ) **共通** のものです。
+この文書は、バックエンド(当アプリ)とフロントエンド(`cd ../time-table-to-line`) **共通** のものです。
 
 ## 概要
 「time-table-to-line」における「イベント」に対し、 **長めのスパンでのタスク** を意味する「マイルストーン」を設置します。
@@ -36,11 +36,11 @@ Calendar (タブ左)は、ユーザー個人での操作。 Timeline (タブ右)
 
 - 想定するカラム(型表記は SQLAlchemy 仕様)
 	- id: Integer, primary_key=True
-	- staff_id: Integer, ForeignKey("M_LOGGININFO.STAFFID")
+	- staff_id: Integer, ForeignKey("M_LOGININFO.STAFFID")
 	- title: String(100)
 	- description: String(256), nullable=True
 	- color: String(10)
-	- status: Boolean, default=True
+	- status: ~~Boolean, default=True~~ String(10), default=open // 2026-08-27 更新
 	- created_at: Date()
 	- guidline_end_date: Date(), nullable=True
 	- accomplished_date: Date(), nullable=True
@@ -49,7 +49,7 @@ Calendar (タブ左)は、ユーザー個人での操作。 Timeline (タブ右)
 	- completed: Boolean, default=False
 
 カラムに対する機能説明:
-- status: 作成されたら、 True(open) とし、 created_at にも値が入ります。  accomplished_date に値が入れば、 False(closed) になります。 **現時点での構想** として、一度 closed されてしまったマイルストーンは再 open できないものとします。
+- status: 作成されたら、 open とし、 created_at にも値が入ります。 accomplished_date に値が入れば、~~False(closed) になります。~~ waiting (waiting for close の意味)となり、数日間 **再 open** の猶予を設けます。 ~~現時点での構想 として、一度~~ 数日後(2026-08-27 更新) closed されてしまったマイルストーンは再 open できないものとします。
 
 ## 実装要件
 バックエンド:
@@ -85,9 +85,12 @@ Calendar (タブ左)は、ユーザー個人での操作。 Timeline (タブ右)
 - completed: マイルストーンの close に合わせて、自動で True にします。
 - 削除: UI に削除ボタンも追加します(作成ミスのときため)。
 - 色: 10 件超えた場合、 1 つ目で付けた色にし、以降は **同順でサイクル** させます。たぶん 10 を超えることはないでしょう。
-	- 10 固定パターン: ` #9c27b0 #009688 #795548 #607d8b #e91e63 #3f51b5 #00bcd4 #ff5722 #8bc34a #ff9800` (バックエンド側考案)
 	**重要**: completed または、マイルストーンが削除されたタイムライン上のイベントは、デフォルトの色( #2196f3)に変更させます。
 - milestone_id: 既存 /event/add スキーマに optional での追加で良いです。
+
+### 2026/08/27 追記
+- マイルストーンの **再 open の猶予期間** を持たせるため、M_MILESTONE.status を String(10) に変更します。
+  - 注入される値は、 open, waiting, closed を想定しています(waiting は、 waiting for close の意味)。
 
 ## 今後の展望
 - 管理者権限による、タイムラインの操作

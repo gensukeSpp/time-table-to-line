@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import { Box, Text, Loader, Button } from '@mantine/core';
 
 import { useMilestonesQuery } from '../../resources/queries';
-import { list, item, colorBar } from './MilestoneList.css';
+import { MilestoneProps } from '../../lib/TimelineType';
+import { MilestoneListTitle } from './MilestoneListTitle';
+import { MilestoneDetailDialog } from './MilestoneDetailDialog';
+import { list } from './MilestoneList.css';
 
 export const MilestoneList = () => {
   const { data, isPending, isError, error } = useMilestonesQuery();
+  const [selected, setSelected] = useState<MilestoneProps | null>(null);
 
   if (isPending) {
     return (
@@ -23,19 +28,19 @@ export const MilestoneList = () => {
     );
   }
 
-  const openMilestones = (data ?? []).filter((milestone) => milestone.status);
+  const openMilestones = (data ?? []).filter((m) => m.status !== 'closed');
 
   return (
-    <Box className={list}>
-      {openMilestones.map((milestone) => (
-        <Box key={milestone.id} className={item}>
-          <Box
-            className={colorBar}
-            style={{ backgroundColor: milestone.color }}
-          />
-          <Text>{milestone.title}</Text>
-        </Box>
-      ))}
-    </Box>
+    <>
+      <Box className={list}>
+        {openMilestones.map((milestone) => (
+          <MilestoneListTitle key={milestone.id} milestone={milestone}
+            onOpenDetail={setSelected} />
+        ))}
+      </Box>
+      {selected && (
+        <MilestoneDetailDialog milestone={selected} onClose={() => setSelected(null)} />
+      )}
+    </>
   );
 };

@@ -19,7 +19,7 @@ export const MilestoneCreateDialog = ({
 
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [guidlineEndDate, setGuidlineEndDate] = useState<Date | null>(null);
+  const [guidelineEndDate, setGuidelineEndDate] = useState<Date | null>(null);
 
   const handleSubmit = () => {
     if (!title.trim()) {
@@ -29,8 +29,8 @@ export const MilestoneCreateDialog = ({
     const values: MilestoneFormValues = {
       title: title.trim(),
       description: description.trim() || undefined,
-      guidline_end_date: guidlineEndDate
-        ? format(guidlineEndDate, 'yyyy-MM-dd')
+      guideline_end_date: guidelineEndDate
+        ? format(guidelineEndDate, 'yyyy-MM-dd')
         : undefined
     };
 
@@ -71,8 +71,8 @@ export const MilestoneCreateDialog = ({
         <DateInput
           label="ガイドライン終了日"
           placeholder="日付を選択"
-          value={guidlineEndDate}
-          onChange={setGuidlineEndDate}
+          value={guidelineEndDate}
+          onChange={setGuidelineEndDate}
           clearable
         />
         <div className={actions}>
