@@ -146,4 +146,26 @@ describe('MilestoneList', () => {
     expect(screen.getByText('マイルストーン詳細')).toBeInTheDocument();
     expect(screen.getByText(/作成者名/)).toBeInTheDocument();
   });
+
+  it('should block detail dialog for non-admin users', async () => {
+    const user = userEvent.setup();
+    const mockMilestones: MilestoneProps[] = [
+      { id: 1, title: 'M1', status: 'open', color: '#9c27b0', staff_id: 1,
+        created_at: '2026-08-20', guideline_end_date: null, accomplished_date: null },
+    ];
+
+    ;(useAuthInfo as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      type: 'auth',
+      authId: 1,
+      code: 3,
+      group: 'グループA',
+      admin: false,
+    });
+    mockQuery({ data: mockMilestones, isPending: false, isError: false });
+    renderList();
+
+    await user.click(screen.getByText('M1'));
+
+    expect(screen.queryByText('マイルストーン詳細')).not.toBeInTheDocument();
+  });
 });

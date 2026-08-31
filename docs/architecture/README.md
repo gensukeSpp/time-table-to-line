@@ -11,3 +11,4 @@
 | 2026-08-14 | Atomic Design migration and scheduling view stabilization (PR #12) |
 | 2026-08-21 | Fix event drag/resize issues and add Milestone requirements (PR #13) |
 | 2026-08-25 | Add Milestone management feature (PR #17) |
+| 2026-08-31 | Milestone update feature and waiting status (PR #19) |

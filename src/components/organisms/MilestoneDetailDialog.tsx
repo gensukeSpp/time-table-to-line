@@ -11,10 +11,11 @@ import { form, actions } from './MilestoneDetailDialog.css';
 
 interface MilestoneDetailDialogProps {
   milestone: MilestoneProps | null;   // null なら閉じている
+  admin: boolean;
   onClose: () => void;
 }
 
-export const MilestoneDetailDialog = ({ milestone, onClose }: MilestoneDetailDialogProps) => {
+export const MilestoneDetailDialog = ({ milestone, admin, onClose }: MilestoneDetailDialogProps) => {
   const { data: groupUsers } = useGroupUsersQuery();
   const authInfo = useAuthInfo();
   const updateMilestone = useUpdateMilestoneMutation();
@@ -38,7 +39,7 @@ export const MilestoneDetailDialog = ({ milestone, onClose }: MilestoneDetailDia
   const groupName = authInfo.type === 'auth' ? authInfo.group : 'グループなし';
 
   const handleUpdate = () => {
-    if (!milestone || !title.trim()) return;
+    if (!milestone || !admin || !title.trim()) return;
     const body: MilestoneUpdateFormValues = {
       title: title.trim(),
       description: description.trim() || undefined,
@@ -55,17 +56,25 @@ export const MilestoneDetailDialog = ({ milestone, onClose }: MilestoneDetailDia
           onSubmit={(e) => { e.preventDefault(); handleUpdate(); }}>
           <Text>作成者名: {creatorName}</Text>
           <Text>グループ名: {groupName}</Text>
-          <TextInput label="タイトル" required value={title}
-            onChange={(e) => setTitle(e.currentTarget.value)} />
-          <Textarea label="説明" value={description}
-            onChange={(e) => setDescription(e.currentTarget.value)} />
-          <DateInput label="ガイドライン終了日" value={guidelineEndDate}
-            onChange={setGuidelineEndDate} clearable />
-          <DateInput label="達成日" placeholder="達成日(空)" value={accomplishedDate}
-            onChange={setAccomplishedDate} clearable />
+          {!admin ? (
+            <Text c="dimmed">管理者のみ更新できます。</Text>
+          ) : (
+            <>
+              <TextInput label="タイトル" required value={title}
+                onChange={(e) => setTitle(e.currentTarget.value)} />
+              <Textarea label="説明" value={description}
+                onChange={(e) => setDescription(e.currentTarget.value)} />
+              <DateInput label="ガイドライン終了日" value={guidelineEndDate}
+                onChange={setGuidelineEndDate} clearable />
+              <DateInput label="達成日" placeholder="達成日(空)" value={accomplishedDate}
+                onChange={setAccomplishedDate} clearable />
+            </>
+          )}
           <div className={actions}>
             <Button variant="default" onClick={onClose}>キャンセル</Button>
-            <Button type="submit" disabled={!title.trim()} loading={updateMilestone.isPending}>更新</Button>
+            {admin && (
+              <Button type="submit" disabled={!title.trim()} loading={updateMilestone.isPending}>更新</Button>
+            )}
           </div>
         </form>
       )}
