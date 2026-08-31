@@ -1,91 +1,181 @@
-# Copilot instructions for time-table-to-line
+# Copilot Instructions — time-table-to-line
 
-This file collects repository-specific instructions that help future Copilot/assistant sessions start quickly and produce high-quality results. It consolidates verified commands, architecture notes, and conventions found in the codebase (package.json, src/, resources/, tasks/).
-
----
-
-## Quick commands (from package.json)
-Use the project's package scripts. The project uses Bun for package management and scripts.
-
-Install
-- bun: bun install
-
-Dev (HMR)
-- bun: bun run dev
-
-Build (production)
-- bun: bun run build
-
-Preview
-- bun: bun run preview
-
-Lint
-- bun: bun run lint
-
-Tests
-- Watch mode (dev): bun run test
-- Single-run (CI): bun run testrun
-- Run a single test file: bun run test -- path/to/file.spec.tsx
-- Run tests matching a name: bun run test -- -t "Test name pattern"
-
-Storybook
-- bun run storybook
-- Build static: bun run build-storybook
-
-Notes
-- package.json scripts: `dev`, `build` (runs `tsc && vite build`), `lint` (eslint with --max-warnings 0), `test` (vitest), `testrun` (vitest run).
+This file helps Copilot sessions work effectively in this React + Vite codebase. It consolidates verified commands, architecture notes, and coding conventions.
 
 ---
 
-## High-level architecture (big picture)
-- React 19 + TypeScript + Vite front-end app exposing two primary views:
-  - Calendar view (react-big-calendar) — date-grid UI for day/week operations and drag-and-drop.
-  - Timeline view (react-calendar-timeline) — horizontal timeline (Gantt-like) for staff resources.
-- State layers:
-  - Client context: Context API via useContextFamily for local global state (EventsStateContext, Auth contexts).
-  - Server state: @tanstack/react-query (resources/*) — queries live in `src/resources` and cache keys in `resources/cache`.
-  - Mutations: useEventMutation pattern (React Query) centralizes create/update/delete semantics.
-- Styling: Vanilla Extract with per-component `.css.ts` files and Sprinkles for responsive utilities.
-- UI toolkit: Mantine v7 (project migrated from Chakra/Radix), Framer Motion for interactions.
-- Dates: Project standard is date-fns (some legacy code still references moment/dayjs; prefer date-fns in new work).
-- Networking: Axios instance at `src/lib/AuthInfo.ts` used throughout; authentication logic and interceptors live in templates (`AxiosClientProvider.tsx`).
+## Quick Commands
+
+**Package Management (Bun)**
+```bash
+bun install          # Install dependencies
+bun add <pkg>       # Add a package
+bun add -d <pkg>    # Add dev dependency
+bun remove <pkg>    # Remove a package
+```
+
+**Development**
+```bash
+bun run dev         # Start dev server (HMR enabled)
+bun run build       # Build for production (tsc + vite build)
+bun run preview     # Preview built app
+```
+
+**Code Quality**
+```bash
+bun run lint        # ESLint check (enforces --max-warnings 0)
+```
+
+**Testing**
+```bash
+bun test                                        # Watch mode
+bun run testrun                                 # Single run (CI)
+bun test -- path/to/file.spec.tsx             # Single test file
+bun test -- -t "pattern"                       # Tests matching name
+```
+
+**Storybook**
+```bash
+bun run storybook          # Dev server (port 6006)
+bun run build-storybook    # Static build
+```
 
 ---
 
-## Key codebase conventions (non-obvious)
-- Atomic component organization: `src/components/{molecules,organisms,pages,templates}`. Look under templates for global providers (AuthParent, EventsParent).
-- Timeline event shape: `TimelineEventProps` (src/lib/TimelineType.ts). Many components expect both `start`/`end` (Date) and `start_time`/`end_time` for timeline-compat.
-- React Query keys: defined in `src/resources/cache.ts`. Use these helpers for invalidation.
-- Avoid mutating fetched objects: queries often transform server payloads into Date instances — prefer non-mutating map to avoid shared-reference bugs (see `src/resources/queries.ts`).
-- Token/auth flow: prefer reading from the auth context (useAuthContext) first, then refresh query, then localStorage fallback. Interceptor code was recently fixed to follow this order; follow that pattern when adding network logic.
-- No build artifacts in repo: storybook static files should not be committed. If you find build artifacts included, prefer removing them and adding to .gitignore.
-- ESLint setup: repo enforces `--max-warnings 0`. Fix lint issues before pushing.
-- Keep `console.log` removed — security and noise policy; CI may fail if logs are too noisy.
+## High-Level Architecture
+
+**Two Views, One Event Model**
+- **Calendar View** (react-big-calendar): Week/day grid for personal event management with drag-and-drop.
+- **Timeline View** (react-calendar-timeline): Gantt-like horizontal timeline for group resources and milestones.
+- Both views operate on the same event model (`TimelineEventProps` in `src/lib/TimelineType.ts`).
+
+**State Management Layers**
+- **Server State**: @tanstack/react-query 5 → queries in `src/resources/queries.ts`, cache keys in `resources/cache.ts`.
+- **Client State**: Context API → auth and events contexts via `useContextFamily.ts`.
+- **Component State**: `useState`/`useReducer` for form controls, dialogs, etc.
+
+**Request Flow**
+1. Auth token passed via URL query (`?token=xxx`) → stored in auth context.
+2. Axios interceptor (`AxiosClientProvider.tsx`) attaches token to all requests via `Authorization: Bearer`.
+3. Server state mutations via TanStack Query (e.g., `useEventMutation`, `useMilestoneMutation`).
+
+**Styling & UI**
+- **CSS**: Vanilla Extract (zero-runtime) with per-component `.css.ts` files colocated with components.
+- **UI Library**: Mantine v7 (unified from Chakra/Radix; do not introduce other UI libraries).
+- **Dates**: date-fns (legacy code may reference moment/dayjs; standardize on date-fns in new work).
 
 ---
 
-## Where to look first when debugging
-- Authentication/token issues: `src/components/templates/AxiosClientProvider.tsx`, `src/lib/AuthInfo.ts`, `src/resources/fetch.ts` (API wrappers).
-- Events / timeline issues: `src/hooks/useContextFamily.tsx`, `src/resources/queries.ts`, `src/lib/TmelineData.ts` (watch for typo in filename), `src/lib/TimelineType.ts`.
-- Drag & drop / interactions: `src/hooks/useMouseHandle.ts`, `src/hooks/useTimelineDragZoom.ts`.
+## Key Conventions
+
+### Component Organization (Atomic Design)
+```
+src/components/
+├── molecules/      # Simple reusable components (e.g., EventUpdateButtonComponent)
+├── organisms/      # Complex stateful components (e.g., Dialog, InputItem, MilestoneCreateDialog)
+├── pages/          # Full page components (e.g., CalendarComponent, TimelinePage)
+└── templates/      # Layout wrappers & global providers (e.g., AuthParent, AxiosClientProvider)
+```
+
+### Directory Overview
+```
+src/
+├── hooks/          # Custom hooks (useEventMutation, useAuthGuard, useContextFamily)
+├── lib/            # Type definitions & utilities (TimelineType.ts = canonical event shape)
+├── resources/      # TanStack Query integration (queries, mutations, cache keys)
+├── tests/          # Vitest test files
+├── stories/        # Storybook component stories
+└── assets/         # Static files
+```
+
+### Event Shape (Central Contract)
+The canonical event model is `TimelineEventProps` in `src/lib/TimelineType.ts`. Always include:
+- `start`, `end` — Date instances for react-big-calendar.
+- `start_time`, `end_time` — For timeline compatibility (backend may store as string; normalize in queries).
+- Other fields: `id`, `title`, `resource_id` (staff), `milestone_id` (optional), etc.
+
+### React Query Integration
+- Define cache keys in `src/resources/cache.ts` (e.g., `queryKeys.events()`, `queryKeys.milestones()`).
+- Queries live in `src/resources/queries.ts` (hooks like `useEventsQuery`, `useMilestonesQuery`).
+- Mutations in hooks (e.g., `useEventMutation`, `useMilestoneMutation`).
+- **Important**: Avoid mutating fetched objects; use non-mutating transformations (e.g., `.map()` not direct mutation).
+
+### Authentication & Networking
+- Token from URL: `new URLSearchParams(location.search).get('token')`.
+- Store in auth context via `AuthParent.tsx`.
+- **Order of precedence**: auth context → refresh query → localStorage fallback.
+- **Security**: Axios interceptor must prepend `Authorization: Bearer` to all requests.
+
+### Code Quality & Linting
+- **ESLint**: Enforced with `--max-warnings 0`. All warnings must be fixed.
+- **No console.log**: Remove all logging before committing (security policy).
+- **No commented code**: Delete instead of commenting out.
+- **Unused imports/variables**: Remove via `bun run lint --fix` where possible.
+- **TypeScript**: Strict mode; always use precise types.
+
+### Styling Rules
+- All new styles must use Vanilla Extract (`.css.ts` files).
+- Colocate `ComponentName.css.ts` with `ComponentName.tsx`.
+- Use Mantine's responsive utilities via Sprinkles when possible.
+- CSS Modules (`.module.css`) are legacy only; do not introduce new ones.
+
+### Testing
+- **Framework**: Vitest with jsdom.
+- **Setup**: `src/tests/vitest-setup.ts` (auto-included in vite.config.ts).
+- **Component Tests**: Prefer Storybook interaction tests (covers Testing Library internally).
+- **Unit Tests**: Place colocated as `*.spec.ts` or in `src/tests/`.
 
 ---
 
-## Automation, CI and tests
-- CI should run: `lint`, `testrun`, and `build`. Ensure `eslint` and `tsc` are green.
-- Vitest is configured in vite.config.ts; use `vite`-based runner (scripts already wired).
+## Known Issues & Refactoring Status
+
+### Current Refactoring Priority (from requirement-01.md)
+1. **Code Quality**: Remove `console.log`, commented code, unused types/imports.
+2. **UI Library**: Unified to Mantine v7 (Chakra/Radix deprecated).
+3. **Date Library**: Standardize on date-fns (moment/dayjs being phased out).
+4. **Unused Files**: Clean up Theme.ts and other stale modules.
+
+### Known Bugs (from requirement-01.md)
+- **Calendar PM 11:00 issue**: Events added at 11:00 PM are placed in all-day section instead of the intended time slot.
+- **Timezone issue**: Server stores times in non-JST; UI displays correctly except for above bug.
+
+### Milestone Feature (requirement-03.md) — In Progress
+- Milestones are long-span tasks shared across groups (admin-only create/close).
+- Database: `M_MILESTONE` table with color, status, accomplished_date.
+- UI: Appears in Timeline view only (group scope, not personal).
+- Colors: 10 fixed patterns; defaults differ from event colors (#2196f3, #ffc107).
 
 ---
 
-## Files from other AI assistants (checked)
-No Claude/Cursor/Aider/Cline/Windsurf assistant configs detected in repo root.
+## Debug Checklist
+
+| Issue | Look Here |
+|-------|-----------|
+| Auth token missing / Bearer header not sent | `src/components/templates/AxiosClientProvider.tsx`, `src/lib/AuthInfo.ts`, `src/resources/fetch.ts` |
+| Event not showing / CRUD failing | `src/hooks/useEventMutation.ts`, `src/resources/queries.ts`, `src/lib/TimelineType.ts` |
+| Timeline rendering wrong / zoom broken | `src/hooks/useTimelineDragZoom.ts`, `src/lib/TmelineData.ts` (note: typo in filename) |
+| Calendar drag-drop not working | `src/hooks/useMouseHandle.ts`, `src/components/pages/CalendarComponent.tsx` |
+| Types not matching | `src/lib/TimelineType.ts` (single source of truth for event schema) |
 
 ---
 
-## Suggested additions for future Copilot sessions
-- Add a short top-level README fragment that lists the canonical commands and the main contexts (Auth, Events, Timeline) — Copilot sessions use these to prioritize files.
-- Add `docs/architecture/quick-glossary.md` with the canonical shapes (TimelineEventProps) and React Query keys.
+## CI/CD Expectations
+
+Before pushing, ensure:
+1. `bun run lint` ✓ (0 errors, 0 warnings)
+2. `bun run testrun` ✓ (all tests pass)
+3. `bun run build` ✓ (tsc passes, no Vite errors)
+4. No `console.log` in source files
+5. No build artifacts (dist/, storybook-static/) staged
 
 ---
 
-Created/updated by an automated assistant. Want me to add this file to the repo now? If yes, will write the updated `.github/copilot-instructions.md`. Also: configure an MCP server for Playwright/Browser testing or Storybook visual testing? (yes/no)
+## Useful References
+
+- **Architecture Deep Dive**: See `QWEN.md` (Japanese) for detailed component hierarchy and refactoring roadmap.
+- **Requirement Specs**: `requirement-01.md` (initial refactor plan), `requirement-03.md` (milestone feature).
+- **Existing Instruction Files**: `AGENTS.md` (other agent contexts), `GEMINI.md`, `QWEN.md` for additional perspectives.
+
+---
+
+Last updated: 2026-08-31. Maintained by Copilot session automation.
