@@ -1,17 +1,37 @@
 import { addHours } from 'date-fns';
 import React, { useRef, useLayoutEffect, useMemo, useState } from 'react';
-import { Timeline, TimelineGroupBase } from "react-calendar-timeline";
+import { Timeline, TimelineGroupBase, Id } from "react-calendar-timeline";
 
 import { useGroupUsersQuery } from "../../resources/queries";
 import { useEventsState } from "../../hooks/useContextFamily";
 import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useTimelineDragZoom } from '../../hooks/useTimelineDragZoom'; // Import the new custom hook
 import { getGroup, getItems, toTimelineStackItems } from '../../lib/TmelineData';
+import { TimelineEventProps } from '../../lib/TimelineType';
+import { EventDetailOverlay } from '../organisms/EventDetailOverlay';
 import { MilestoneList } from '../organisms/MilestoneList';
 import { MilestoneAddButton } from '../organisms/MilestoneAddButton';
 import { toolbar } from './TimelinePage.css';
 
 import 'react-calendar-timeline/style.css';
+
+// クリックしたイベント付近にオーバーレイを重ねる位置を、コンテナ基準で計算する。
+// e.currentTarget が null（React 19 等）の場合はフォールバック位置へ倒す。
+const computeOverlayPos = (
+  e: React.SyntheticEvent,
+  containerRef: React.RefObject<HTMLDivElement | null>
+): { top: number; left: number } => {
+  const container = containerRef.current;
+  const target = e.currentTarget as HTMLElement | null;
+  if (!container || !target) {
+    return { top: 12, left: 12 };
+  }
+  const item = target.getBoundingClientRect();
+  const cont = container.getBoundingClientRect();
+  const top = Math.min(item.bottom - cont.top + 8, cont.height - 220);
+  const left = Math.min(Math.max(item.left - cont.left, 0), cont.width - 340);
+  return { top: Math.max(top, 8), left: Math.max(left, 8) };
+};
 
 export const GroupHorizonTimeline = () => {
   const { data: groupUsers, isPending } = useGroupUsersQuery();
@@ -27,6 +47,11 @@ export const GroupHorizonTimeline = () => {
   // Container ref to get timeline width
   const containerRef = useRef<HTMLDivElement>(null);
   const [timelineWidth, setTimelineWidth] = useState(0);
+
+  // イベントクリックで開く詳細オーバーレイ（Issue #20）
+  const authId = authInfo.type === 'auth' ? authInfo.authId : undefined;
+  const [selectedEvent, setSelectedEvent] = useState<TimelineEventProps | null>(null);
+  const [overlayPos, setOverlayPos] = useState<{ top: number; left: number } | null>(null);
   // <Timeline> の resize() を非表示→表示の切り替え(タブ切替)時に呼ぶための把持。
   // react-calendar-timeline は window resize 時のみ幅を再測定するため、Mantine Tabs の
   // keepMounted で非表示のままマウントされると canvas 幅(buffer込み)が初期値=1000*3=3000px 等に
@@ -91,6 +116,16 @@ export const GroupHorizonTimeline = () => {
 
   const onBoundsChange = () => {};
 
+  // イベントクリックで詳細オーバーレイを開く（管理者 OR 自分のイベントのみ）
+  const handleItemClick = (itemId: Id, e: React.SyntheticEvent, _time: number) => {
+    const event = state.find((evt) => evt.id === itemId);
+    if (!event) return;
+    // 一般ユーザーには他メンバーの詳細を表示しない（{admin & ...}）
+    if (!(isAdmin || authId === event.staff_id)) return;
+    setSelectedEvent(event);
+    setOverlayPos(computeOverlayPos(e, containerRef));
+  };
+
   // onTimeChange handler to sync scrolling with our zoom state
   const handleTimeChange = (
     visibleTimeStart: number,
@@ -112,6 +147,7 @@ export const GroupHorizonTimeline = () => {
       {/* Add a container div with a ref and mouse event handlers */}
       <div
         ref={containerRef}
+        style={{ position: 'relative' }}
         onMouseDownCapture={handleMouseDown}
         onMouseMoveCapture={handleMouseMove}
         onMouseUpCapture={handleMouseUp}
@@ -135,11 +171,23 @@ export const GroupHorizonTimeline = () => {
             lineHeight={60}
             stackItems={true} // Stack overlapping items vertically
             onCanvasClick={() => { }}
+            onItemClick={handleItemClick}
             onBoundsChange={onBoundsChange}
             resizeDetector={resizeDetector}
           />
         )}
       </div>
+      {selectedEvent && overlayPos && (
+        <EventDetailOverlay
+          event={selectedEvent}
+          position={overlayPos}
+          readOnly={isAdmin}
+          onClose={() => {
+            setSelectedEvent(null);
+            setOverlayPos(null);
+          }}
+        />
+      )}
     </>
   )
 }
