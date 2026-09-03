@@ -42,6 +42,7 @@
 | 11 | バグ修正（Issue #11）Issue 1: 時・分・秒欠落, Issue 2: タイムライン表示破綻 | **完了** | `tasks/issue-11/README.md` |
 | 16 | 機能追加（Issue #16）マイルストーンの追加処理と表示 | **完了** | `tasks/issue-16/README.md` |
 | 18 | 機能追加（Issue #18）マイルストーン内容の更新と削除（タイトルクリック詳細モーダル・waiting/re-open 契約・`guideline_end_date` スペル統一） | **完了** | `tasks/issue-18/README.md` |
+| 20 | 機能追加（Issue #20 / PR #21）タイムライン詳細モーダル — `AddChildForm` に `readOnly` プロップ追加（管理者 + 他人のイベントで読取専用: 更新/削除ボタン・警告ダイアログ非表示, メンバー名表示）、`EventDetailOverlay` 新規（絶対配置オーバーレイ、外部クリック + Escape で close）、`TimelinePage.tsx` の `onItemClick` 配線（管理者 OR 自分のイベントのみ開く、`computeOverlayPos` で位置計算）。**契約: `readOnly` は無条件読取専用**とし、権限由来の条件は親側で伝播（PR #21 レビューで確定。条件付き編集が必要なら `adminReadOnly` / `allowEdit` 等の責務名を使用）。テスト: `src/tests/InputItem.spec.tsx` 新規 | **完了** | PR #21 (MERGED), `src/components/organisms/EventDetailOverlay.tsx`, `src/tests/InputItem.spec.tsx` |
 
 ---
 
