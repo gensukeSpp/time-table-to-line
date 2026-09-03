@@ -94,9 +94,11 @@ describe('AddChildForm (readonly)', () => {
     expect(screen.queryByText('異なるスタッフの、変更はできません')).not.toBeInTheDocument();
   });
 
-  it('自分のイベントは readOnly 指定でも編集可（更新/削除ボタンが出る）', () => {
+  it('自分のイベントも readOnly で開くと編集不可（更新/削除ボタンが出ない）', () => {
     renderWith(myEvent, true);
-    expect(screen.getByRole('button', { name: '更新' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '削除' })).toBeInTheDocument();
+    // 編集は Calendar 側で行うため、タイムライン詳細モーダルでは常に閲覧専用
+    expect(screen.queryByRole('button', { name: '更新' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '削除' })).not.toBeInTheDocument();
+    expect(screen.getByText('内容：')).toBeInTheDocument();
   });
 });

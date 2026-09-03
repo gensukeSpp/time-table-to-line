@@ -181,7 +181,8 @@ export const GroupHorizonTimeline = () => {
         <EventDetailOverlay
           event={selectedEvent}
           position={overlayPos}
-          readOnly={isAdmin}
+          // タイムライン詳細モーダルは常に閲覧専用（編集は Calendar 側で行う）
+          readOnly={true}
           onClose={() => {
             setSelectedEvent(null);
             setOverlayPos(null);

@@ -13,8 +13,9 @@ import { EventUpdateButtons } from '../molecules/EventUpdateButton';
 interface InputEventProps {
 	selectedEvent: TimelineEventProps,
 	closeClick: () => void,
-	// 管理者が他メンバーのイベント詳細を読取専用で閲覧するモード（Issue #20）
-	// 指定しても、自分のイベントは従来どおり編集可（更新 / 削除ボタン表示）
+	// 無条件に編集不可とするモード（Issue #20 / PR #21 レビュー指摘）。
+	// タイムライン詳細モーダルは閲覧専用とし、イベント編集は Calendar 側で行う。
+	// true の場合は自分のイベントでも更新 / 削除ボタンを表示しない。
 	readOnly?: boolean
 }
 
@@ -44,10 +45,9 @@ export const AddChildForm = forwardRef(
 	// リテラルタイプ化
 	const auth = useAuthInfo();
 	const authId = auth.type === 'auth' ? auth.authId : undefined;
-	const isAdmin = auth.type === 'auth' ? auth.admin : false;
 	const isOwnEvent = authId === selectedEvent.staff_id;
-	// readOnly 指定かつ管理者かつ自分のイベントでない場合のみ、読取専用
-	const readOnlyMode = isAdmin && readOnly === true && !isOwnEvent;
+	// readOnly は無条件に編集不可（admin / 自分のイベントは問わない）
+	const readOnlyMode = readOnly === true;
 
 	// グループメンバー名の解決（読取専用時に staff_id 数値の代わりに表示）
 	const { data: groupUsers } = useGroupUsersQuery();
