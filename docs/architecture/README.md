@@ -10,3 +10,4 @@
 | 2026-08-10 | Add admin property to TimelineEventProps for future RBAC (PR #9) |
 | 2026-08-14 | Atomic Design migration and scheduling view stabilization (PR #12) |
 | 2026-08-21 | Fix event drag/resize issues and add Milestone requirements (PR #13) |
+| 2026-09-03 | Implement Event Detail Modal and RBAC admin flag (PR #22) |
