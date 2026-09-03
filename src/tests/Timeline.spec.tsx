@@ -3,7 +3,7 @@ import { composeStories } from '@storybook/react';
 
 import * as stories from '../stories/Timeline.stories';
 
-describe('MyHorizonTimeline component', () =>{
+describe('GroupHorizonTimeline component', () =>{
   const { Standard } = composeStories(stories);
   type PlayCtx = Parameters<NonNullable<typeof Standard.play>>[0];
   it('タイムラインの表示', async () => {

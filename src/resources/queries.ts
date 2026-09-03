@@ -95,13 +95,16 @@ export const useUserEventsQuery = () => {
   }
 }
 
-export const useGroupUsersQuery = () => {
+export const useGroupUsersQuery = (options?: { enabled?: boolean }) => {
   const authContext = useAuthContext();
   const tokenContext = authContext.type === 'token' ? authContext.accessToken : undefined;  
 
   return useQuery({
     queryKey: eventKeys.userList(),
     queryFn: () => requestGroupMember(tokenContext!),
+    // 呼び出し側がメンバー名を表示しないケース（編集フォーム等）では
+    // enabled: false を渡して /group/users リクエスト自体を止められる。
+    enabled: options?.enabled ?? true,
   });
 }
 

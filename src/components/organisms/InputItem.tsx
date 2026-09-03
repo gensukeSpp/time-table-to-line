@@ -30,6 +30,35 @@ const options: OptionType[] = [
 	{value: 'complete', label: '完了'}
 ];
 
+// 閲覧専用表示。編集フォームと分離することで、readOnly 時以外に
+// メンバー一覧クエリ (/group/users) を発行しない（PR #22 レビュー指摘）。
+const ReadOnlyView = forwardRef(
+	({selectedEvent, closeClick}: InputEventProps, childRef: Ref<HTMLDivElement>) => {
+		// メンバー名の解決のためだけにメンバー一覧を取得する
+		const { data: groupUsers } = useGroupUsersQuery({ enabled: true });
+		const member = groupUsers?.data?.find((u) => u.staff_id === selectedEvent.staff_id);
+		const memberName = member ? `${member.family_kana ?? ''}${member.last_kana ?? ''}` : '不明';
+
+		return (
+			<Box ref={childRef} className={formParent}>
+				<Button color="green" onClick={closeClick} className={buttonPosition}>
+					<Text style={{ fontSize: '2rem' }} c="white">×</Text><Text c="white">閉じる</Text>
+				</Button>
+				<Text style={{ fontSize: '2rem' }} fw={700}>{memberName}</Text>
+				<Text style={{ fontSize: '2rem' }} fw={700} className={boundaryTop}>{selectedEvent.title}</Text>
+				<section className={boundaryTop}>
+					<Text>内容：</Text>
+					<Text>{selectedEvent.summary ?? ''}</Text>
+				</section>
+				<section className={boundaryTop}>
+					<Text>どんな感じ：</Text>
+					<Text>{selectedEvent.progress ?? ''}</Text>
+				</section>
+			</Box>
+		);
+	}
+);
+
 export const AddChildForm = forwardRef(
 	({selectedEvent, closeClick, readOnly}: InputEventProps,
 		childRef: Ref<HTMLDivElement>) => {
@@ -49,33 +78,10 @@ export const AddChildForm = forwardRef(
 	// readOnly は無条件に編集不可（admin / 自分のイベントは問わない）
 	const readOnlyMode = readOnly === true;
 
-	// グループメンバー名の解決（読取専用時に staff_id 数値の代わりに表示）
-	const { data: groupUsers } = useGroupUsersQuery();
-	const member = groupUsers?.data?.find((u) => u.staff_id === selectedEvent.staff_id);
-	const memberName = member ? `${member.family_kana ?? ''}${member.last_kana ?? ''}` : '不明';
-
 	const { Dialog, close } = useDialog();
 
 		if (readOnlyMode) {
-			return (
-			  <>
-			    <Box ref={childRef} className={formParent}>
-			      <Button color="green" onClick={closeClick} className={buttonPosition}>
-			        <Text style={{ fontSize: '2rem' }} c="white">×</Text><Text c="white">閉じる</Text>
-			      </Button>
-			      <Text style={{ fontSize: '2rem' }} fw={700}>{memberName}</Text>
-			      <Text style={{ fontSize: '2rem' }} fw={700} className={boundaryTop}>{selectedEvent.title}</Text>
-			      <section className={boundaryTop}>
-			        <Text>内容：</Text>
-			        <Text>{selectedEvent.summary ?? ''}</Text>
-			      </section>
-			      <section className={boundaryTop}>
-			        <Text>どんな感じ：</Text>
-			        <Text>{selectedEvent.progress ?? ''}</Text>
-			      </section>
-			    </Box>
-			  </>
-			);
+			return <ReadOnlyView ref={childRef} selectedEvent={selectedEvent} closeClick={closeClick} />;
 		}
 
 		return (

@@ -172,19 +172,23 @@ export const GroupHorizonTimeline = () => {
           resizeDetector={resizeDetector}
         />
       )}
+      {/* オーバーレイは position: relative のコンテナ内部に配置する。
+          computeOverlayPos() が返すのはコンテナ基準の相対座標であり、
+          兄弟要素として描画すると別の包含ブロック基準で解釈され
+          位置がずれるため（PR #22 レビュー指摘）。 */}
+      {selectedEvent && overlayPos && (
+        <EventDetailOverlay
+          event={selectedEvent}
+          position={overlayPos}
+          // タイムライン詳細モーダルは常に閲覧専用（編集は Calendar 側で行う）
+          readOnly={true}
+          onClose={() => {
+            setSelectedEvent(null);
+            setOverlayPos(null);
+          }}
+        />
+      )}
     </div>
-    {selectedEvent && overlayPos && (
-      <EventDetailOverlay
-        event={selectedEvent}
-        position={overlayPos}
-        // タイムライン詳細モーダルは常に閲覧専用（編集は Calendar 側で行う）
-        readOnly={true}
-        onClose={() => {
-          setSelectedEvent(null);
-          setOverlayPos(null);
-        }}
-      />
-    )}
     </>
   )
 }
