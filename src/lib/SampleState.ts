@@ -81,7 +81,8 @@ export const exAuthUser: AuthInfoProp = {
   type: 'auth',
   authId: 500,
   code: 2,
-  group: 'coffee'
+  group: 'coffee',
+  admin: false
 }
 
 export const exGroupUsers: GroupUserProps[] = [

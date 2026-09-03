@@ -2,6 +2,7 @@ export type InquiryStaff = {
   staff_id: number;
   group_id: number;
   group_name: string;
+  admin: boolean;
 };
 
 /**
@@ -43,5 +44,6 @@ export function normalizeAuthPayload(raw: unknown): InquiryStaff | null {
     staff_id,
     group_id: Number(inner.group_id ?? inner.code ?? 0),
     group_name: String(inner.group_name ?? inner.group ?? ''),
+    admin: Boolean(inner.admin ?? false),
   };
 }
