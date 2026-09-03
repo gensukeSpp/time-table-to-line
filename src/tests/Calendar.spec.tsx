@@ -79,6 +79,7 @@ describe('MyCalendar (CalendarView)', () => {
       authId: mockAuthId,
       code: 1,
       group: 'group 1',
+      admin: true,
     });
     (useSearchQuery as Mock).mockReturnValue({ data: mockAuthId.toString() });
     (useEventsState as Mock).mockReturnValue(mockEvents);

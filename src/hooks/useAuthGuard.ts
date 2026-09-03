@@ -16,6 +16,7 @@ export const useAuthInfo = (): AuthInfoProp => {
       authId: payload.staff_id,
       code: payload.group_id,
       group: payload.group_name,
+      admin: payload.admin,
       type: 'auth',
     };
   }

@@ -28,7 +28,7 @@ export type GroupUserProps = {
 
 // ここから、認証Prop
 export type AuthInfoProp =
-	{ type: 'auth'; authId: number; code: number; group: string }
+	{ type: 'auth'; authId: number; code: number; group: string; admin: boolean }
 	| { type: 'token'; accessToken: string };
 
 export interface EventFormProps {

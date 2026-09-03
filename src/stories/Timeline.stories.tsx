@@ -106,6 +106,6 @@ export const Standard: Story = {
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement);
     // canvas.getByRole
-    expect(canvas.getByText("マイタイムライン")).toBeInTheDocument();
+    expect(canvas.getByText("グループタイムライン")).toBeInTheDocument();
   },
 };

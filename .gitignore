@@ -36,7 +36,7 @@ env/
 .playwright-mcp/
 
 # For release
-# docker-compose.yml
+docker-compose.yml
 .gemini/
 .github/
 .hermes/
