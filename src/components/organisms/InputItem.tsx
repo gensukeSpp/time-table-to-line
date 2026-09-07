@@ -58,15 +58,16 @@ export const AddChildForm = forwardRef(
 	// 派生値を readOnly / editable の両 return から参照する。
 	const { data: milestones } = useMilestonesQuery();
 	// open のみ列挙（受け入れ要件 1）。現在所属のマイルストーンも選択肢に含め、値の round-trip を担保。
-	// 毎レンダーで新配列を作るので unshift（配列内変更）は `const` でも安全（prefer-const 対策）。
-	const milestoneOptions = (milestones ?? [])
+	// 毎レンダーで新配列を作るのでスプレッドで先頭に挿入する（ミューテーションを避ける）。
+	const openOptions = (milestones ?? [])
 		.filter((m) => m.status === 'open')
 		.map((m) => ({ value: String(m.id), label: m.title }));
 	const curId = eventItem.milestone_id;
-	if (curId != null && !milestoneOptions.some((o) => Number(o.value) === curId)) {
-		const cur = (milestones ?? []).find((m) => m.id === curId);
-		if (cur) milestoneOptions.unshift({ value: String(cur.id), label: `${cur.title}（${cur.status}）` });
-	}
+	const cur = curId != null ? (milestones ?? []).find((m) => m.id === curId) : undefined;
+	const curOption = cur && !openOptions.some((o) => Number(o.value) === cur.id)
+		? { value: String(cur.id), label: `${cur.title}（${cur.status}）` }
+		: null;
+	const milestoneOptions = curOption ? [curOption, ...openOptions] : openOptions;
 	const milestoneId = selectedEvent.milestone_id;
 	const curMilestone = (milestones ?? []).find((m) => m.id === milestoneId);
 

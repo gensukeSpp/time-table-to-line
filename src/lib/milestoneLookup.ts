@@ -2,13 +2,13 @@ import { MilestoneProps, MilestoneStatus } from './TimelineType';
 
 export function buildMilestoneColorMap(milestones: MilestoneProps[]): Map<number, string> {
   const map = new Map<number, string>();
-  for (const m of milestones ?? []) map.set(m.id, m.color);
+  for (const m of milestones) map.set(m.id, m.color);
   return map;
 }
 
 export function buildMilestoneStatusMap(milestones: MilestoneProps[]): Map<number, MilestoneStatus> {
   const map = new Map<number, MilestoneStatus>();
-  for (const m of milestones ?? []) map.set(m.id, m.status);
+  for (const m of milestones) map.set(m.id, m.status);
   return map;
 }
 

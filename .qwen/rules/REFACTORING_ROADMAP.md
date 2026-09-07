@@ -15,6 +15,11 @@
 6. **RBAC 土台**: `TimelineEventProps` に `admin: boolean` 追加（PR #9 / commit `71a9ae1`）
 7. **マイルストーン追加・表示**: PR #17（Issue #16）。admin 判定を `useAuthInfo().admin`（実データ）に修正。更新/削除・子イベント紐付け・配色は未実装（→ `.qwen/rules/MILESTONE.md` 参照）
 
+## 完了（2026-09-03 時点）
+
+8. **マイルストーン更新 & waiting 状態**: PR #19（Issue #18）。`MilestoneStatus`（open/waiting/closed）導入、`guideline_end_date` スペル修正、`useUpdateMilestoneMutation` / `useRemoveMilestoneMutation` 追加、`MilestoneDetailDialog` / `MilestoneListTitle` 新規。closed 動作・自動 completed は未実装（→ `.qwen/rules/MILESTONE.md` 参照）
+9. **タイムライン詳細モーダル**: PR #21（Issue #20）。`AddChildForm` に `readOnly` プロップ追加（管理者 + 他人のイベントで読取専用）、`EventDetailOverlay` 新規（絶対配置オーバーレイ、外部クリック + Escape で close）、`TimelinePage.tsx` の `onItemClick` 配線（管理者 OR 自分のイベントのみ開く、`computeOverlayPos` で位置計算）。**契約: `readOnly` は無条件読取専用**（権限由来の条件は親側で伝播）
+
 ## 今後必要なコード修正タスク（順次実施）
 
 1. **ESLint フラット設定**: `.eslintrc.cjs` → `eslint.config.js` 移行（ESLint 9 対応）

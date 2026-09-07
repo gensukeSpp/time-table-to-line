@@ -1,5 +1,5 @@
 import { addHours } from 'date-fns';
-import React, { useRef, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useRef, useLayoutEffect, useMemo, useState } from 'react';
 import { Timeline, TimelineGroupBase, Id, type ItemContext } from "react-calendar-timeline";
 
 import { useGroupUsersQuery, useMilestonesQuery } from "../../resources/queries";
@@ -145,7 +145,8 @@ export const GroupHorizonTimeline = () => {
   // 所属マイルストーンに応じてイベントの背景色 / 待機時不透明度を適用するカスタム描画。
   // react-calendar-timeline は itemRenderer の引数型（ItemRendererProps）を公開していないため、
   // lint の no-explicit-any を避けるべく、必要な分だけを inline で明示する（`:{ any }` は使わない）。
-  const itemRenderer = ({
+  // useCallback でメモ化し、<Timeline> の props 参照が毎レンダーごとに変わらないようにする（PR #24 P4）。
+  const itemRenderer = useCallback(({
     item,
     itemContext,
     getItemProps,
@@ -167,7 +168,7 @@ export const GroupHorizonTimeline = () => {
         {useResizeHandle ? <div {...right} /> : null}
       </div>
     );
-  };
+  }, [colorByMilestoneId, statusByMilestoneId]);
 
 
   return (
