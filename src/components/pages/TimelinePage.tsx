@@ -1,8 +1,9 @@
 import { addHours } from 'date-fns';
 import React, { useRef, useLayoutEffect, useMemo, useState } from 'react';
-import { Timeline, TimelineGroupBase, Id } from "react-calendar-timeline";
+import { Timeline, TimelineGroupBase, Id, type ItemContext } from "react-calendar-timeline";
 
-import { useGroupUsersQuery } from "../../resources/queries";
+import { useGroupUsersQuery, useMilestonesQuery } from "../../resources/queries";
+import { buildMilestoneColorMap, buildMilestoneStatusMap, computeItemDecorations } from '../../lib/milestoneLookup';
 import { useEventsState } from "../../hooks/useContextFamily";
 import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useTimelineDragZoom } from '../../hooks/useTimelineDragZoom'; // Import the new custom hook
@@ -43,6 +44,11 @@ export const GroupHorizonTimeline = () => {
   // グループ管理者かどうかは /timetable/inquiry のレスポンス（JWT クレーム由来）の admin で判定する。
   const authInfo = useAuthInfo();
   const isAdmin = authInfo.type === 'auth' ? authInfo.admin : false;
+
+  // マイルストーン取得と、id→色 / 状態 のルックアップマップ構築（Issue #23）
+  const { data: milestones } = useMilestonesQuery();
+  const colorByMilestoneId = useMemo(() => buildMilestoneColorMap(milestones ?? []), [milestones]);
+  const statusByMilestoneId = useMemo(() => buildMilestoneStatusMap(milestones ?? []), [milestones]);
 
   // Container ref to get timeline width
   const containerRef = useRef<HTMLDivElement>(null);
@@ -136,6 +142,33 @@ export const GroupHorizonTimeline = () => {
     updateScrollCanvas(visibleTimeStart, visibleTimeEnd);
   };
 
+  // 所属マイルストーンに応じてイベントの背景色 / 待機時不透明度を適用するカスタム描画。
+  // react-calendar-timeline は itemRenderer の引数型（ItemRendererProps）を公開していないため、
+  // lint の no-explicit-any を避けるべく、必要な分だけを inline で明示する（`:{ any }` は使わない）。
+  const itemRenderer = ({
+    item,
+    itemContext,
+    getItemProps,
+    getResizeProps,
+  }: {
+    item: { milestone_id?: number | null };
+    itemContext: Pick<ItemContext, 'useResizeHandle' | 'title' | 'dimensions'>;
+    getItemProps: (p: { style?: React.CSSProperties }) => React.HTMLAttributes<HTMLDivElement> & { key: string; ref: React.LegacyRef<HTMLDivElement> };
+    getResizeProps: () => { left: React.HTMLAttributes<HTMLDivElement>; right: React.HTMLAttributes<HTMLDivElement> };
+  }) => {
+    const { useResizeHandle, title, dimensions } = itemContext;
+    const { left, right } = getResizeProps();
+    const decor = computeItemDecorations(colorByMilestoneId, statusByMilestoneId, item.milestone_id);
+    const { key, ref, ...rest } = getItemProps({ style: decor });
+    return (
+      <div {...rest} ref={ref} key={`${key}-outer`}>
+        {useResizeHandle ? <div {...left} /> : null}
+        <div className="rct-item-content" style={{ maxHeight: `${dimensions.height}px` }}>{title}</div>
+        {useResizeHandle ? <div {...right} /> : null}
+      </div>
+    );
+  };
+
 
   return (
     <>
@@ -174,6 +207,7 @@ export const GroupHorizonTimeline = () => {
             onItemClick={handleItemClick}
             onBoundsChange={onBoundsChange}
             resizeDetector={resizeDetector}
+            itemRenderer={itemRenderer}
           />
         )}
       </div>
