@@ -47,6 +47,8 @@ src/main.tsx
                       │                   │    └── DialogOnSlot
                       │                   └── /timeline → GroupHorizonTimeline
                       │                        ├── MilestoneList / MilestoneAddButton (admin)
+                      │                        ├── MilestoneDetailDialog (admin、タイトルクリックで更新)
+                      │                        ├── EventDetailOverlay (onItemClick で詳細表示)
                       │                        └── react-calendar-timeline
 ```
 
@@ -60,11 +62,14 @@ src/
 │   │   ├── TimeUpdateButtonComponent.tsx   # 日時一括更新ボタン
 │   │   └── WrapComponent.tsx               # カスタムイベントラッパー
 │   ├── organisms/       # 複合コンポーネント
-│   │   ├── Dialog.tsx / DialogOnSlotComponent.tsx  # <dialog> モーダル
+│   │   ├── DialogOnSlot.tsx                # <dialog> モーダル
 │   │   ├── InputItem.tsx / InputTitleDialog.tsx     # イベント入力フォーム
+│   │   ├── EventDetailOverlay.tsx          # タイムライン詳細オーバーレイ（PR #21）
 │   │   ├── MilestoneAddButton.tsx          # マイルストーン作成ボタン（admin のみ）
 │   │   ├── MilestoneCreateDialog.tsx       # マイルストーン作成モーダル
-│   │   └── MilestoneList.tsx               # open マイルストーン一覧
+│   │   ├── MilestoneDetailDialog.tsx       # マイルストーン詳細モーダル（更新、PR #19）
+│   │   ├── MilestoneList.tsx               # open/waiting マイルストーン一覧
+│   │   └── MilestoneListTitle.tsx          # 一覧タイトル（クリックで詳細、PR #19）
 │   ├── pages/           # ページコンポーネント
 │   │   ├── CalendarComponent.tsx / CalendarWrapperComponent.tsx
 │   │   ├── TimelinePage.tsx                # GroupHorizonTimeline
@@ -78,7 +83,7 @@ src/
 │   ├── useContextFamily.ts          # Context 定義
 │   ├── useAuthGuard.ts              # 認証情報取得（admin 含む）
 │   ├── useEventMutation.ts          # イベント CRUD mutation
-│   ├── useMilestoneMutation.ts      # マイルストーン mutation（useAddMilestoneMutation）
+│   ├── useMilestoneMutation.ts      # マイルストーン mutation（add / update / remove）
 │   ├── useMouseHandle.ts            # カレンダー DnD ハンドル
 │   ├── useTimelineDragZoom.ts       # タイムラインズーム
 │   ├── useCallingForm.tsx           # 編集フォーム制御
@@ -90,6 +95,7 @@ src/
 │   ├── Localization.ts              # date-fns ローカライザー
 │   ├── SampleState.ts               # モックデータ
 │   ├── TmelineData.ts               # タイムラインデータ変換
+│   ├── milestone.ts                 # マイルストーン猶予日ユーティリティ（PR #19）
 │   ├── timelineZoomUtils.ts         # ズーム計算
 ├── resources/           # データフェッチ & キャッシュ
 │   ├── fetch.ts                     # API 呼び出し（fetchMilestones 含む）
@@ -101,6 +107,8 @@ src/
 └── tests/               # Vitest テスト
     ├── Calendar.spec.tsx
     ├── Timeline.spec.tsx
+    ├── InputItem.spec.tsx            # AddChildForm readOnly（PR #21）
+    ├── EventDetailOverlay.spec.tsx   # 詳細オーバーレイ（PR #21）
     └── timelineZoomUtils.spec.ts
 ```
 
@@ -109,7 +117,7 @@ src/
 2. **イベント取得**: `EventsContextProvider` が `useEventsQueryForTL` (TanStack Query) で全イベントを取得 → Context に保存 → 各コンポーネントが `useEventsState()` で参照
 3. **イベント操作**: カレンダー上で DnD → `useMouseHandle` が新旧時刻を `eventList` に蓄積 → `TimesUpdateButton` が一括更新 (`useUpdateDateListMutation`)
 4. **新規作成**: カレンダーのスロットをクリック → `DialogOnSlot` がモーダル表示 → `InputTitleDialog` でタイトル入力 → `useCreateMutation` で POST
-5. **マイルストーン**: `useMilestonesQuery` で一覧取得 → `MilestoneList` が open 一覧表示。`MilestoneAddButton`（admin のみ）→ `MilestoneCreateDialog` → `useAddMilestoneMutation` で POST `/milestone/add`
+5. **マイルストーン**: `useMilestonesQuery` で一覧取得 → `MilestoneList` が open/waiting 一覧表示。`MilestoneAddButton`（admin のみ）→ `MilestoneCreateDialog` → `useAddMilestoneMutation` で POST `/milestone/add`。一覧タイトルクリック（admin のみ）→ `MilestoneDetailDialog` で編集 → `useUpdateMilestoneMutation` で POST `/milestone/update/:id`（PR #19）。タイムラインのイベントクリック（admin OR 自分のイベント）→ `EventDetailOverlay`（`AddChildForm` の readOnly 表示）を開く（PR #21）
 
 ### バックエンド API（推測）
 
@@ -128,8 +136,8 @@ src/
 | `/group/users` | POST | グループメンバー一覧 |
 | `/milestone/all` | GET | マイルストーン一覧取得 |
 | `/milestone/add` | POST | マイルストーン追加 |
-| `/milestone/update/:id` | POST | マイルストーン更新（backend 実装済み・フロント未実装） |
-| `/milestone/remove/:id` | DELETE | マイルストーン削除（backend 実装済み・フロント未実装） |
+| `/milestone/update/:id` | POST | マイルストーン更新（PR #19 で実装） |
+| `/milestone/remove/:id` | DELETE | マイルストーン削除（PR #19 で実装） |
 
 ## ビルド & 実行
 ```bash

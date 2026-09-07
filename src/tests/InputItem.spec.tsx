@@ -1,13 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
 import { AxiosResponse } from 'axios';
 
 import { AddChildForm } from '../components/organisms/InputItem';
-import { TimelineEventProps, GroupUserProps } from '../lib/TimelineType';
+import { TimelineEventProps, GroupUserProps, MilestoneProps } from '../lib/TimelineType';
 import { InquiryStaff } from '../lib/authPayload';
 import { AuthStateContext } from '../hooks/useContextFamily';
-import { authKeys, eventKeys } from '../resources/cache';
+import { authKeys, eventKeys, milestoneKeys } from '../resources/cache';
 
 const authToken = 'valid-token';
 const queryClient = new QueryClient({
@@ -41,6 +41,13 @@ queryClient.setQueryData(eventKeys.userList(), {
   headers: {},
   config: {},
 } as AxiosResponse<GroupUserProps[]>);
+
+// グループマイルストーン（/milestone/all）用モック。open のみ編集セレクトに出る（受け入れ 1）。
+const mockMilestones: MilestoneProps[] = [
+  { id: 1, staff_id: 1000, title: 'open-ms', color: '#9c27b0', status: 'open', created_at: '2026-01-01', guideline_end_date: null },
+  { id: 2, staff_id: 1000, title: 'waiting-ms', color: '#009688', status: 'waiting', created_at: '2026-01-02', guideline_end_date: null },
+];
+queryClient.setQueryData(milestoneKeys.all(), mockMilestones);
 
 const otherEvent: TimelineEventProps = {
   id: 1,
@@ -100,5 +107,31 @@ describe('AddChildForm (readonly)', () => {
     expect(screen.queryByRole('button', { name: '更新' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '削除' })).not.toBeInTheDocument();
     expect(screen.getByText('内容：')).toBeInTheDocument();
+  });
+});
+
+describe('AddChildForm (edit mode: milestone)', () => {
+  it('edit モードでマイルストーンセレクトが open のみを表示する', () => {
+    renderWith(myEvent);
+    expect(screen.getByText('open-ms')).toBeInTheDocument();
+    expect(screen.queryByText('waiting-ms')).not.toBeInTheDocument(); // waiting は出ない（受け入れ 1）
+  });
+
+  it('edit モードでマイルストーン選択が eventItem に反映される', () => {
+    renderWith(myEvent);
+    // progress と milestone の 2 つのセレクトが存在。2 つ目（DOM 順）がマイルストーン。
+    const milestoneSelect = screen.getAllByRole('combobox')[1];
+    fireEvent.change(milestoneSelect, { target: { value: '1' } });
+    expect(milestoneSelect).toHaveValue('1');
+  });
+});
+
+// readOnly 表示でもマイルストーン名が出る（Task 5）
+const msEvent: TimelineEventProps = { ...myEvent, id: 10, milestone_id: 1 };
+describe('AddChildForm (readonly: milestone)', () => {
+  it('readOnly で所属マイルストーン名を表示する', () => {
+    renderWith(msEvent, true);
+    expect(screen.getByText('マイルストーン：')).toBeInTheDocument();
+    expect(screen.getByText('open-ms')).toBeInTheDocument();
   });
 });

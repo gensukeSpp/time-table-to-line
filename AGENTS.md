@@ -214,6 +214,7 @@ gives you structural context (callers, dependents, test coverage) that file sear
 - **Understanding impact**: `get_impact_radius_tool` instead of manually tracing imports
 - **Code review**: `detect_changes_tool` + `get_review_context_tool` instead of reading entire files
 - **Finding relationships**: `query_graph_tool` with callers_of/callees_of/imports_of/tests_for
+- **関数の定義元・呼び出し先・型定義の探索**: `Serene` のツールを活用する
 - **Architecture questions**: `get_architecture_overview_tool` + `list_communities_tool`
 
 ### Verify in the source
@@ -246,3 +247,49 @@ gives you structural context (callers, dependents, test coverage) that file sear
 3. Use `get_affected_flows_tool` to understand impact.
 4. Use `query_graph_tool` pattern="tests_for" to check coverage.
 <!-- /code-review-graph MCP tools -->
+
+<!-- better-code-review-graph MCP tools -->
+## MCP Tools: better-code-review-graph
+
+**This is the successor MCP server for the same knowledge graph.** The graph DB
+(`.code-review-graph/graph.db`) is shared by both servers, but the recent,
+集約 API (`config` / `graph` / `query` / `review` / `security`) を後継とする。
+新規の操作では **better 版を優先**し、旧 `*_tool` 名はレガシーとして扱う。
+※ セキュリティスキャンは `security` ツールで実施可能 (OWASP 系 sink 検出。
+  現時点では未実施、作業候補として扱う)。
+
+### When to use better-code-review-graph FIRST
+
+- **Code review**: `review(action="context")` で変更 diff の影響範囲・ソース断片・
+  レビュー指針を一度に生成 (旧 `detect_changes_tool` + `get_review_context_tool` に相当)
+- **Refactor audit**: `review(action="delta", show_line_shifts=true)` で関数の行移動を
+  検出し、純粋リファクタコミットの呼び出し箇所を洗い出す
+- **Code relationship**: `query(pattern=callers_of / callees_of / imports_of / tests_for)`
+- **Semantic / keyword search**: `query(action="search")` (embedding はローカル Qwen3 運用)
+- **Blast radius**: `query(action="impact")` で変更ファイルの依存 BFS を実行
+- **Decomposition audit**: `query(action="large_functions")` で長大関数・ファイルを検出
+- **Security scanning** (作業候補): `security(action="scan")` で SQL 注入 / シェル注入 /
+  パストラバーサル / eval 注入 / ハードコードシークレットを検出。結果は
+  `nodes.security_tags` に永続化され、`report(format="sarif")` で GitHub 連携も可
+
+### Key Tools
+
+| Tool | Action | Use when |
+| ------ | ---------- | ------ |
+| `review` | `context` | 変更の影響範囲 + ソース断片 + レビュー指針を一度に得る |
+| `review` | `delta` | 2 コミット間の add/remove/modify と関数行移動 (`show_line_shifts=true`) を監査 |
+| `query` | `query` | callers_of / callees_of / imports_of / tests_for 等で関係を追跡 |
+| `query` | `search` | 名前・キーワード・セマンティック検索 |
+| `query` | `impact` | 変更ファイルの blast radius 分析 |
+| `graph` | `build` / `update` / `embed` / `stats` | グラフ構築・更新・embedding・状態確認 |
+| `security` | `scan` / `report` | セキュリティスキャン (現時点は未実施・作業候補) |
+
+### Workflow
+
+1. Code review は `review(action="context", base="origin/main")` でスコープを絞る
+   (include_source=false でトークン節約可)。
+2. 影響範囲を `query(action="impact")` で確認する。
+3. テスト網羅は `query(pattern="tests_for", target=<func>)` で確認する。
+4. 純粋リファクタ (ロジック不変) の監査は `review(action="delta", show_line_shifts=true)`
+   を利用する。
+<!-- /better-code-review-graph MCP tools -->

@@ -23,12 +23,14 @@
 
 ## 状態
 
-- open / closed。closed は `accomplished_date` を入力して確定。一度 closed なら再 open 不可
-- `completed` は closed に連動して自動 True
+- open / waiting / closed（`MilestoneStatus` 型、`src/lib/TimelineType.ts`）
+- open: 作成直後の状態。`accomplished_date` を入力すると **waiting**（waiting for close）になり、猶予期間（`MILESTONE_CLOSE_GRACE_DAYS` = 2 日、仮）中は再 open 可能
+- closed: 猶予期間経過後に確定。一度 closed なら再 open 不可
+- `completed` は closed に連動して自動 True（未実装）
 
 ## テーブル定義
 
-- `M_MILESTONE`: id, staff_id(FK), title(100), description(256, nullable), color(10), status(bool, default=True), created_at, guidline_end_date(Date?, nullable), accomplished_date(Date?, nullable)
+- `M_MILESTONE`: id, staff_id(FK), title(100), description(256, nullable), color(10), status(String(10), default=open), created_at, guideline_end_date(Date?, nullable), accomplished_date(Date?, nullable)
 - `T_TIMELINE_EVENT` に追加: `milestone_id`(FK, nullable), `completed`(bool, default=False)
 
 ## UI 操作（Timeline 画面）
@@ -50,12 +52,20 @@
 - `TimelinePage.tsx` に配置（toolbar: 左に一覧・右に追加ボタン）。admin 判定を `useAuthInfo().admin` に変更し、未使用の `useAuthContext` / `tokenContext` / `useAuthQuery` を整理
 - `@mantine/dates` 追加（`DateInput` 使用）、`Timeline.stories.tsx` に `MantineProvider` + milestone mock 追加
 
+### 実装済み（PR #19 / Issue #18）
+
+- `MilestoneStatus` 型追加（`'open' | 'waiting' | 'closed'`）、`guidline_end_date` → `guideline_end_date` スペル修正（`src/lib/TimelineType.ts`）
+- 猶予日ユーティリティ: `MILESTONE_CLOSE_GRACE_DAYS = 2`（仮）、`getMilestoneClosedAt` / `formatClosedLabel`（`src/lib/milestone.ts`、`src/lib/milestone.spec.ts`）
+- `useUpdateMilestoneMutation`（POST `/milestone/update/{id}`）/ `useRemoveMilestoneMutation`（DELETE `/milestone/remove/{id}`）追加（`src/hooks/useMilestoneMutation.ts`）
+- コンポーネント新規: `MilestoneDetailDialog`（作成者名・グループ名は読取専用、タイトル/説明/ガイドライン終了日/達成日は編集可、更新で API 反映・成功時 close。削除ボタンなし）、`MilestoneListTitle`（タイトルクリック可能、waiting 時「MM/dd close」を gray 表示）
+- `MilestoneList` のフィルタを `status !== 'closed'` に変更、タイトルクリックで詳細モーダルを開く（admin のみ）
+
 ### 未実装（次 Issue 以降）
 
-- バックエンドに対する更新 / 削除機能（`/milestone/update/{id}` / `/milestone/remove/{id}` は backend 実装済み）
+- closed の動作の実装（一覧からの除外・再 open 不可の確定処理）
+- closed による自動 `TimelineEventProps.completed` = True
 - マイルストーンと子イベントの紐付け（`InputItem.tsx` への所属セレクト追加）
 - マイルストーンに属するイベントへの配色
-- close（`accomplished_date` 設定 + 子イベント `completed` 一括 True）
 - Calendar 側へのマイルストーン反映
 
 ## 実装範囲（当初計画）

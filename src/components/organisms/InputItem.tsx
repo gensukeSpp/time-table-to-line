@@ -4,7 +4,7 @@ import { Box, Text, TextInput, NativeSelect, Button } from '@mantine/core';
 import { TimelineEventProps } from '../../lib/TimelineType';
 import { useDialog } from '../../hooks/useDialog';
 import { useAuthInfo } from '../../hooks/useAuthGuard';
-import { useGroupUsersQuery } from '../../resources/queries';
+import { useGroupUsersQuery, useMilestonesQuery } from '../../resources/queries';
 
 import { boundaryTop, boundaryY, buttonPosition } from '../sprinkles.responsive.css';
 import { formParent } from './InputItem.css';
@@ -39,7 +39,7 @@ export const AddChildForm = forwardRef(
   const handleChange = (e: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLSelectElement>) => {
 		// name, valueという変数名で決まっているようだ
 		const {name, value} = e.target;
-		    setEventItem({...eventItem, [name]:value});
+	    setEventItem({...eventItem, [name]:value});
 	}
 
 	// リテラルタイプ化
@@ -53,6 +53,23 @@ export const AddChildForm = forwardRef(
 	const { data: groupUsers } = useGroupUsersQuery();
 	const member = groupUsers?.data?.find((u) => u.staff_id === selectedEvent.staff_id);
 	const memberName = member ? `${member.family_kana ?? ''}${member.last_kana ?? ''}` : '不明';
+
+	// マイルストーン一覧（編集セレクト / 読取表示で使用）。トップレベルでクエリを呼び、
+	// 派生値を readOnly / editable の両 return から参照する。
+	const { data: milestones } = useMilestonesQuery();
+	// open のみ列挙（受け入れ要件 1）。現在所属のマイルストーンも選択肢に含め、値の round-trip を担保。
+	// 毎レンダーで新配列を作るのでスプレッドで先頭に挿入する（ミューテーションを避ける）。
+	const openOptions = (milestones ?? [])
+		.filter((m) => m.status === 'open')
+		.map((m) => ({ value: String(m.id), label: m.title }));
+	const curId = eventItem.milestone_id;
+	const cur = curId != null ? (milestones ?? []).find((m) => m.id === curId) : undefined;
+	const curOption = cur && !openOptions.some((o) => Number(o.value) === cur.id)
+		? { value: String(cur.id), label: `${cur.title}（${cur.status}）` }
+		: null;
+	const milestoneOptions = curOption ? [curOption, ...openOptions] : openOptions;
+	const milestoneId = selectedEvent.milestone_id;
+	const curMilestone = (milestones ?? []).find((m) => m.id === milestoneId);
 
 	const { Dialog, close } = useDialog();
 
@@ -72,6 +89,12 @@ export const AddChildForm = forwardRef(
 			      <section className={boundaryTop}>
 			        <Text>どんな感じ：</Text>
 			        <Text>{selectedEvent.progress ?? ''}</Text>
+			      </section>
+			      <section className={boundaryTop}>
+			        <Text>マイルストーン：</Text>
+			        {curMilestone
+			          ? <Text>{curMilestone.title}</Text>
+			          : <Text>所属なし</Text>}
 			      </section>
 			    </Box>
 			  </>
@@ -96,6 +119,21 @@ export const AddChildForm = forwardRef(
 		          data={[
 		            '---進捗を選んでください---',
 		            ...options.map((option) => option.label),
+		          ]}
+		        />
+		      </section>
+		      <section className={boundaryTop}>
+		        <Text>マイルストーン：</Text>
+		        <NativeSelect
+		          name="milestone_id"
+		          value={eventItem.milestone_id == null ? '' : String(eventItem.milestone_id)}
+		          onChange={(e) => {
+		            const v = e.currentTarget.value;
+		            setEventItem({ ...eventItem, milestone_id: v === '' ? null : Number(v) });
+		          }}
+		          data={[
+		            { value: '', label: '---所属なし---' },
+		            ...milestoneOptions,
 		          ]}
 		        />
 		      </section>
