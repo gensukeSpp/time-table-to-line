@@ -40,6 +40,7 @@
 | 9 | 機能追加 — RBAC 土台の型追加（`TimelineEventProps` に `admin: boolean`） | **完了** | PR #9 / commit `71a9ae1` |
 | 10 | 認証 401 調査 | **完了** | `tasks/task-10/README.md`。原因はフロントのトークン未送信。backend 側の実装は仕様どおり正常 |
 | 11 | バグ修正（Issue #11）Issue 1: 時・分・秒欠落, Issue 2: タイムライン表示破綻 | **完了** | `tasks/issue-11/README.md` |
+| 11b | 機能追加（task-11）マイルストーンの自動 closed（猶予期間 `MILESTONE_CLOSE_GRACE_DAYS` 経過で waiting→closed） — **backend（`light_token_server`）**。APScheduler `BackgroundScheduler` を FastAPI lifespan で起動し定期実行。ジョブ本体は純粋関数 `close_expired_waiting_milestones(db, today) -> int`（`app/jobs/close_milestones.py`）に分離、`app/scheduler.py` + `app/main.py` lifespan で start/stop。境界は `accomplished_date + GRACE_DAYS <= today`（`<=` 採用・当日に確定）。決定事項: 実行方式は lifespan + APScheduler、子イベント `completed` は自動 closed では変更しない、間隔 `MILESTONE_CLOSE_INTERVAL_MINUTES`（既定 60 分）/ `ENABLE_MILESTONE_SCHEDULER`（既定 true）で env 制御。フロント対応（`useMilestonesQuery` の `refetchInterval` 追加）は**未実装（今後の実装対象）**。プランは `time-table-to-line/tasks/task-11/`（バックエンド完了後に実装） | **完了** | `light_token_server/tasks/task-11/`, `specs/2026-09-08-spec.md`, `time-table-to-line/tasks/task-11/` |
 | 16 | 機能追加（Issue #16）マイルストーンの追加処理と表示 | **完了** | `tasks/issue-16/README.md` |
 | 18 | 機能追加（Issue #18）マイルストーン内容の更新と削除（タイトルクリック詳細モーダル・waiting/re-open 契約・`guideline_end_date` スペル統一） | **完了** | `tasks/issue-18/README.md` |
 | 20 | 機能追加（Issue #20 / PR #21）タイムライン詳細モーダル — `AddChildForm` に `readOnly` プロップ追加（管理者 + 他人のイベントで読取専用: 更新/削除ボタン・警告ダイアログ非表示, メンバー名表示）、`EventDetailOverlay` 新規（絶対配置オーバーレイ、外部クリック + Escape で close）、`TimelinePage.tsx` の `onItemClick` 配線（管理者 OR 自分のイベントのみ開く、`computeOverlayPos` で位置計算）。**契約: `readOnly` は無条件読取専用**とし、権限由来の条件は親側で伝播（PR #21 レビューで確定。条件付き編集が必要なら `adminReadOnly` / `allowEdit` 等の責務名を使用）。テスト: `src/tests/InputItem.spec.tsx` 新規 | **完了** | PR #21 (MERGED), `src/components/organisms/EventDetailOverlay.tsx`, `src/tests/InputItem.spec.tsx` |
@@ -56,6 +57,8 @@
 - ~~**認証**: `/event/all`・`/refresh` への GET が繰り返し 401~~ — **task-10**: フロントのトークン未送信。`Authorization: Bearer` を付与して解消
 - ~~**タイムテーブル**: 新規イベントの時刻が「時・分・秒」欠落（DB 保存が `00:00:00.000Z`）~~ — **Issue #11 Issue 1**: backend `/event/add` の受信解釈と照合し送信形式を確定
 - ~~**タイムライン**: 表示が壊れる（行 `rct-hl-*` が 3000px 超え）~~ — **Issue #11 Issue 2**: `TimelinePage.tsx` を ResizeObserver + `resizeDetector` 方式に変更
+- ~~**タイムライン**: マイルストーン所属イベントの色が選択解除後にデフォルト `#2196f3` へ戻る~~ — **task-12**: `TimelinePage.tsx` の `itemRenderer` を修正。`getItemProps` には decor を渡さず（`style: {}`）、自作 ref コールバックで `!important` 付き `background-color` を適用（`node.style.setProperty(bg, 'important')`）。`itemContext.selected` を型（`Pick<ItemContext, ...'selected'>`）に追加し、非選択時のみマイルストーン色を適用。詳細は `tasks/task-12/`
+- ~~**タイムライン**: マイルストーン所属イベントをクリックすると選択背景が透明になる（`background` 属性欠落）~~ — **task-12 フォローアップ（同一セッションで解消）**: selected 分岐の `removeProperty('background-color')` がライブラリ選択色 `#ffc107` ごと消して透明化 → `selected ? '#ffc107' : decor.backgroundColor` を `!important` で**明示適用**する方式に変更（選択中 `rgb(255, 193, 7)` を保証、`removeProperty` は使わない）
 
 ### 未対応（保留中）
 

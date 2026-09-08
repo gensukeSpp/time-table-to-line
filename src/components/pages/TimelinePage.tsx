@@ -153,16 +153,34 @@ export const GroupHorizonTimeline = () => {
     getResizeProps,
   }: {
     item: { milestone_id?: number | null };
-    itemContext: Pick<ItemContext, 'useResizeHandle' | 'title' | 'dimensions'>;
+    itemContext: Pick<ItemContext, 'useResizeHandle' | 'title' | 'dimensions' | 'selected'>;
     getItemProps: (p: { style?: React.CSSProperties }) => React.HTMLAttributes<HTMLDivElement> & { key: string; ref: React.LegacyRef<HTMLDivElement> };
     getResizeProps: () => { left: React.HTMLAttributes<HTMLDivElement>; right: React.HTMLAttributes<HTMLDivElement> };
   }) => {
-    const { useResizeHandle, title, dimensions } = itemContext;
+    const { useResizeHandle, title, dimensions, selected } = itemContext;
     const { left, right } = getResizeProps();
     const decor = computeItemDecorations(colorByMilestoneId, statusByMilestoneId, item.milestone_id);
-    const { key, ref, ...rest } = getItemProps({ style: decor });
+    // react-calendar-timeline は Item の style を getItemStyle() で合成し（既定 #2196f3 / 選択中 #ffc107 を
+    // background として style prop 経由で渡す）、React が再レンダーごとに書き込む。その一方で、この
+    // ref コールバックはレンダー後に毎回走るため、ここが最後の書き込みになる。
+    // そこで getItemProps には装飾を渡さず（ライブラリ既定の背景を素直に使う）、マイルストーン色は
+    // !important 付きの background-color 適用で、React の通常優先度の書き込みに勝たせる。
+    // selected 中はライブラリ選択色 #ffc107（== ed）を同じく !important で明示適用する。
+    // （選択中に removeProperty('background-color') で解除すると、背景が消えて透明になるため、必ず明示色で上書きする）
+    const { key, ref, ...rest } = getItemProps({ style: {} });
+    const applyMilestoneStyle = (node: HTMLDivElement | null) => {
+      if (!node || !decor.backgroundColor) return; // 未所属イベントはライブラリ既定色のまま
+      node.style.setProperty('background-color', selected ? '#ffc107' : decor.backgroundColor, 'important');
+      if (!selected && decor.opacity != null) node.style.opacity = String(decor.opacity);
+    };
+    const itemRef = (node: HTMLDivElement | null) => {
+      // ライブラリの ref（オブジェクト or 関数）を維持しつつ、自前の背景適用を合成する
+      if (typeof ref === 'function') ref(node);
+      else if (ref && typeof ref === 'object' && ref.current !== undefined) (ref as { current: unknown }).current = node;
+      applyMilestoneStyle(node);
+    };
     return (
-      <div {...rest} ref={ref} key={`${key}-outer`}>
+      <div {...rest} ref={itemRef} key={`${key}-outer`}>
         {useResizeHandle ? <div {...left} /> : null}
         <div className="rct-item-content" style={{ maxHeight: `${dimensions.height}px` }}>{title}</div>
         {useResizeHandle ? <div {...right} /> : null}
