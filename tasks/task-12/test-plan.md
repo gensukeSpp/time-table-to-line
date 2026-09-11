@@ -17,7 +17,7 @@ bun run testrun   # 単体テスト → 72 passed / 1 skipped（2026-09-08 時�
 
 環境:
 - バックエンド `uvicorn app.main:app`（port 8000）/ フロント `bun run dev`（port 5173）
-- ログイン: 社員番号 `201` / パスワード `projectA2` → `/timetable/auth` 経由で `/timeline`
+- ログイン: 社員番号 `201` / パスワード `***` → `/timetable/auth` 経由で `/timeline`
 
 操作手順（Playwright 等で再現可）:
 
