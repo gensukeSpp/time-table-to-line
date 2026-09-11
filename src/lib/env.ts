@@ -1,0 +1,3 @@
+export const MILESTONE_REFRESH_INTERVAL_MS = Number(
+  import.meta.env.VITE_MILESTONE_REFRESH_INTERVAL_MS ?? 60 * 60 * 1000
+);

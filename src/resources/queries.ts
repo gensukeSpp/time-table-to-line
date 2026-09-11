@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember, fetchMilestones } from "./fetch";
 import { eventKeys, authKeys, milestoneKeys } from "./cache";
 import { useAuthContext } from "../hooks/useContextFamily";
+import { MILESTONE_REFRESH_INTERVAL_MS } from "../lib/env";
 
 export const useSearchQuery = (searchKey: string) => {
   const search = useLocation().search;
@@ -119,5 +120,8 @@ export const useMilestonesQuery = () => {
   return useQuery({
     queryKey: milestoneKeys.all(),
     queryFn: fetchMilestones,
+    // バックエンドの自動 closed(APScheduler)は invalidate を飛ばさないため
+    // 定期再取得で waiting -> closed を画面へ反映する(間隔は .env で管理)
+    refetchInterval: MILESTONE_REFRESH_INTERVAL_MS,
   });
 }

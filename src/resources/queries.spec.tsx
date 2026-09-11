@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
 
-import { useAuthQuery } from './queries';
-import { fetchAuthResponse } from './fetch';
+import { useAuthQuery, useMilestonesQuery } from './queries';
+import { fetchAuthResponse, fetchMilestones } from './fetch';
+import { MILESTONE_REFRESH_INTERVAL_MS } from '../lib/env';
 
 vi.mock('./fetch', () => ({
   fetchEventsDataForTT: vi.fn(),
@@ -12,10 +13,16 @@ vi.mock('./fetch', () => ({
   refresh: vi.fn(),
   requestGroup: vi.fn(),
   requestGroupMember: vi.fn(),
+  fetchMilestones: vi.fn(),
 }));
 
 const TestComponent = () => {
   useAuthQuery('test-token');
+  return null;
+};
+
+const MilestoneTestComponent = () => {
+  useMilestonesQuery();
   return null;
 };
 
@@ -65,5 +72,40 @@ describe('useAuthQuery', () => {
     await waitFor(() => {
       expect(mockedFetchAuthResponse).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('useMilestonesQuery', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('refetches milestones periodically after MILESTONE_REFRESH_INTERVAL_MS elapses', async () => {
+    vi.useFakeTimers();
+    const mockedFetchMilestones = vi.mocked(fetchMilestones);
+    mockedFetchMilestones.mockResolvedValue([] as never);
+
+    const queryClient = createQueryClient();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MilestoneTestComponent />
+      </QueryClientProvider>
+    );
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockedFetchMilestones).toHaveBeenCalledTimes(1);
+
+    // 間隔の途中では再取得しない
+    await vi.advanceTimersByTimeAsync(MILESTONE_REFRESH_INTERVAL_MS - 1);
+    expect(mockedFetchMilestones).toHaveBeenCalledTimes(1);
+
+    // 間隔経過で再取得される
+    await vi.advanceTimersByTimeAsync(1);
+    expect(mockedFetchMilestones).toHaveBeenCalledTimes(2);
   });
 });
