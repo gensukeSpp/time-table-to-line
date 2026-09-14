@@ -36,19 +36,20 @@ env/
 .playwright-mcp/
 
 # TODO: release branch で解除
-# docker-compose.yml
-# .gemini/
-# .github/
-# .hermes/
-# .qwen/
-# .roo/
-# docs/
-# tasks/
-# AGENT.md
-# GEMINI.md
-# QWEN.md
-# requirement-01.md
-# requirement-03.md
+docker-compose.yml
+.gemini/
+.github/
+.hermes/
+.qwen/
+.roo/
+docs/
+specs/
+tasks/
+AGENT.md
+GEMINI.md
+QWEN.md
+requirement-01.md
+requirement-03.md
 
 # wrangler files
 .wrangler
@@ -57,3 +58,4 @@ env/
 !.env.example
 # Added by code-review-graph
 .code-review-graph/
+.better-code-review-graph/
