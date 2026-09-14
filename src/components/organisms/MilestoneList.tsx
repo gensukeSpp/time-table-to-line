@@ -32,7 +32,6 @@ export const MilestoneList = () => {
   }
 
   const openMilestones = (data ?? []).filter((m) => m.status !== 'closed');
-  const handleOpenDetail = isAdmin ? setSelected : () => undefined;
 
   return (
     <>
@@ -41,12 +40,11 @@ export const MilestoneList = () => {
           <MilestoneListTitle
             key={milestone.id}
             milestone={milestone}
-            admin={isAdmin}
-            onOpenDetail={handleOpenDetail}
+            onOpenDetail={setSelected}
           />
         ))}
       </Box>
-      {selected && isAdmin && (
+      {selected && (
         <MilestoneDetailDialog
           milestone={selected}
           admin={isAdmin}

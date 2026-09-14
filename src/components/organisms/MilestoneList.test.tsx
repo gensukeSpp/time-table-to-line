@@ -147,7 +147,7 @@ describe('MilestoneList', () => {
     expect(screen.getByText(/作成者名/)).toBeInTheDocument();
   });
 
-  it('should block detail dialog for non-admin users', async () => {
+  it('should open detail dialog for non-admin users (read-only)', async () => {
     const user = userEvent.setup();
     const mockMilestones: MilestoneProps[] = [
       { id: 1, title: 'M1', status: 'open', color: '#9c27b0', staff_id: 1,
@@ -166,6 +166,10 @@ describe('MilestoneList', () => {
 
     await user.click(screen.getByText('M1'));
 
-    expect(screen.queryByText('マイルストーン詳細')).not.toBeInTheDocument();
+    // 非管理者でも詳細モーダルが開き、作成者名が表示される
+    expect(screen.getByText('マイルストーン詳細')).toBeInTheDocument();
+    expect(screen.getByText(/作成者名/)).toBeInTheDocument();
+    // 読取専用: 更新ボタンは表示されない
+    expect(screen.queryByRole('button', { name: '更新' })).toBeNull();
   });
 });

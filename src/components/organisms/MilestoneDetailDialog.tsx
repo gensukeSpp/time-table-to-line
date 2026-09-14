@@ -57,7 +57,20 @@ export const MilestoneDetailDialog = ({ milestone, admin, onClose }: MilestoneDe
           <Text>作成者名: {creatorName}</Text>
           <Text>グループ名: {groupName}</Text>
           {!admin ? (
-            <Text c="dimmed">管理者のみ更新できます。</Text>
+            <>
+              <Text>タイトル: {milestone.title}</Text>
+              <Text>
+                ステータス:{' '}
+                {milestone.status === 'open'
+                  ? '進行中'
+                  : milestone.status === 'waiting'
+                    ? '終了待ち（達成日入力済み）'
+                    : '終了'}
+              </Text>
+              <Text>説明: {milestone.description ?? '（なし）'}</Text>
+              <Text>ガイドライン終了日: {milestone.guideline_end_date ?? '（未設定）'}</Text>
+              <Text>達成日: {milestone.accomplished_date ?? '（未設定）'}</Text>
+            </>
           ) : (
             <>
               <TextInput label="タイトル" required value={title}
