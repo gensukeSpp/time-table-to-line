@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
+import { act } from 'react';
 
 import { useAuthQuery, useMilestonesQuery } from './queries';
 import { fetchAuthResponse, fetchMilestones } from './fetch';
@@ -97,15 +98,21 @@ describe('useMilestonesQuery', () => {
       </QueryClientProvider>
     );
 
-    await vi.advanceTimersByTimeAsync(0);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
     expect(mockedFetchMilestones).toHaveBeenCalledTimes(1);
 
     // 間隔の途中では再取得しない
-    await vi.advanceTimersByTimeAsync(MILESTONE_REFRESH_INTERVAL_MS - 1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(MILESTONE_REFRESH_INTERVAL_MS - 1);
+    });
     expect(mockedFetchMilestones).toHaveBeenCalledTimes(1);
 
     // 間隔経過で再取得される
-    await vi.advanceTimersByTimeAsync(1);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
     expect(mockedFetchMilestones).toHaveBeenCalledTimes(2);
   });
 });

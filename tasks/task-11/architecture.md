@@ -42,6 +42,7 @@ MilestoneList は waiting のまま表示し続ける
 |---|---|---|
 | 再取得間隔 | `.env` の `VITE_MILESTONE_REFRESH_INTERVAL_MS`、未設定時は **60 分**(3,600,000ms) | サーバー猶予チェック間隔(既定 60 分)に揃える |
 | 間隔の管理 | `.env`(VITE_*)で管理し、`import.meta.env` から読む | ビルド時に解決される VITE_* の性質に注意 |
+| 猶予日数 | `.env` の `VITE_MILESTONE_CLOSE_GRACE_DAYS`、未設定時は **5 日**(2026-09-08 正式採用) | バックエンド `MILESTONE_CLOSE_GRACE_DAYS` と揃える(値が散らないよう両リポジトリ同期) |
 | 自動 closed 後の UX | 何もしない(一覧から消えるだけ) | 追加 UI/通知なし。display ロジックは既存で対応済み |
 
 ### 60 分の根拠(確定仕様)

@@ -1,8 +1,9 @@
 import { addDays, format } from 'date-fns';
+import { MILESTONE_CLOSE_GRACE_DAYS } from './env';
 
-// TODO(issue): 猶予期間の実値が決まったら置き換える（現在は仮の 2 日）
-// 5日後に決定(2026-09-08)
-export const MILESTONE_CLOSE_GRACE_DAYS = 5;
+// 猶予日数（accomplished_date から自動 close までの日数）は .env の
+// VITE_MILESTONE_CLOSE_GRACE_DAYS で設定する（既定 5 日, 2026-09-08 正式採用）。
+// バックエンドの自動 close 判定（accomplished_date + 猶予日数）と実値を揃えること。
 
 export function getMilestoneClosedAt(accomplished_date?: string | null): Date | null {
   if (!accomplished_date) return null;
