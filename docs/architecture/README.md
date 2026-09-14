@@ -14,3 +14,5 @@
 | 2026-08-31 | Milestone update feature and waiting status (PR #19) |
 | 2026-09-01 | Timeline detail modal implementation (PR #21) |
 | 2026-09-07-1 | Event milestone association and Timeline coloring |
+| 2026-09-08 | Fix milestone event color reset bug after deselection |
+| 2026-09-11 | Auto-refresh Milestones for closed status (PR #26) |
