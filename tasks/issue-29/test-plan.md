@@ -22,7 +22,7 @@ bun run build      # tsc + vite build、0 エラー
 ## 実ブラウザ確認（事前調査で環境構築済み）
 - バックエンド: `http://127.0.0.1:8000/`（`/login` でサインイン）
 - フロント: `http://localhost:5173/calendar?userID=201`
-- ログイン: 社員番号 `201` / パスワード `projectA2` → ホーム → 「time-table-to-line へ」→ フロント `/calendar` へ自動遷移
+- ログイン: 社員番号 `201` / パスワード `***` → ホーム → 「time-table-to-line へ」→ フロント `/calendar` へ自動遷移
 
 ### 手順 1: 週ビューのベースライン（変更後も不変）
 1. 'Week' に切り替え、空スロット（例: 9:00）をクリック → タイトル入力 → 追加
