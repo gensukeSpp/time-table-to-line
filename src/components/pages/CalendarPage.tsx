@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 import { SlotInfo, View } from 'react-big-calendar';
 import { Box, Tabs } from '@mantine/core';
@@ -19,6 +19,14 @@ export const CalendarWrapper = () => {
   const [movedEvents, setMovedEvents] = useState<TimelineEventProps[]>([]);
   const [slotPicker, setSlotPicker] = useState<{ slotInfo?: SlotInfo; view?: View }>({});
 
+  // スロットクリック時の現在ビューを、ダイアログ（DialogOnSlot → TitleInput）へ届ける。
+  // インライン無名関数だと毎レンダー新参照になり、CalendarView 側 useEffect の依存
+  // （onSlotInfo）が変わって再実行 → setSlotPicker が新オブジェクトを返して
+  // 「Maximum update depth exceeded」の無限ループになるため、useCallback で安定化する。
+  const handleSlot = useCallback((childSlotInfo: SlotInfo, view: View) => {
+    setSlotPicker({ slotInfo: childSlotInfo, view });
+  }, []);
+
   return (
     <Tabs defaultValue='tab1'>
       <Tabs.List className={tabMenu}>
@@ -29,7 +37,7 @@ export const CalendarWrapper = () => {
         <Box className={flexXmandatory}>
           <MyCalendar
             onTimeChangeEvents={childData => setMovedEvents(childData)}
-            onSlotInfo={(childSlotInfo, view) => setSlotPicker({ slotInfo: childSlotInfo, view })}
+            onSlotInfo={handleSlot}
           />
           <TimesUpdateButton timeChangeEvents={movedEvents} />
           <DialogOnSlot slotInfo={slotPicker.slotInfo} view={slotPicker.view} />
