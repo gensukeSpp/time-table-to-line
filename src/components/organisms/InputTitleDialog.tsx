@@ -4,16 +4,17 @@ import { Box, Text, TextInput, Button } from '@mantine/core';
 import { useEventsState } from '../../hooks/useContextFamily';
 import { useCreateMutation } from '../../hooks/useEventMutation';
 import { AuthInfoProp } from '../../lib/TimelineType';
-import { resolveSlotEnd } from '../../lib/slot';
+import { resolveEventEnd } from '../../lib/slot';
 
 interface TitleInputProps {
   authInfo: AuthInfoProp,
   slotStartTime: Date,
+  isMonth: boolean,
   closeDialog: () => void
 }
 
 export const TitleInput = ({
-  authInfo, slotStartTime, closeDialog}: TitleInputProps) => {
+  authInfo, slotStartTime, isMonth, closeDialog}: TitleInputProps) => {
   const eventsState = useEventsState();
 
   const createEvent = useCreateMutation();
@@ -25,7 +26,7 @@ export const TitleInput = ({
 
   // 23:00 スロット等、日跨ぎになる場合は同日 endOfDay に丸めて通常イベントとして表示する
   const startTime = slotStartTime;
-  const endTime = resolveSlotEnd(slotStartTime);
+  const endTime = resolveEventEnd(slotStartTime, isMonth);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();

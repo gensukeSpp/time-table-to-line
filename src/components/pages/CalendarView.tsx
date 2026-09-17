@@ -9,6 +9,7 @@ import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useCallingEditForm } from '../../hooks/useCallingForm';
 import localizer from '../../lib/Localization';
 import { CalendarActionProps, TimelineEventProps } from '../../lib/TimelineType';
+import { isFullDayEvent } from '../../lib/slot';
 import { AddChildForm } from '../organisms/InputItem';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -103,8 +104,8 @@ export const MyCalendar = (
   }, []);
 
   useEffect(() => {
-    onSlotInfo?.(slotInfoState!);
-  }, [onSelectSlot, slotInfoState, onSlotInfo]);
+    onSlotInfo?.(slotInfoState!, currentView);
+  }, [onSelectSlot, slotInfoState, onSlotInfo, currentView]);
 
   /**
    * Edit form appear
@@ -132,7 +133,7 @@ export const MyCalendar = (
             localizer={localizer}
             events={newState}
             defaultView="week"
-            allDayAccessor={() => false}
+            allDayAccessor={(stateEvent: TimelineEventProps) => isFullDayEvent(stateEvent.start_time, stateEvent.end_time)}
             startAccessor={(stateEvent: TimelineEventProps) => {
               return stateEvent.start_time;
             }}

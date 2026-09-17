@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { SlotInfo } from 'react-big-calendar';
+import { SlotInfo, View } from 'react-big-calendar';
 import { Box, Tabs } from '@mantine/core';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
@@ -17,7 +17,7 @@ export const CalendarWrapper = () => {
   // :子コンポーネントから親コンポーネントにデータを受け渡す方法
   // https://www.freecodecamp.org/japanese/news/pass-data-between-components-in-react/
   const [movedEvents, setMovedEvents] = useState<TimelineEventProps[]>([]);
-  const [slotInfo, setSlotInfo] = useState<SlotInfo>();
+  const [slotPicker, setSlotPicker] = useState<{ slotInfo?: SlotInfo; view?: View }>({});
 
   return (
     <Tabs defaultValue='tab1'>
@@ -29,10 +29,10 @@ export const CalendarWrapper = () => {
         <Box className={flexXmandatory}>
           <MyCalendar
             onTimeChangeEvents={childData => setMovedEvents(childData)}
-            onSlotInfo={childSlotInfo => setSlotInfo(childSlotInfo)}
+            onSlotInfo={(childSlotInfo, view) => setSlotPicker({ slotInfo: childSlotInfo, view })}
           />
           <TimesUpdateButton timeChangeEvents={movedEvents} />
-          <DialogOnSlot slotInfo={slotInfo} />
+          <DialogOnSlot slotInfo={slotPicker.slotInfo} view={slotPicker.view} />
         </Box>
       </Tabs.Panel>
       <Tabs.Panel value='tab2'>
