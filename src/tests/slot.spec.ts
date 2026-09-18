@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addHours, endOfDay, setHours, startOfDay } from 'date-fns';
-import { resolveSlotEnd, resolveEventEnd, isFullDayEvent } from '../lib/slot';
+import { resolveSlotEnd, resolveEventEnd, isFullDayEvent, shouldBlockMonthDnd } from '../lib/slot';
 
 describe('resolveSlotEnd', () => {
   it('通常スロット（例: 9:00）は start + 1h を返す', () => {
@@ -97,5 +97,33 @@ describe('isFullDayEvent', () => {
     const start = startOfDay(new Date(2026, 8, 16));
     const end = new Date(2026, 8, 16, 23, 58, 59);
     expect(isFullDayEvent(start, end)).toBe(false);
+  });
+});
+
+describe('shouldBlockMonthDnd', () => {
+  const day = new Date(2026, 8, 16);
+  const fullday = {
+    start_time: startOfDay(day),
+    end_time: endOfDay(day),
+  };
+  const timed = {
+    start_time: setHours(startOfDay(day), 9),
+    end_time: setHours(startOfDay(day), 10),
+  };
+
+  it('month ビュー + フルデイイベントはブロックしない', () => {
+    expect(shouldBlockMonthDnd(fullday, 'month')).toBe(false);
+  });
+
+  it('month ビュー + 時間イベントはブロックする', () => {
+    expect(shouldBlockMonthDnd(timed, 'month')).toBe(true);
+  });
+
+  it('week ビューは時間イベントでもブロックしない', () => {
+    expect(shouldBlockMonthDnd(timed, 'week')).toBe(false);
+  });
+
+  it('month 以外の view（agenda）はブロックしない', () => {
+    expect(shouldBlockMonthDnd(timed, 'agenda')).toBe(false);
   });
 });
