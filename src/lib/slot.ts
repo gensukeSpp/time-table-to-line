@@ -1,5 +1,7 @@
 import { addHours, endOfDay, min, startOfDay, isSameDay, isSameMinute } from 'date-fns';
 
+import type { View } from 'react-big-calendar';
+
 /**
  * 11PM 問題対策: スロット開始時刻からイベント終了時刻を求める。
  *
@@ -43,5 +45,27 @@ export function isFullDayEvent(start: Date, end: Date): boolean {
     start.getTime() === startOfDay(start).getTime() &&
     isSameDay(start, end) &&
     isSameMinute(end, endOfDay(start))
+  );
+}
+
+/**
+ * Issue #30: 'month' ビューで「単日の時間ごとのイベント（フルデイでない）」の
+ * ドラッグ（移動）・リサイズ（伸縮）を不可にする判定。
+ * rbc の draggableAccessor / resizableAccessor に「! を付けて」渡す。
+ *
+ * view === 'month' かつ（単日 && isFullDayEvent でない）→ true（DnD をブロック）。
+ * - 単日でない（日跨ぎ・マルチデイ）イベントはブロックしない
+ *   （フルデイイベントを月ビューで伸長して日跨ぎ化した場合、続けて伸縮できるようにする）。
+ * - フルデイ（0:00–23:59）はブロックしない。
+ * - 'week' の時間列（縦リサイズ・移動）には影響しない。
+ */
+export function shouldBlockMonthDnd(
+  event: { start_time: Date; end_time: Date },
+  view: View
+): boolean {
+  return (
+    view === 'month' &&
+    isSameDay(event.start_time, event.end_time) &&
+    !isFullDayEvent(event.start_time, event.end_time)
   );
 }
