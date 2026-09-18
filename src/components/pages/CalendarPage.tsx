@@ -27,6 +27,12 @@ export const CalendarWrapper = () => {
     setSlotPicker({ slotInfo: childSlotInfo, view });
   }, []);
 
+  // DialogOnSlot の close を親 state に反映する（pr-32-review 指摘1）。
+  // ダイアログのライフサイクルを slotPicker state に一元化する。
+  const handleCloseSlotPicker = useCallback(() => {
+    setSlotPicker({});
+  }, []);
+
   return (
     <Tabs defaultValue='tab1'>
       <Tabs.List className={tabMenu}>
@@ -40,7 +46,7 @@ export const CalendarWrapper = () => {
             onSlotInfo={handleSlot}
           />
           <TimesUpdateButton timeChangeEvents={movedEvents} />
-          <DialogOnSlot slotInfo={slotPicker.slotInfo} view={slotPicker.view} />
+          <DialogOnSlot slotInfo={slotPicker.slotInfo} view={slotPicker.view} onClose={handleCloseSlotPicker} />
         </Box>
       </Tabs.Panel>
       <Tabs.Panel value='tab2'>

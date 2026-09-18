@@ -91,21 +91,27 @@ export const MyCalendar = (
   const countRef = useRef<number | undefined>(undefined);
 
   const clickRef = useRef<number | undefined>(undefined);
-  const [slotInfoState, setSlotInfoState] = useState<SlotInfo>();
+  // スロット選択時に「slotInfo と選択時点の view」を一組で保存する（pr-32-review 指摘1）。
+  // 親への通知は新しい選択があったときだけ。ビュー切替では再通知しない。
+  const [slotSelection, setSlotSelection] = useState<{ slotInfo: SlotInfo; view: View }>();
   const onSelectSlot = useCallback((slotInfo: SlotInfo) => {
     window.clearTimeout(clickRef?.current);
     clickRef.current = window.setTimeout(() => {
       if (countRef.current === clickRef.current) {
-        setSlotInfoState(slotInfo);
+        setSlotSelection({ slotInfo, view: currentView });
       }
     }, 250);
     // こっちが先になる
     countRef.current = clickRef.current;
-  }, []);
+  }, [currentView]);
 
+  // 新しいスロット選択があったときだけ親へ通知する。
+  // currentView を依存に含めないためビュー切替で再通知されず、
+  // 未選択（undefined）のときは通知しない。
   useEffect(() => {
-    onSlotInfo?.(slotInfoState!, currentView);
-  }, [onSelectSlot, slotInfoState, onSlotInfo, currentView]);
+    if (slotSelection === undefined) return;
+    onSlotInfo?.(slotSelection.slotInfo, slotSelection.view);
+  }, [slotSelection, onSlotInfo]);
 
   /**
    * Edit form appear

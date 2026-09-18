@@ -70,4 +70,32 @@ describe('isFullDayEvent', () => {
     const end = startOfDay(new Date(2026, 8, 18));
     expect(isFullDayEvent(start, end)).toBe(false);
   });
+
+  // pr-32-review 指摘3: start は厳密に 0:00（秒・ミリ秒含む）を要求する
+  it('start が 00:00:59 なら false（同一分でも厳密 0:00 でない）', () => {
+    const start = new Date(2026, 8, 16, 0, 0, 59);
+    const end = new Date(2026, 8, 16, 23, 59, 0);
+    expect(isFullDayEvent(start, end)).toBe(false);
+  });
+
+  it('start が 00:00:00.001 なら false（ミリ秒のズレも許容しない）', () => {
+    const start = new Date(startOfDay(new Date(2026, 8, 16)).getTime() + 1);
+    const end = endOfDay(new Date(2026, 8, 16));
+    expect(isFullDayEvent(start, end)).toBe(false);
+  });
+
+  // pr-32-review 指摘3: end は同一分（23:59 台）を許容する契約
+  // month 由来の endOfDay(23:59:59.999) に加え、DnD 等で 23:59:00 になった
+  // イベントも「その日の終わり」として all-day 扱いにする
+  it('end が 23:59:00（endOfDay と同一分）なら true', () => {
+    const start = startOfDay(new Date(2026, 8, 16));
+    const end = new Date(2026, 8, 16, 23, 59, 0);
+    expect(isFullDayEvent(start, end)).toBe(true);
+  });
+
+  it('end が 23:58:59 なら false（23:59 台でない）', () => {
+    const start = startOfDay(new Date(2026, 8, 16));
+    const end = new Date(2026, 8, 16, 23, 58, 59);
+    expect(isFullDayEvent(start, end)).toBe(false);
+  });
 });

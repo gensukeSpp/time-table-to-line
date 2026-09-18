@@ -17,3 +17,4 @@
 | 2026-09-08 | Fix milestone event color reset bug after deselection |
 | 2026-09-11 | Auto-refresh Milestones for closed status (PR #26) |
 | 2026-09-14 | Milestone access relaxation and UI adjustments (PR #27) |
+| 2026-09-17 | Month view event addition (PR #32) |
