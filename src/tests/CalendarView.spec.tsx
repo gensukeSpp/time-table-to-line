@@ -156,4 +156,36 @@ describe('MyCalendar slot selection lifecycle (pr-32-review)', () => {
     expect(allDayAccessor({ start_time: startOfDay(day), end_time: endOfDay(day) } as TimelineEventProps)).toBe(true);
     expect(allDayAccessor({ start_time: setHours(startOfDay(day), 9), end_time: setHours(startOfDay(day), 10) } as TimelineEventProps)).toBe(false);
   });
+
+  it('アクセサは month ビューで時間イベントの DnD を無効化する', () => {
+    renderCalendar();
+    const day = new Date(2026, 8, 16);
+    const timed = {
+      start_time: setHours(startOfDay(day), 9),
+      end_time: setHours(startOfDay(day), 10),
+    } as TimelineEventProps;
+    const fullday = {
+      start_time: startOfDay(day),
+      end_time: endOfDay(day),
+    } as TimelineEventProps;
+
+    // 既定 view は week → 時間イベントも操作可
+    let props = stubRegistry.props as {
+      draggableAccessor: (e: TimelineEventProps) => boolean;
+      resizableAccessor: (e: TimelineEventProps) => boolean;
+    };
+    expect(props.draggableAccessor(timed)).toBe(true);
+    expect(props.resizableAccessor(timed)).toBe(true);
+
+    // month に切替 → 時間イベントだけ操作不可、フルデイは可
+    act(() => { fireView('month'); });
+    props = stubRegistry.props as {
+      draggableAccessor: (e: TimelineEventProps) => boolean;
+      resizableAccessor: (e: TimelineEventProps) => boolean;
+    };
+    expect(props.draggableAccessor(timed)).toBe(false);
+    expect(props.resizableAccessor(timed)).toBe(false);
+    expect(props.draggableAccessor(fullday)).toBe(true);
+    expect(props.resizableAccessor(fullday)).toBe(true);
+  });
 });
