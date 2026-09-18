@@ -15,3 +15,16 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: () => false,
   }),
 });
+
+// jsdom は HTMLDialogElement.showModal を実装していないため、
+// Dialog コンポーネント（ネイティブ <dialog>）のテスト用にスタブを提供する
+if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.showModal = function showModal() {
+    this.setAttribute('open', '');
+  };
+}
+if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.close) {
+  HTMLDialogElement.prototype.close = function close() {
+    this.removeAttribute('open');
+  };
+}

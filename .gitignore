@@ -43,6 +43,7 @@ env/
 # .qwen/
 # .roo/
 # docs/
+# specs/
 # tasks/
 # AGENT.md
 # GEMINI.md
@@ -57,3 +58,4 @@ env/
 !.env.example
 # Added by code-review-graph
 .code-review-graph/
+.better-code-review-graph/

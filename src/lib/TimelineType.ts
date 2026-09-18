@@ -1,4 +1,4 @@
-import { Event, SlotInfo } from 'react-big-calendar';
+import { Event, SlotInfo, View } from 'react-big-calendar';
 import { TimelineItemBase as TimelineItem } from 'react-calendar-timeline';
 
 export interface EventItem extends Event {
@@ -58,7 +58,7 @@ export interface ChangingButtonProp {
 
 export interface CalendarActionProps {
 	onTimeChangeEvents?: (movedEvents: TimelineEventProps[]) => void
-	onSlotInfo?: (selectedSlot: SlotInfo) => void
+	onSlotInfo?: (selectedSlot: SlotInfo, view: View) => void
 }
 
 // type alias を定義するか

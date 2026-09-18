@@ -32,7 +32,7 @@ describe('Calendar', () => {
 
 // 以降に MyCalendar コンポーネントのテストを追記
 import { vi, type Mock } from 'vitest';
-import { setHours, startOfDay } from 'date-fns';
+import { endOfDay, setHours, startOfDay } from 'date-fns';
 import { MantineProvider } from '@mantine/core';
 import { MyCalendar } from '../components/pages/CalendarView';
 
@@ -162,6 +162,25 @@ describe('MyCalendar (CalendarView)', () => {
     // イベントがないので、rbc-eventクラスを持つ要素は存在しないはず
     const renderedEvents = container.querySelectorAll('.rbc-event');
     expect(renderedEvents.length).toBe(0);
+  });
+
+  // --- pr-32-review 指摘2: allDayAccessor の描画経路 ---
+  // （slot 選択通知のライフサイクルは CalendarView.spec.tsx（Calendar mock）で検証）
+  it('フルデイイベントは all-day バンドに描画され、時間イベントは載らない', () => {
+    const day = new Date();
+    // MyCalendar は stateAll.length > 2 のときのみフィルタ表示するため 3 件用意する
+    const fullDayEvents: TimelineEventProps[] = [
+      { id: 10, title: 'Full Day Event', start_time: startOfDay(day), end_time: endOfDay(day), staff_id: 1, group: 1, admin: false },
+      { id: 11, title: 'Timed Event', start_time: setHours(startOfDay(day), 9), end_time: setHours(startOfDay(day), 10), staff_id: 1, group: 1, admin: false },
+      { id: 12, title: 'Other User Event', start_time: setHours(startOfDay(day), 13), end_time: setHours(startOfDay(day), 14), staff_id: 2, group: 2, admin: false },
+    ];
+    (useEventsState as Mock).mockReturnValue(fullDayEvents);
+    const { container } = render(<MantineProvider><MyCalendar onTimeChangeEvents={() => { }} onSlotInfo={() => { }} /></MantineProvider>);
+    // allDayAccessor が true を返したイベントのみ all-day バンド（.rbc-allday-cell）に載る
+    const alldayCell = container.querySelector('.rbc-allday-cell');
+    expect(alldayCell).not.toBeNull();
+    expect(alldayCell!.textContent).toContain('Full Day Event');
+    expect(alldayCell!.textContent).not.toContain('Timed Event');
   });
 });
 
