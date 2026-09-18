@@ -126,4 +126,14 @@ describe('shouldBlockMonthDnd', () => {
   it('month 以外の view（agenda）はブロックしない', () => {
     expect(shouldBlockMonthDnd(timed, 'agenda')).toBe(false);
   });
+
+  it('month ビュー + 日跨ぎ（フルデイを伸長した後のマルチデイ）はブロックしない', () => {
+    // フルデイイベントを month ビューで伸長した結果、end が翌日へ跨る状態。
+    // isSameDay=false → 単日イベントではないためブロック対象外（続けて伸縮可能）。
+    const multiDay = {
+      start_time: startOfDay(day),
+      end_time: startOfDay(new Date(2026, 8, 18)),
+    };
+    expect(shouldBlockMonthDnd(multiDay, 'month')).toBe(false);
+  });
 });

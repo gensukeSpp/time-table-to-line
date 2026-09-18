@@ -49,16 +49,23 @@ export function isFullDayEvent(start: Date, end: Date): boolean {
 }
 
 /**
- * Issue #30: 'month' ビューではフルデイイベント以外（時間ごとのイベント）の
+ * Issue #30: 'month' ビューで「単日の時間ごとのイベント（フルデイでない）」の
  * ドラッグ（移動）・リサイズ（伸縮）を不可にする判定。
  * rbc の draggableAccessor / resizableAccessor に「! を付けて」渡す。
  *
- * view === 'month' かつ isFullDayEvent でない → true（DnD をブロック）。
- * 'week' の時間列（縦リサイズ・移動）には影響しない。
+ * view === 'month' かつ（単日 && isFullDayEvent でない）→ true（DnD をブロック）。
+ * - 単日でない（日跨ぎ・マルチデイ）イベントはブロックしない
+ *   （フルデイイベントを月ビューで伸長して日跨ぎ化した場合、続けて伸縮できるようにする）。
+ * - フルデイ（0:00–23:59）はブロックしない。
+ * - 'week' の時間列（縦リサイズ・移動）には影響しない。
  */
 export function shouldBlockMonthDnd(
   event: { start_time: Date; end_time: Date },
   view: View
 ): boolean {
-  return view === 'month' && !isFullDayEvent(event.start_time, event.end_time);
+  return (
+    view === 'month' &&
+    isSameDay(event.start_time, event.end_time) &&
+    !isFullDayEvent(event.start_time, event.end_time)
+  );
 }

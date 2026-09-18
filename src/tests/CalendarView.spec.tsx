@@ -168,6 +168,11 @@ describe('MyCalendar slot selection lifecycle (pr-32-review)', () => {
       start_time: startOfDay(day),
       end_time: endOfDay(day),
     } as TimelineEventProps;
+    // フルデイを month で伸長した後の日跨ぎ（マルチデイ）イベント
+    const multiDay = {
+      start_time: startOfDay(day),
+      end_time: startOfDay(new Date(2026, 8, 18)),
+    } as TimelineEventProps;
 
     // 既定 view は week → 時間イベントも操作可
     let props = stubRegistry.props as {
@@ -177,7 +182,7 @@ describe('MyCalendar slot selection lifecycle (pr-32-review)', () => {
     expect(props.draggableAccessor(timed)).toBe(true);
     expect(props.resizableAccessor(timed)).toBe(true);
 
-    // month に切替 → 時間イベントだけ操作不可、フルデイは可
+    // month に切替 → 時間イベント(単日)だけ操作不可、フルデイ・日跨ぎは可
     act(() => { fireView('month'); });
     props = stubRegistry.props as {
       draggableAccessor: (e: TimelineEventProps) => boolean;
@@ -187,5 +192,7 @@ describe('MyCalendar slot selection lifecycle (pr-32-review)', () => {
     expect(props.resizableAccessor(timed)).toBe(false);
     expect(props.draggableAccessor(fullday)).toBe(true);
     expect(props.resizableAccessor(fullday)).toBe(true);
+    expect(props.draggableAccessor(multiDay)).toBe(true);
+    expect(props.resizableAccessor(multiDay)).toBe(true);
   });
 });
