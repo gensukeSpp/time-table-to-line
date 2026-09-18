@@ -20,3 +20,11 @@ export const gridArea = style({
 globalStyle(':global(.rbc-event-allday)', {
   backgroundColor: '#00695c',
 });
+
+// Issue #30 - 対策3: EW リサイズアンカーのヒット領域拡大 + 隣イベントより上に。
+// dnd styles.css の既定は中身（3px の icon）しか当たり判定がなく、z-index 未指定のため、
+// 隣スロットのイベントと重なると掴めない。幅を持たせ、上に重ねる。
+globalStyle(':global(.rbc-addons-dnd-resize-ew-anchor)', {
+  width: '20px',
+  zIndex: 2,
+});
