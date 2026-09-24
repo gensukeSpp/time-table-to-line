@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, CSSProperties } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Calendar, View, SlotInfo } from 'react-big-calendar'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import { Box } from '@mantine/core';
@@ -9,7 +9,7 @@ import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useCallingEditForm } from '../../hooks/useCallingForm';
 import localizer from '../../lib/Localization';
 import { CalendarActionProps, TimelineEventProps } from '../../lib/TimelineType';
-import { isFullDayEvent } from '../../lib/slot';
+import { isFullDayEvent, shouldBlockMonthDnd } from '../../lib/slot';
 import { AddChildForm } from '../organisms/InputItem';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -31,29 +31,6 @@ export const MyCalendar = (
   const state = auth.type === 'auth' && stateAll.length > 2 ? stateAll.filter((stateEvent) => {
     return stateEvent.staff_id === auth.authId;
   }) : undefined;
-
-  /**
-   * EventPropGetter — 自分のイベントのみ操作可能に
-   */
-  const eventPropGetter = (event: TimelineEventProps) => {
-    const uncontrolStyle: CSSProperties = {
-      opacity: '.7'
-    }
-    const controlStyle: CSSProperties = {
-      pointerEvents: 'auto'
-    }
-    const myStaffId = auth.type === 'auth' ? auth.authId : undefined;
-    if (myStaffId == null || event.staff_id !== myStaffId) {
-      return { style: uncontrolStyle };
-    } else {
-      return { style: controlStyle };
-    }
-  }
-
-  /**
-   * onDragStart and prevent
-   */
-
 
   /**
    * Drag and Drop
@@ -84,6 +61,17 @@ export const MyCalendar = (
   const onView = useCallback((newView: View) => {
     setCurrentView(newView);
   }, []);
+
+  // Issue #30: 'month' ビューの時間イベントへの DnD（移動・リサイズ）を無効化。
+  // closure で currentView を参照するため、ビュー切替で作り直される（再レンダー1回）。
+  const draggableAccessor = useCallback(
+    (event: TimelineEventProps) => !shouldBlockMonthDnd(event, currentView),
+    [currentView]
+  );
+  const resizableAccessor = useCallback(
+    (event: TimelineEventProps) => !shouldBlockMonthDnd(event, currentView),
+    [currentView]
+  );
 
   /**
    * Slot and Dialog
@@ -147,7 +135,8 @@ export const MyCalendar = (
               return stateEvent.end_time;
             }}
             onNavigate={onNavigate}
-            eventPropGetter={eventPropGetter}
+            draggableAccessor={draggableAccessor}
+            resizableAccessor={resizableAccessor}
             onEventDrop={onEventDrop}
             onEventResize={onEventResize}
             resizable

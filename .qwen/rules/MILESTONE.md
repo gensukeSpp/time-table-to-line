@@ -24,9 +24,10 @@
 ## 状態
 
 - open / waiting / closed（`MilestoneStatus` 型、`src/lib/TimelineType.ts`）
-- open: 作成直後の状態。`accomplished_date` を入力すると **waiting**（waiting for close）になり、猶予期間（`MILESTONE_CLOSE_GRACE_DAYS` = 2 日、仮）中は再 open 可能
+- open: 作成直後の状態。`accomplished_date` を入力すると **waiting**（waiting for close）になり、猶予期間（`VITE_MILESTONE_CLOSE_GRACE_DAYS`、**既定 5 日**（2026-09-08 正式採用、当初「仮 2 日」→ PR #26 / task-11-FE で環境変数化））中は再 open 可能
 - closed: 猶予期間経過後に確定。一度 closed なら再 open 不可
-- `completed` は closed に連動して自動 True（未実装）
+   - **自動 closed は backend の APScheduler（FastAPI lifespan 起動、`light_token_server`）が猶予期間経過を定期判定して確定**（task-11）。判定境界は `accomplished_date + GRACE_DAYS <= today`（`<=` 採用・当日確定）。フロントは `useMilestonesQuery` の `refetchInterval`（既定 60 分、`VITE_MILESTONE_REFRESH_INTERVAL_MS`）で反映
+- `completed` は closed に連動して自動 True — **未実装（方針として変更しない）**。task-11 の決定事項で「自動 closed では子イベント `completed` は変更しない」と確定
 
 ## テーブル定義
 
@@ -60,13 +61,20 @@
 - コンポーネント新規: `MilestoneDetailDialog`（作成者名・グループ名は読取専用、タイトル/説明/ガイドライン終了日/達成日は編集可、更新で API 反映・成功時 close。削除ボタンなし）、`MilestoneListTitle`（タイトルクリック可能、waiting 時「MM/dd close」を gray 表示）
 - `MilestoneList` のフィルタを `status !== 'closed'` に変更、タイトルクリックで詳細モーダルを開く（admin のみ）
 
+### 実装済み（PR #24 / Issue #23、task-12、PR #26 / task-11-FE、PR #27 / task-13）
+
+- **イベントのマイルストーン所属と配色（PR #24 / Issue #23）**: `InputItem.tsx`（Calendar の `AddChildForm`）に **open 状態のみ** を列挙するマイルストーンセレクト追加（「所属なし」→ `milestone_id: null`。所属解除の null 対応は backend `model_fields_set` で成立）。Timeline（`TimelinePage.tsx`）は `itemRenderer` 経由で所属マイルストーンの色で配色 ＋ waiting 時に `opacity: 0.7` 網掛け、readOnly 詳細に所属マイルストーン名表示。純粋ヘルパ `src/lib/milestoneLookup.ts` 新規（`buildMilestoneColorMap` / `buildMilestoneStatusMap` / `computeItemDecorations`）。**決定:** closed 所属イベントはデフォルト色 `#2196f3` のまま（`/milestone/all` に closed 含まず / YAGNI）
+- **配色の永続化修正（task-12）**: 選択解除時にマイルストーン色が `#2196f3` へ戻る不具合を修正。`itemRenderer` の `ref` コールバックで `!important` 付き `background-color` を DOM へ直接適用（React の宣言的 style はライブラリの imperative 上書きに負けるため）。選択時は `itemContext.selected` を型追加し `#ffc107` を明示適用、`removeProperty` 不使用で透明化も防止
+- **自動 closed の画面反映（PR #26 / task-11-FE）**: `useMilestonesQuery` に `refetchInterval` 追加（`VITE_MILESTONE_REFRESH_INTERVAL_MS`、未設定時 60 分）。猶予日数を `VITE_MILESTONE_CLOSE_GRACE_DAYS`（既定 5 日）として env 化し、`parseEnvPositiveInt()`（`src/lib/env.ts`）で不正値は既定値へフォールバック。`.env.example` 新規追加
+- **マイルストーン詳細の全員閲覧化（PR #27 / task-13）**: 閲覧は管理者権限関係なく誰でも可能、変更（更新）は管理者のみを維持。`MilestoneListTitle` の admin ゲート撤廃、`MilestoneDetailDialog` は非管理者に「タイトル / ステータス / 説明 / ガイドライン終了日 / 達成日」の読み取り専用表示（optional は `?? '（なし）'` 等で fallback）。`EventDetailOverlay.css.ts` に `padding: '0.75rem'` 追加
+
 ### 未実装（次 Issue 以降）
 
-- closed の動作の実装（一覧からの除外・再 open 不可の確定処理）
-- closed による自動 `TimelineEventProps.completed` = True
-- マイルストーンと子イベントの紐付け（`InputItem.tsx` への所属セレクト追加）
-- マイルストーンに属するイベントへの配色
-- Calendar 側へのマイルストーン反映
+- ~~closed の動作の実装（一覧からの除外・再 open 不可の確定処理）~~ → **解消（2026-09-11 / task-11 + PR #26）**: backend APScheduler による自動 closed と、フロントの `refetchInterval` 反映で確定。一覧からの除外は既存の `status !== 'closed'` フィルタで対応
+- ~~closed による自動 `TimelineEventProps.completed` = True~~ → **方針として実装しない**（task-11 決定: 自動 closed では子イベント `completed` は変更しない）
+- ~~マイルストーンと子イベントの紐付け（`InputItem.tsx` への所属セレクト追加）~~ → **解消（PR #24 / Issue #23）**: open マイルストーンの選択セレクト実装済み
+- ~~マイルストーンに属するイベントへの配色~~ → **解消（PR #24 / Issue #23 + task-12）**: `itemRenderer` による配色・waiting 網掛け・選択解除時の色永続化まで実装済み
+- ~~Calendar 側へのマイルストーン反映~~ → **解消（PR #24 / Issue #23）**: `InputItem.tsx` のマイルストーンセレクトで反映済み
 
 ## 実装範囲（当初計画）
 

@@ -1,181 +1,57 @@
-# Copilot Instructions — time-table-to-line
+# Copilot instructions for time-table-to-line
 
-This file helps Copilot sessions work effectively in this React + Vite codebase. It consolidates verified commands, architecture notes, and coding conventions.
+This repository is a React + Vite SPA for managing events in two synchronized views: a calendar and a timeline. The app is refactor-heavy and uses a shared event model across both views, so prefer incremental, architecture-aware changes over isolated fixes.
 
----
+## Commands
 
-## Quick Commands
+Use Bun for all package scripts.
 
-**Package Management (Bun)**
 ```bash
-bun install          # Install dependencies
-bun add <pkg>       # Add a package
-bun add -d <pkg>    # Add dev dependency
-bun remove <pkg>    # Remove a package
+bun install
+bun run dev
+bun run build        # runs tsc && vite build
+bun run preview      # build then preview with Wrangler
+bun run lint         # eslint . --report-unused-disable-directives --max-warnings 0
+bun test             # watch mode
+bun run testrun      # single CI-style run
+bun test -- src/tests/Calendar.spec.tsx
+bun test -- -t "pattern"
+bun run storybook
+bun run build-storybook
 ```
 
-**Development**
-```bash
-bun run dev         # Start dev server (HMR enabled)
-bun run build       # Build for production (tsc + vite build)
-bun run preview     # Preview built app
-```
+## Architecture at a glance
 
-**Code Quality**
-```bash
-bun run lint        # ESLint check (enforces --max-warnings 0)
-```
+- App bootstrap: `src/main.tsx` mounts React Router and Mantine, then renders `src/components/index.tsx`.
+- `src/components/index.tsx` wraps the app with `QueryClientProvider` and routes via `RoutesComponent`.
+- Calendar and timeline are both first-class entry points. The shared data contract is `TimelineEventProps` in `src/lib/TimelineType.ts`.
+- `src/resources/queries.ts` and `src/resources/cache.ts` define server-state fetching and cache keys; `src/hooks/*` owns mutations and drag/zoom logic.
+- `src/components/templates/` provides providers and route-level composition. `AuthParent` stores auth state and `AxiosClientProvider` attaches the bearer token.
+- `react-big-calendar` handles the personal calendar view; `react-calendar-timeline` handles the group timeline view.
 
-**Testing**
-```bash
-bun test                                        # Watch mode
-bun run testrun                                 # Single run (CI)
-bun test -- path/to/file.spec.tsx             # Single test file
-bun test -- -t "pattern"                       # Tests matching name
-```
+## Repo-specific conventions
 
-**Storybook**
-```bash
-bun run storybook          # Dev server (port 6006)
-bun run build-storybook    # Static build
-```
+- Keep the calendar and timeline aligned around the same event shape. When editing event behavior, start from `src/lib/TimelineType.ts`.
+- Prefer TanStack Query for server data and Context API for app-wide client state; keep component-local state local to the component.
+- Auth tokens are expected in the URL as `?token=...`; the app stores this in auth context and sends it via `Authorization: Bearer ...`.
+- Use Mantine v7, date-fns, and Vanilla Extract `.css.ts` files for styling; do not introduce new UI libraries or date libraries.
+- Maintain the existing folder pattern: `components/molecules`, `components/organisms`, `components/pages`, `components/templates`, plus `hooks`, `lib`, `resources`, `tests`.
+- Avoid mutating fetched objects in-place; prefer derived transformations (`map`, `filter`, etc.) when adjusting data.
+- Do not leave `console.log` or commented-out code behind. Remove unused imports, types, and dead modules as part of refactor work.
+- Tests live in `src/tests/` and as colocated `*.spec.tsx` files. Use Vitest + Testing Library, not Jest.
 
----
+## Refactor and feature notes
 
-## High-Level Architecture
+- This project is intentionally refactoring toward a cleaner architecture, not a greenfield app. Preserve existing patterns while reducing technical debt.
+- `requirement-01.md` tracks known refactoring and bug work; `requirement-03.md` tracks the milestone feature.
+- The app previously mixed old patterns (moment/dayjs, Chakra/Radix), so prefer the current Mantine + date-fns setup in new work.
+- For timeline-related bug fixes, check `src/hooks/useTimelineDragZoom.ts`, `src/lib/TmelineData.ts`, and related timeline components before changing behavior.
 
-**Two Views, One Event Model**
-- **Calendar View** (react-big-calendar): Week/day grid for personal event management with drag-and-drop.
-- **Timeline View** (react-calendar-timeline): Gantt-like horizontal timeline for group resources and milestones.
-- Both views operate on the same event model (`TimelineEventProps` in `src/lib/TimelineType.ts`).
+## Relevant files to read first
 
-**State Management Layers**
-- **Server State**: @tanstack/react-query 5 → queries in `src/resources/queries.ts`, cache keys in `resources/cache.ts`.
-- **Client State**: Context API → auth and events contexts via `useContextFamily.ts`.
-- **Component State**: `useState`/`useReducer` for form controls, dialogs, etc.
-
-**Request Flow**
-1. Auth token passed via URL query (`?token=xxx`) → stored in auth context.
-2. Axios interceptor (`AxiosClientProvider.tsx`) attaches token to all requests via `Authorization: Bearer`.
-3. Server state mutations via TanStack Query (e.g., `useEventMutation`, `useMilestoneMutation`).
-
-**Styling & UI**
-- **CSS**: Vanilla Extract (zero-runtime) with per-component `.css.ts` files colocated with components.
-- **UI Library**: Mantine v7 (unified from Chakra/Radix; do not introduce other UI libraries).
-- **Dates**: date-fns (legacy code may reference moment/dayjs; standardize on date-fns in new work).
-
----
-
-## Key Conventions
-
-### Component Organization (Atomic Design)
-```
-src/components/
-├── molecules/      # Simple reusable components (e.g., EventUpdateButtonComponent)
-├── organisms/      # Complex stateful components (e.g., Dialog, InputItem, MilestoneCreateDialog)
-├── pages/          # Full page components (e.g., CalendarComponent, TimelinePage)
-└── templates/      # Layout wrappers & global providers (e.g., AuthParent, AxiosClientProvider)
-```
-
-### Directory Overview
-```
-src/
-├── hooks/          # Custom hooks (useEventMutation, useAuthGuard, useContextFamily)
-├── lib/            # Type definitions & utilities (TimelineType.ts = canonical event shape)
-├── resources/      # TanStack Query integration (queries, mutations, cache keys)
-├── tests/          # Vitest test files
-├── stories/        # Storybook component stories
-└── assets/         # Static files
-```
-
-### Event Shape (Central Contract)
-The canonical event model is `TimelineEventProps` in `src/lib/TimelineType.ts`. Always include:
-- `start`, `end` — Date instances for react-big-calendar.
-- `start_time`, `end_time` — For timeline compatibility (backend may store as string; normalize in queries).
-- Other fields: `id`, `title`, `resource_id` (staff), `milestone_id` (optional), etc.
-
-### React Query Integration
-- Define cache keys in `src/resources/cache.ts` (e.g., `queryKeys.events()`, `queryKeys.milestones()`).
-- Queries live in `src/resources/queries.ts` (hooks like `useEventsQuery`, `useMilestonesQuery`).
-- Mutations in hooks (e.g., `useEventMutation`, `useMilestoneMutation`).
-- **Important**: Avoid mutating fetched objects; use non-mutating transformations (e.g., `.map()` not direct mutation).
-
-### Authentication & Networking
-- Token from URL: `new URLSearchParams(location.search).get('token')`.
-- Store in auth context via `AuthParent.tsx`.
-- **Order of precedence**: auth context → refresh query → localStorage fallback.
-- **Security**: Axios interceptor must prepend `Authorization: Bearer` to all requests.
-
-### Code Quality & Linting
-- **ESLint**: Enforced with `--max-warnings 0`. All warnings must be fixed.
-- **No console.log**: Remove all logging before committing (security policy).
-- **No commented code**: Delete instead of commenting out.
-- **Unused imports/variables**: Remove via `bun run lint --fix` where possible.
-- **TypeScript**: Strict mode; always use precise types.
-
-### Styling Rules
-- All new styles must use Vanilla Extract (`.css.ts` files).
-- Colocate `ComponentName.css.ts` with `ComponentName.tsx`.
-- Use Mantine's responsive utilities via Sprinkles when possible.
-- CSS Modules (`.module.css`) are legacy only; do not introduce new ones.
-
-### Testing
-- **Framework**: Vitest with jsdom.
-- **Setup**: `src/tests/vitest-setup.ts` (auto-included in vite.config.ts).
-- **Component Tests**: Prefer Storybook interaction tests (covers Testing Library internally).
-- **Unit Tests**: Place colocated as `*.spec.ts` or in `src/tests/`.
-
----
-
-## Known Issues & Refactoring Status
-
-### Current Refactoring Priority (from requirement-01.md)
-1. **Code Quality**: Remove `console.log`, commented code, unused types/imports.
-2. **UI Library**: Unified to Mantine v7 (Chakra/Radix deprecated).
-3. **Date Library**: Standardize on date-fns (moment/dayjs being phased out).
-4. **Unused Files**: Clean up Theme.ts and other stale modules.
-
-### Known Bugs (from requirement-01.md)
-- **Calendar PM 11:00 issue**: Events added at 11:00 PM are placed in all-day section instead of the intended time slot.
-- **Timezone issue**: Server stores times in non-JST; UI displays correctly except for above bug.
-
-### Milestone Feature (requirement-03.md) — In Progress
-- Milestones are long-span tasks shared across groups (admin-only create/close).
-- Database: `M_MILESTONE` table with color, status, accomplished_date.
-- UI: Appears in Timeline view only (group scope, not personal).
-- Colors: 10 fixed patterns; defaults differ from event colors (#2196f3, #ffc107).
-
----
-
-## Debug Checklist
-
-| Issue | Look Here |
-|-------|-----------|
-| Auth token missing / Bearer header not sent | `src/components/templates/AxiosClientProvider.tsx`, `src/lib/AuthInfo.ts`, `src/resources/fetch.ts` |
-| Event not showing / CRUD failing | `src/hooks/useEventMutation.ts`, `src/resources/queries.ts`, `src/lib/TimelineType.ts` |
-| Timeline rendering wrong / zoom broken | `src/hooks/useTimelineDragZoom.ts`, `src/lib/TmelineData.ts` (note: typo in filename) |
-| Calendar drag-drop not working | `src/hooks/useMouseHandle.ts`, `src/components/pages/CalendarComponent.tsx` |
-| Types not matching | `src/lib/TimelineType.ts` (single source of truth for event schema) |
-
----
-
-## CI/CD Expectations
-
-Before pushing, ensure:
-1. `bun run lint` ✓ (0 errors, 0 warnings)
-2. `bun run testrun` ✓ (all tests pass)
-3. `bun run build` ✓ (tsc passes, no Vite errors)
-4. No `console.log` in source files
-5. No build artifacts (dist/, storybook-static/) staged
-
----
-
-## Useful References
-
-- **Architecture Deep Dive**: See `QWEN.md` (Japanese) for detailed component hierarchy and refactoring roadmap.
-- **Requirement Specs**: `requirement-01.md` (initial refactor plan), `requirement-03.md` (milestone feature).
-- **Existing Instruction Files**: `AGENTS.md` (other agent contexts), `GEMINI.md`, `QWEN.md` for additional perspectives.
-
----
-
-Last updated: 2026-08-31. Maintained by Copilot session automation.
+- `src/lib/TimelineType.ts` — canonical event and milestone contract
+- `src/components/index.tsx` — app root and QueryClient wiring
+- `src/components/templates/ViewComponents.tsx` — route composition
+- `src/resources/cache.ts` and `src/resources/queries.ts` — cache keys and data fetching
+- `src/hooks/useEventMutation.ts` — mutation patterns for event CRUD
+- `README.md`, `AGENTS.md`, and `QWEN.md` — project context and refactor notes
