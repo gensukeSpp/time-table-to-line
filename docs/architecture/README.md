@@ -18,3 +18,4 @@
 | 2026-09-11 | Auto-refresh Milestones for closed status (PR #26) |
 | 2026-09-14 | Milestone access relaxation and UI adjustments (PR #27) |
 | 2026-09-17 | Month view event addition (PR #32) |
+| 2026-09-18 | Month view DnD pre-processing and safety improvements (PR #33) |
