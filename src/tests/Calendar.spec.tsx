@@ -28,6 +28,53 @@ describe('Calendar', () => {
     // console.log('Role button: ', buttonElements);
     expect(expectElms.length).toBe(3);
   });
+
+  it('隣接する月ビューイベントに左右の EW アンカーをそれぞれ生成する', () => {
+    const day = startOfDay(new Date(2026, 8, 16));
+    const adjacentEvents: TimelineEventProps[] = [
+      {
+        id: 20,
+        title: 'Left Full Day',
+        start_time: day,
+        end_time: endOfDay(day),
+        staff_id: 1,
+        group: 1,
+        admin: false,
+      },
+      {
+        id: 21,
+        title: 'Right Full Day',
+        start_time: startOfDay(new Date(2026, 8, 17)),
+        end_time: endOfDay(new Date(2026, 8, 17)),
+        staff_id: 1,
+        group: 1,
+        admin: false,
+      },
+    ];
+
+    const { container } = render(
+      <DnDCalendar
+        localizer={localizer}
+        date={day}
+        view="month"
+        events={adjacentEvents}
+        startAccessor="start_time"
+        endAccessor="end_time"
+        allDayAccessor={() => true}
+        draggableAccessor={() => true}
+        resizableAccessor={() => true}
+        resizable
+      />
+    );
+
+    for (const title of ['Left Full Day', 'Right Full Day']) {
+      const event = Array.from(container.querySelectorAll('.rbc-event')).find(
+        (element) => element.textContent?.includes(title)
+      );
+      expect(event).toBeDefined();
+      expect(event?.querySelectorAll('.rbc-addons-dnd-resize-ew-anchor')).toHaveLength(2);
+    }
+  });
 });
 
 // 以降に MyCalendar コンポーネントのテストを追記
