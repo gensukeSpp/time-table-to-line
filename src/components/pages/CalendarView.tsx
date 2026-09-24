@@ -10,6 +10,7 @@ import { useCallingEditForm } from '../../hooks/useCallingForm';
 import localizer from '../../lib/Localization';
 import { CalendarActionProps, TimelineEventProps } from '../../lib/TimelineType';
 import { isFullDayEvent, shouldBlockMonthDnd } from '../../lib/slot';
+import { resolveEventColor } from '../../lib/progressColor';
 import { AddChildForm } from '../organisms/InputItem';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -70,6 +71,17 @@ export const MyCalendar = (
   );
   const resizableAccessor = useCallback(
     (event: TimelineEventProps) => !shouldBlockMonthDnd(event, currentView),
+    [currentView]
+  );
+
+  // Issue #35: 進捗による配色。week は progress 色（null は default #3174ad）、
+  // month は #3174ad / #00695c のみ（進捗配色は出さない）。
+  // inline style は CSS（.rbc-event-allday 等）より優先され、ビュー毎に制御できる。
+  const eventPropGetter = useCallback(
+    (stateEvent: TimelineEventProps) => {
+      const backgroundColor = resolveEventColor(stateEvent, currentView);
+      return backgroundColor ? { style: { backgroundColor } } : {};
+    },
     [currentView]
   );
 
@@ -135,6 +147,7 @@ export const MyCalendar = (
               return stateEvent.end_time;
             }}
             onNavigate={onNavigate}
+            eventPropGetter={eventPropGetter}
             draggableAccessor={draggableAccessor}
             resizableAccessor={resizableAccessor}
             onEventDrop={onEventDrop}
