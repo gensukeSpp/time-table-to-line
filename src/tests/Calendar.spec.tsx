@@ -194,10 +194,30 @@ describe('MyCalendar (CalendarView)', () => {
 
     // 表示されているイベントのタイトルが正しいことを確認
     const eventTitles = Array.from(renderedEvents).map(el => el.textContent);
-    console.log(eventTitles); // eslint-disable-line no-console
     expect(eventTitles[0]).toContain('My Event 1');
     expect(eventTitles[1]).toContain('My Event 2');
     expect(eventTitles).not.toContain('Another User Event');
+  });
+
+  // リファクタリング前から残る `stateAll.length > 2` ガードの除去を固定する。
+  // 旧ロジックでは状態全体が 2 件以下だと state=undefined になり描画されなかった。
+  it('ユーザーのイベントが2件以下でもフィルタして描画される（length>2 ガード除去の回帰防止）', async () => {
+    const fewEvents: TimelineEventProps[] = [
+      { id: 30, title: 'Solo Event', start_time: setHours(startOfDay(new Date()), 9), end_time: setHours(startOfDay(new Date()), 10), staff_id: 1, group: 1, admin: false },
+      { id: 31, title: 'Other User Event', start_time: setHours(startOfDay(new Date()), 11), end_time: setHours(startOfDay(new Date()), 12), staff_id: 2, group: 2, admin: false },
+    ];
+    (useEventsState as Mock).mockReturnValue(fewEvents);
+
+    const { container } = render(<MantineProvider><MyCalendar onTimeChangeEvents={() => { }} onSlotInfo={() => { }} /></MantineProvider>);
+
+    // AuthUser=1 のイベントは 1 件だけ → 1 件描画されること（旧ガードでは 0 件だった）
+    const renderedEvents = await waitFor(() => {
+      const elements = container.querySelectorAll('.rbc-event');
+      if (elements.length !== 1) throw new Error('Expected 1 event to be rendered');
+      return elements;
+    });
+    expect(renderedEvents.length).toBe(1);
+    expect(renderedEvents[0].textContent).toContain('Solo Event');
   });
 
   it('表示すべきイベントがない場合でも、クラッシュせずに正常にレンダリングされること', () => {
@@ -215,7 +235,7 @@ describe('MyCalendar (CalendarView)', () => {
   // （slot 選択通知のライフサイクルは CalendarView.spec.tsx（Calendar mock）で検証）
   it('フルデイイベントは all-day バンドに描画され、時間イベントは載らない', () => {
     const day = new Date();
-    // MyCalendar は stateAll.length > 2 のときのみフィルタ表示するため 3 件用意する
+    // AuthUser=staff1 のフルデイ・時間イベントを all-day バンド判定するため、他ユーザーイベント 1 件を混ぜて用意
     const fullDayEvents: TimelineEventProps[] = [
       { id: 10, title: 'Full Day Event', start_time: startOfDay(day), end_time: endOfDay(day), staff_id: 1, group: 1, admin: false },
       { id: 11, title: 'Timed Event', start_time: setHours(startOfDay(day), 9), end_time: setHours(startOfDay(day), 10), staff_id: 1, group: 1, admin: false },

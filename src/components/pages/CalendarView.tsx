@@ -29,7 +29,9 @@ export const MyCalendar = (
 
   const stateAll = useEventsState();
 
-  const state = auth.type === 'auth' && stateAll.length > 2 ? stateAll.filter((stateEvent) => {
+  // auth のときのみ、ログインユーザー自身のイベントへフィルタする。
+  // リファクタリング前から残っていた `stateAll.length > 2` 条件は除去（イベントが 2 件以下でも描画させる）。
+  const state = auth.type === 'auth' ? stateAll.filter((stateEvent) => {
     return stateEvent.staff_id === auth.authId;
   }) : undefined;
 

@@ -20,3 +20,4 @@
 | 2026-09-17 | Month view event addition (PR #32) |
 | 2026-09-18 | Month view DnD pre-processing and safety improvements (PR #33) |
 | 2026-09-24 | Progress-based event coloring implementation (PR #36) |
+| 2026-09-25 | Extend progress color to week/day/agenda/work_week + drop leftover calendar guard (Issue #37) |
