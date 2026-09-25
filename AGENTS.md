@@ -214,7 +214,6 @@ gives you structural context (callers, dependents, test coverage) that file sear
 - **Understanding impact**: `get_impact_radius_tool` instead of manually tracing imports
 - **Code review**: `detect_changes_tool` + `get_review_context_tool` instead of reading entire files
 - **Finding relationships**: `query_graph_tool` with callers_of/callees_of/imports_of/tests_for
-- **関数の定義元の探索**: **Serena のツール** (`serena` LSP) を活用する。呼び出し先・型定義の探索も同様に Serena を使う
 - **Architecture questions**: `get_architecture_overview_tool` + `list_communities_tool`
 
 ### Verify in the source
@@ -242,7 +241,9 @@ gives you structural context (callers, dependents, test coverage) that file sear
 
 ### Workflow
 
-1. The graph auto-updates on file changes (via hooks).
+1. Rebuild the graph after source changes: `graph build` (full) once to initialize,
+   then `graph build`/`update` (incremental) after each change. (No git hooks are
+   installed in this repo; builds are manual.)
 2. Use `detect_changes_tool` for code review.
 3. Use `get_affected_flows_tool` to understand impact.
 4. Use `query_graph_tool` pattern="tests_for" to check coverage.
@@ -292,4 +293,19 @@ gives you structural context (callers, dependents, test coverage) that file sear
 3. テスト網羅は `query(pattern="tests_for", target=<func>)` で確認する。
 4. 純粋リファクタ (ロジック不変) の監査は `review(action="delta", show_line_shifts=true)`
    を利用する。
+
+### Serena との使い分け
+
+**Serena** (`serena` LSP) と知識グラフは**競合せず、役割で使い分ける**。
+
+| 目的 | 使用ツール |
+| --- | --- |
+| **シンボルの定義元・呼び出し先・型定義を正確に特定** | **Serena** (`serena` LSP)。`find_declaration` / `find_referencing_symbols` / `find_implementations` / `find_symbol` などを使用。LSP が実ファイルから動的解決するため、インデックス不要で常に最新ソースに追従する |
+| **影響範囲 (blast radius)・依存構造・テスト網羅の俯瞰** | **better-code-review-graph**。`query(action="impact")` / `query(pattern=callers_of|callees_of|imports_of|tests_for)` などを使用。ただしビルド済みグラフを参照するため、ソース変更後は `graph build` (差分) で最新化が必要 |
+| 関数の実装・編集 (リネーム等) | **Serena** (`rename_symbol` / `replace_symbol_body` / `insert_before_symbol` など) |
+
+使い分けの原則:
+- **単一シンボルの正確な定義・呼び出し・型の解決は Serena を優先**する。LSP による解決はグラフ未ビルド時や変更直後でも正確。
+- **プロジェクト全体の構造・影響範囲・テスト網羅は知識グラフ (`query(action="impact")` etc.) を使う**。
+- グラフはビルド時点のスナップショットであり、ソースと食い違う場合がある。**ソースが正**。
 <!-- /better-code-review-graph MCP tools -->
