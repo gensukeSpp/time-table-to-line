@@ -5,6 +5,7 @@ import { endOfDay, setHours, startOfDay } from 'date-fns';
 import type { SlotInfo, View } from 'react-big-calendar';
 
 import type { TimelineEventProps } from '../lib/TimelineType';
+import { MONTH_FULLDAY_COLOR } from '../lib/progressColor';
 
 // pr-32-review 指摘1・2:
 // RBC 本体の slot 選択（Selection）は座標計算（document.elementFromPoint /
@@ -194,5 +195,46 @@ describe('MyCalendar slot selection lifecycle (pr-32-review)', () => {
     expect(props.resizableAccessor(fullday)).toBe(true);
     expect(props.draggableAccessor(multiDay)).toBe(true);
     expect(props.resizableAccessor(multiDay)).toBe(true);
+  });
+
+  it('eventPropGetter は week で進捗色、week の null フルデイは undefined を返す', () => {
+    renderCalendar();
+    const day = new Date(2026, 8, 16);
+    const eventPropGetter = stubRegistry.props!.eventPropGetter as
+      (e: TimelineEventProps) => { style?: { backgroundColor?: string } };
+    const timed = {
+      start_time: setHours(startOfDay(day), 9),
+      end_time: setHours(startOfDay(day), 10),
+      progress: '完了',
+    } as TimelineEventProps;
+    const fullday = {
+      start_time: startOfDay(day),
+      end_time: endOfDay(day),
+      progress: null,
+    } as unknown as TimelineEventProps;
+    // week（既定）: 進捗色
+    expect(eventPropGetter(timed).style?.backgroundColor).toBe('#d81b60');
+    // week: null フルデイ → {} で backgroundColor なし（default #3174ad に委譲）
+    expect(eventPropGetter(fullday).style?.backgroundColor).toBeUndefined();
+  });
+
+  it('eventPropGetter は month でフルデイ teal、単日時間は undefined（進捗配色なし）', () => {
+    renderCalendar();
+    const day = new Date(2026, 8, 16);
+    act(() => { fireView('month'); });
+    const eventPropGetter = stubRegistry.props!.eventPropGetter as
+      (e: TimelineEventProps) => { style?: { backgroundColor?: string } };
+    const fullday = {
+      start_time: startOfDay(day),
+      end_time: endOfDay(day),
+      progress: '完了',
+    } as TimelineEventProps;
+    const timed = {
+      start_time: setHours(startOfDay(day), 9),
+      end_time: setHours(startOfDay(day), 10),
+      progress: '完了',
+    } as TimelineEventProps;
+    expect(eventPropGetter(fullday).style?.backgroundColor).toBe(MONTH_FULLDAY_COLOR);
+    expect(eventPropGetter(timed).style?.backgroundColor).toBeUndefined();
   });
 });
