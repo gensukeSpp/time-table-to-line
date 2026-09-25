@@ -93,4 +93,27 @@ describe('resolveEventColor', () => {
     };
     expect(resolveEventColor(multiDay, 'month')).toBe(MONTH_FULLDAY_COLOR);
   });
+
+  // Issue #37: day / agenda / work_week も week と同様に進捗色を返す（仕様の実態への昇華）。
+  // 進捗なし → undefined（rbc 既定 #3174ad へ委譲）、進捗あり → 対応色。
+  describe.each(['day', 'agenda', 'work_week'] as const)(
+    'その他のビュー（%s）',
+    (view) => {
+      const timed = (over: { progress?: string | null } = {}) => ({
+        start_time: setHours(startOfDay(day), 9),
+        end_time: setHours(startOfDay(day), 10),
+        ...over,
+      });
+
+      it('進捗なし（null / undefined）は undefined を返す', () => {
+        expect(resolveEventColor(timed({ progress: null }), view)).toBeUndefined();
+        expect(resolveEventColor(timed({ progress: undefined }), view)).toBeUndefined();
+      });
+
+      it('進捗に応じた色を返す（ラベル / 英字）', () => {
+        expect(resolveEventColor(timed({ progress: '完了' }), view)).toBe('#d81b60');
+        expect(resolveEventColor(timed({ progress: 'almost' }), view)).toBe('#8e24aa');
+      });
+    }
+  );
 });
