@@ -83,4 +83,14 @@ describe('resolveEventColor', () => {
     };
     expect(resolveEventColor(timed, 'month')).toBeUndefined();
   });
+
+  // Issue #30 回帰の関数レベル固定: 日跨ぎ（マルチデイ）入力から直接 teal を解決する。
+  it('month: 日跨ぎ（マルチデイ）イベントは teal（Issue #30 回帰を固定）', () => {
+    const multiDay = {
+      start_time: startOfDay(day),
+      end_time: startOfDay(new Date(2026, 8, 18)),
+      progress: '完了',
+    };
+    expect(resolveEventColor(multiDay, 'month')).toBe(MONTH_FULLDAY_COLOR);
+  });
 });
