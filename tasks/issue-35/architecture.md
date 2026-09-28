@@ -28,7 +28,9 @@
 |---|---|---|
 | `month` | `isMonthAllday(event)`（= `isFullDayEvent || !isSameDay`） | `#00695c`（monitor 従来の teal。進捗配色は**出さない**） |
 | `month` | それ以外（単日時間イベント） | `undefined` → default `#3174ad` |
-| `week` / 他 | `progressToColor(event.progress)` | 進捗色、または `undefined`（null→default `#3174ad`） |
+| `week` / `day` / `agenda` / `work_week` | `progressToColor(event.progress)` | 進捗色、または `undefined`（null→default `#3174ad`） |
+
+> 注: 当初は 'week' のみを対象としたが、**Issue #37 により week / day / agenda / work_week へ正式拡張**された（`tasks/issue-37/`）。month は対象外のまま。
 
 - 月ビューの多日跨ぎイベント（`diff>1`、`isFullDayEvent` 判定外）を `isMonthAllday` で `#00695c` に残すことで、Issue #30 の描画を回帰ゼロで再現（同 `diff>1` は rbc の `.rbc-event-allday` クラスも付与される対象）。
 

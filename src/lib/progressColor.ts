@@ -47,9 +47,9 @@ export function isMonthAllday(start: Date, end: Date): boolean {
 }
 
 /**
- * ビューに応じてイベントの配色を決める。
+ * ビューに応じてイベントの配色を決める（Issue #37: week 以外の day / agenda / work_week にも進捗色を正式適用）。
  * - 'month' : 進捗配色は適用しない。フルデイ系のみ MONTH_FULLDAY_COLOR、他は undefined（default）。
- * - 'week' ほか: 進捗色。null は undefined を返し rbc 既定（#3174ad）へ委譲する。
+ * - 'week' / 'day' / 'agenda' / 'work_week' : 進捗色。null は undefined を返し rbc 既定（#3174ad）へ委譲する。
  */
 export function resolveEventColor(
   event: { progress?: string | null; start_time: Date; end_time: Date },
