@@ -218,6 +218,37 @@ describe('MyCalendar slot selection lifecycle (pr-32-review)', () => {
     expect(eventPropGetter(fullday).style?.backgroundColor).toBeUndefined();
   });
 
+  // pr-38-review 改善提案: resolveEventColor の単体テストに加え、
+  // CalendarView がビューごとに eventPropGetter へ正しい currentView を渡す接続を検証する。
+  describe.each(['day', 'agenda', 'work_week'] as const)(
+    'eventPropGetter は %s でも進捗色の inline style を返す（Issue #37 接続）',
+    (view) => {
+      const day = new Date(2026, 8, 16);
+      const timed = (progress: string | null) =>
+        ({
+          start_time: setHours(startOfDay(day), 9),
+          end_time: setHours(startOfDay(day), 10),
+          progress,
+        }) as TimelineEventProps;
+
+      it('進捗ありのイベントに対応色の backgroundColor を付ける', () => {
+        renderCalendar();
+        act(() => { fireView(view); });
+        const eventPropGetter = stubRegistry.props!.eventPropGetter as
+          (e: TimelineEventProps) => { style?: { backgroundColor?: string } };
+        expect(eventPropGetter(timed('完了')).style?.backgroundColor).toBe('#d81b60');
+      });
+
+      it('進捗なしのイベントは backgroundColor を付けない（rbc 既定へ委譲）', () => {
+        renderCalendar();
+        act(() => { fireView(view); });
+        const eventPropGetter = stubRegistry.props!.eventPropGetter as
+          (e: TimelineEventProps) => { style?: { backgroundColor?: string } };
+        expect(eventPropGetter(timed(null)).style?.backgroundColor).toBeUndefined();
+      });
+    }
+  );
+
   it('eventPropGetter は month でフルデイ teal、単日時間は undefined（進捗配色なし）', () => {
     renderCalendar();
     const day = new Date(2026, 8, 16);

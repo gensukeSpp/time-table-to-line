@@ -18,6 +18,7 @@
 1. **（実装済み）** `CalendarView.tsx` の `stateAll.length > 2` ガード除去と回帰防止テスト
 2. **（実装済み）** `resolveEventColor`（week / day / agenda / work_week）の進捗配色テストを固定
 3. **（実装済み）** 仕様・計画・アーキテクチャドキュメント（`specs/2026-09-25-spec.md` `tasks/issue-35/` `docs/architecture/README.md`）の view 表を week のみ → **week / day / agenda / work_week** に更新
+4. **（実装済み）** PR #38 レビュー改善提案: `CalendarView.spec.tsx` に day / agenda / work_week の `eventPropGetter` 接続テストを追加（詳細は [`pr-38-improvement-1.md`](./pr-38-improvement-1.md)）
 
 ## スコープ外
 - 'month' ビューの配色（引き続き `#3174ad`（単日時間）/ `#00695c`（フルデイ・日跨ぎ）のみ。進捗配色は**出さない**）

@@ -56,7 +56,7 @@ git add specs/2026-09-25-spec.md tasks/issue-35/ docs/architecture/
 git commit -m "docs(issue-37): 進捗配色対象 view を week/day/agenda/work_week に統一"
 ```
 
-## Task 5（残）: 品質ゲート
+## Task 5（実施済み）: 品質ゲート
 
 ```bash
 bun run testrun   # 全テスト 1 回実行（緑）
@@ -65,6 +65,24 @@ bun run build     # tsc + vite build 0 errors
 ```
 - 実ブラウザで day / agenda の進捗色・DnD を再確認（ユーザー実施）。
 
+## Task 6（実施済み）: PR #38 レビュー対応 — CalendarView の eventPropGetter 接続テスト追加
+
+参照: `.github/reports/pr-38-review.md` 改善提案 / 詳細は [`pr-38-improvement-1.md`](./pr-38-improvement-1.md)
+
+**Objective**: `progressColor.spec.ts` の色解決単体テストに加え、`CalendarView` が
+day / agenda / work_week ビューで `eventPropGetter` へ正しい `currentView` を渡す
+接続（配線）をテストで固定する。
+
+**Files**:
+- Modify: `src/tests/CalendarView.spec.tsx`（`describe.each(['day', 'agenda', 'work_week'])` の接続テスト追加）
+
+**検証（2026-09-28 実施）**:
+- `bunx vitest run src/tests/CalendarView.spec.tsx` → 14 passed
+- `bun run testrun` → 19 files / 138 passed / 1 skipped
+- `bun run lint` → 0 warnings
+- `bun run build` → tsc + vite 0 errors
+
 ## 検証済みコマンド
 - `bunx vitest run src/tests/Calendar.spec.tsx`（+ `CalendarView.spec.tsx`）→ 15 passed / 1 skipped
 - `bunx vitest run src/tests/progressColor.spec.ts` → 18 passed
+- `bunx vitest run src/tests/CalendarView.spec.tsx` → 14 passed（Task 6 追加後）

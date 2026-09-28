@@ -15,11 +15,13 @@ bun run build     # tsc + vite build 0 errors
 | 同上（既存） | `resolveEventColor(..., 'month')` | 単日時間 → `undefined`、フルデイ・日跨ぎ → `MONTH_FULLDAY_COLOR`（**変更なし**） |
 | `src/tests/Calendar.spec.tsx`（新規） | ユーザーのイベントが 2 件以下でも描画（`stateAll.length > 2` ガード除去の回帰防止） | AuthUser のイベント 1 件が `.rbc-event` 1 個で描画 |
 | `src/tests/Calendar.spec.tsx`（既存） | `defaultView='day'` で `exEvents` | 3 件描画（PASS 維持） |
+| `src/tests/CalendarView.spec.tsx`（pr-38 改善提案） | day / agenda / work_week ビューで `eventPropGetter` が進捗色の inline style を返す接続テスト（`describe.each` + `fireView`） | 進捗あり → `style.backgroundColor === '#d81b60'` / 進捗なし → backgroundColor なし（rbc 既定へ委譲） |
 
 実行・確認済み:
 ```
 bunx vitest run src/tests/Calendar.spec.tsx src/tests/CalendarView.spec.tsx   # 15 passed / 1 skipped
 bunx vitest run src/tests/progressColor.spec.ts                               # 18 passed
+bunx vitest run src/tests/CalendarView.spec.tsx                               # 14 passed（pr-38 改善提案の接続テスト追加後）
 ```
 
 ## 3. 実ブラウザ確認（ユーザー実施・確認済み）
