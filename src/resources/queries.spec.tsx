@@ -1,10 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, waitFor } from '@testing-library/react';
+import { render, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
-import { act } from 'react';
+import { act, type ReactNode } from 'react';
 
-import { useAuthQuery, useMilestonesQuery } from './queries';
-import { fetchAuthResponse, fetchMilestones } from './fetch';
+import { useAuthQuery, useMilestonesQuery, useMilestoneEventsQuery } from './queries';
+import { fetchAuthResponse, fetchMilestones, fetchMilestoneEvents } from './fetch';
 import { MILESTONE_REFRESH_INTERVAL_MS } from '../lib/env';
 
 vi.mock('./fetch', () => ({
@@ -15,6 +15,7 @@ vi.mock('./fetch', () => ({
   requestGroup: vi.fn(),
   requestGroupMember: vi.fn(),
   fetchMilestones: vi.fn(),
+  fetchMilestoneEvents: vi.fn(),
 }));
 
 const TestComponent = () => {
@@ -34,6 +35,10 @@ const createQueryClient = () => new QueryClient({
     },
   },
 });
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <QueryClientProvider client={createQueryClient()}>{children}</QueryClientProvider>
+);
 
 describe('useAuthQuery', () => {
   beforeEach(() => {
@@ -114,5 +119,23 @@ describe('useMilestonesQuery', () => {
       await vi.advanceTimersByTimeAsync(1);
     });
     expect(mockedFetchMilestones).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('useMilestoneEventsQuery', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches only when enabled', async () => {
+    (fetchMilestoneEvents as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    const { result, rerender } = renderHook(
+      ({ id, enabled }) => useMilestoneEventsQuery(id, enabled),
+      { initialProps: { id: 1, enabled: false }, wrapper },
+    );
+    expect(fetchMilestoneEvents).not.toHaveBeenCalled();
+    rerender({ id: 1, enabled: true });
+    await waitFor(() => expect(fetchMilestoneEvents).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(result.current.data).toEqual([]));
   });
 });
