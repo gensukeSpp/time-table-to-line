@@ -16,6 +16,7 @@
 | [2026-09-18](2026-09-18-spec.md) | Issue #30: month ビュー DnD 事前処理と安全対策（.rbc-event-allday 固定 CSS 化・EW アンカー等） |
 | [2026-09-24](2026-09-24-spec.md) | Issue #35: 進捗別の配色（week ビュー、eventPropGetter 一本化） |
 | [2026-09-25](2026-09-25-spec.md) | Issue #37: 進捗配色を week/day/agenda/work_week へ正式拡張＋リファクタ残骸 `stateAll.length > 2` ガード除去 |
+| [2026-10-15](2026-10-15-spec.md) | Issue #40: 'open'/'waiting' マイルストーンのイベント参照（'...' → Drawer + progress 別アコーディオン、`group_name` 付与、閲覧権限緩和） |
 
 ## 作成ルール
 - 1 機能 / 1 Issue / 1 PR につき 1 ファイルを `specs/<YYYY-MM-DD>[-連番]-spec.md` で作成する。同一日に複数ある場合は末尾に `-1` / `-2` を付与する。
