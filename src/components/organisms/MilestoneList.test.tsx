@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MilestoneList } from './MilestoneList';
-import { useMilestonesQuery, useGroupUsersQuery } from '../../resources/queries';
+import { useMilestonesQuery, useGroupUsersQuery, useMilestoneEventsQuery } from '../../resources/queries';
 import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useUpdateMilestoneMutation } from '../../hooks/useMilestoneMutation';
 import { MantineProvider } from '@mantine/core';
@@ -10,6 +10,7 @@ import { MilestoneProps } from '../../lib/TimelineType';
 vi.mock('../../resources/queries', () => ({
   useMilestonesQuery: vi.fn(),
   useGroupUsersQuery: vi.fn(),
+  useMilestoneEventsQuery: vi.fn(),
 }));
 
 vi.mock('../../hooks/useAuthGuard', () => ({
@@ -37,6 +38,11 @@ describe('MilestoneList', () => {
     mockQuery({ data: [], isPending: false, isError: false });
     ;(useGroupUsersQuery as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: { data: [] },
+    });
+    ;(useMilestoneEventsQuery as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: [],
+      isPending: false,
+      isError: false,
     });
     ;(useAuthInfo as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       type: 'auth',
@@ -171,5 +177,18 @@ describe('MilestoneList', () => {
     expect(screen.getByText(/作成者名/)).toBeInTheDocument();
     // 読取専用: 更新ボタンは表示されない
     expect(screen.queryByRole('button', { name: '更新' })).toBeNull();
+  });
+
+  it("opens events drawer when '...' button is clicked", async () => {
+    const user = userEvent.setup();
+    const mockMilestones: MilestoneProps[] = [
+      { id: 1, title: 'M1', status: 'open', color: '#9c27b0', staff_id: 1,
+        created_at: '2026-08-20', guideline_end_date: null },
+    ];
+    mockQuery({ data: mockMilestones, isPending: false, isError: false });
+    renderList();
+
+    await user.click(screen.getByRole('button', { name: 'M1 のイベント' }));
+    expect(await screen.findByText('所属イベントはありません')).toBeInTheDocument();
   });
 });
