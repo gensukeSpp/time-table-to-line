@@ -51,3 +51,10 @@ export const titleButton = style({
     transform: 'translateY(1px)',
   },
 });
+
+// イベント一覧を開く '...' ボタン（Issue #40）
+export const moreButton = style({
+  flexShrink: 0,
+  color: '#78909c',
+  ':hover': { color: '#37474f' },
+});
