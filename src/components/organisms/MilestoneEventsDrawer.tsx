@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Drawer, Accordion, Text, Loader, Button } from '@mantine/core';
+import { Box, Drawer, Accordion, Text, Loader, Button, UnstyledButton } from '@mantine/core';
 import { format } from 'date-fns';
 
 import { MilestoneProps, MilestoneEventProps } from '../../lib/TimelineType';
@@ -22,14 +22,22 @@ interface MilestoneEventsDrawerProps {
 
 const MilestoneEventRow = ({ event }: { event: MilestoneEventProps }) => {
   const [expanded, setExpanded] = useState(false);
+  const handleClick = () => setExpanded((v) => !v);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setExpanded((v) => !v);
+    }
+  };
   return (
     <Box className={eventRow}>
-      <Text
+      <UnstyledButton
         className={`${clampLine} ${expanded ? clamp2 : clamp1}`}
-        onClick={() => setExpanded((v) => !v)}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
       >
         {event.title}
-      </Text>
+      </UnstyledButton>
       <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
       <Text className={metaLine}>グループ名: {event.group_name ?? '不明'}</Text>
       <Text className={metaLine}>開始日時: {format(new Date(event.start), 'yyyy/MM/dd HH:mm')}</Text>

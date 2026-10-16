@@ -15,6 +15,8 @@ describe('milestoneEvents', () => {
     expect(normalizeProgressGroup(null)).toBe('指定なし');
     expect(normalizeProgressGroup('')).toBe('指定なし');
     expect(normalizeProgressGroup('unknown')).toBe('指定なし');
+    expect(normalizeProgressGroup('constructor')).toBe('指定なし');
+    expect(normalizeProgressGroup('toString')).toBe('指定なし');
   });
 
   it('groups by progress in fixed order and omits empty groups', () => {

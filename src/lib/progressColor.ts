@@ -34,7 +34,9 @@ const PROGRESS_TOKEN_TO_LABEL: Readonly<Record<string, string>> = {
  */
 export function progressToColor(progress?: string | null): string {
   if (!progress) return DEFAULT_EVENT_COLOR;
-  const key = PROGRESS_TOKEN_TO_LABEL[progress] ?? progress;
+  const key = Object.prototype.hasOwnProperty.call(PROGRESS_TOKEN_TO_LABEL, progress)
+    ? PROGRESS_TOKEN_TO_LABEL[progress]
+    : progress;
   return PROGRESS_COLORS[key] ?? DEFAULT_EVENT_COLOR;
 }
 

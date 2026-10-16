@@ -10,7 +10,7 @@ export const PROGRESS_GROUP_ORDER: Readonly<ProgressGroupKey[]> =
 
 export function normalizeProgressGroup(progress?: string | null): ProgressGroupKey {
   if (!progress) return '指定なし';
-  return TOKEN_TO_GROUP[progress] ?? '指定なし';
+  return Object.prototype.hasOwnProperty.call(TOKEN_TO_GROUP, progress) ? TOKEN_TO_GROUP[progress] : '指定なし';
 }
 
 export interface ProgressGroup {
