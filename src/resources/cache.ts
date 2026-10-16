@@ -52,6 +52,7 @@ export const useAuthCache = () => {
 
 export const milestoneKeys = {
   all: () => ["milestone", "all"] as const,
+  events: (id: number) => ["milestone", "events", id] as const,
 };
 
 export function useMilestoneCache() {

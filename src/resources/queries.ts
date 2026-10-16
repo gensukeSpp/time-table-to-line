@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 
 
-import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember, fetchMilestones } from "./fetch";
+import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember, fetchMilestones, fetchMilestoneEvents } from "./fetch";
 import { eventKeys, authKeys, milestoneKeys } from "./cache";
 import { useAuthContext } from "../hooks/useContextFamily";
 import { MILESTONE_REFRESH_INTERVAL_MS } from "../lib/env";
@@ -125,3 +125,12 @@ export const useMilestonesQuery = () => {
     refetchInterval: MILESTONE_REFRESH_INTERVAL_MS,
   });
 }
+
+// Drawer を開くまで fetch しないよう enabled でゲート（開いたときだけ取得）。
+export const useMilestoneEventsQuery = (milestoneId: number | null, enabled: boolean) => {
+  return useQuery({
+    queryKey: milestoneKeys.events(milestoneId!),
+    queryFn: () => fetchMilestoneEvents(milestoneId!),
+    enabled: enabled && milestoneId != null,
+  });
+};

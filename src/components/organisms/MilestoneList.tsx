@@ -6,6 +6,7 @@ import { MilestoneProps } from '../../lib/TimelineType';
 import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { MilestoneListTitle } from './MilestoneListTitle';
 import { MilestoneDetailDialog } from './MilestoneDetailDialog';
+import { MilestoneEventsDrawer } from './MilestoneEventsDrawer';
 import { list } from './MilestoneList.css';
 
 export const MilestoneList = () => {
@@ -13,6 +14,8 @@ export const MilestoneList = () => {
   const authInfo = useAuthInfo();
   const isAdmin = authInfo.type === 'auth' ? authInfo.admin : false;
   const [selected, setSelected] = useState<MilestoneProps | null>(null);
+  // Issue #40: '...' で開くイベント一覧 Drawer の対象マイルストーン
+  const [eventsMilestone, setEventsMilestone] = useState<MilestoneProps | null>(null);
 
   if (isPending) {
     return (
@@ -41,6 +44,7 @@ export const MilestoneList = () => {
             key={milestone.id}
             milestone={milestone}
             onOpenDetail={setSelected}
+            onOpenEvents={setEventsMilestone}
           />
         ))}
       </Box>
@@ -49,6 +53,12 @@ export const MilestoneList = () => {
           milestone={selected}
           admin={isAdmin}
           onClose={() => setSelected(null)}
+        />
+      )}
+      {eventsMilestone && (
+        <MilestoneEventsDrawer
+          milestone={eventsMilestone}
+          onClose={() => setEventsMilestone(null)}
         />
       )}
     </>

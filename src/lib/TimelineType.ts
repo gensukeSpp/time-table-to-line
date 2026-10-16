@@ -66,3 +66,20 @@ export type TimelineStackItem = Omit<TimelineEventProps, 'start_time' | 'end_tim
 	start_time: number;
 	end_time: number;
 };
+
+// /milestone/{id}/events レスポンス要素（EventORM.to_dict() + group_name、Issue #40）
+export interface MilestoneEventProps {
+	id: number;
+	staff_id: number;
+	group: number;
+	group_name: string | null;
+	start: string;
+	end: string;
+	title: string;
+	summary?: string | null;
+	progress?: string | null;
+	milestone_id: number | null;
+	completed: boolean;
+}
+
+export type ProgressGroupKey = 'これから' | 'まだ' | 'もうすぐ' | '完了' | '指定なし';

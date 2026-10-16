@@ -2,22 +2,25 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import basicAxios from "../lib/AuthInfo";
 import { TimelineEventProps } from "../lib/TimelineType";
-import { eventKeys, useEventCache } from "../resources/cache";
+import { eventKeys, milestoneKeys, useEventCache } from "../resources/cache";
 
 export const useCreateMutation = () => {
   const eventCache = useEventCache();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (timelineEvent: TimelineEventProps) => 
+    mutationFn: (timelineEvent: TimelineEventProps) =>
       basicAxios.post('/event/add', timelineEvent),
     onSuccess: () => {
       eventCache.invalidateList();
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
     }
   });
 }
 
 export const useDeleteMutation = (targetId: number | string) => {
   const eventCache = useEventCache();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: () =>
@@ -26,6 +29,7 @@ export const useDeleteMutation = (targetId: number | string) => {
       
       // targetIdはユーザーじゃない❗
       eventCache.invalidateList();
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
     }
   });
 }
@@ -43,6 +47,7 @@ export const useUpdateEventMutation = (targetId: number | string) => {
     onSuccess: () => {
       // targetIdはユーザーじゃない❗
       eventCache.invalidateList();
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
     },
   });
 }
@@ -52,7 +57,7 @@ export const useUpdateDateListMutation = (targetIds: string[]) => {
   const eventCache = useEventCache();
 
   return useMutation({
-    mutationFn: (timeBeltArray: TimelineEventProps[]) => 
+    mutationFn: (timeBeltArray: TimelineEventProps[]) =>
       basicAxios.post(`/date/update`, {
         data: timeBeltArray
       }),
@@ -65,6 +70,7 @@ export const useUpdateDateListMutation = (targetIds: string[]) => {
     },
     onSettled: () => {
       eventCache.invalidateList();
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
     }
   });
 }
