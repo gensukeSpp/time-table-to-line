@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Drawer, Loader, Text, UnstyledButton } from '@mantine/core';
+import { Box, Button, Collapse, Drawer, Loader, Text, UnstyledButton } from '@mantine/core';
 import { format } from 'date-fns';
 
 import { MilestoneProps, MilestoneEventProps } from '../../lib/TimelineType';
@@ -22,20 +22,20 @@ const ClosedEventItem = ({ event }: { event: MilestoneEventProps }) => {
       >
         {event.title}
       </UnstyledButton>
-      {expanded && (
-        <>
-          <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
-          <Text className={metaLine}>グループ名: {event.group_name ?? '不明'}</Text>
-          <Text className={metaLine}>終了日時: {format(new Date(event.end), 'yyyy/MM/dd HH:mm')}</Text>
-        </>
-      )}
+      {/* Issue #40 の Accordion と同等の開閉アニメーション (Mantine Collapse: 200ms ease) */}
+      <Collapse in={expanded}>
+        <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
+        <Text className={metaLine}>グループ名: {event.group_name ?? '不明'}</Text>
+        <Text className={metaLine}>終了日時: {format(new Date(event.end), 'yyyy/MM/dd HH:mm')}</Text>
+      </Collapse>
     </Box>
   );
 };
 
 // 段 2: 「完了」イベントのみのアコーディオンリスト
-const ClosedMilestoneEvents = ({ milestoneId }: { milestoneId: number }) => {
-  const { data, isPending, isError, error } = useClosedMilestoneEventsQuery(milestoneId, true);
+// enabled は Collapse の開閉状態をそのまま渡し、開いたときだけ取得する。
+const ClosedMilestoneEvents = ({ milestoneId, enabled }: { milestoneId: number; enabled: boolean }) => {
+  const { data, isPending, isError, error } = useClosedMilestoneEventsQuery(milestoneId, enabled);
   const completed = filterCompletedEvents(data ?? []);
 
   if (isPending) {
@@ -77,7 +77,10 @@ const ClosedMilestoneRow = ({ milestone }: { milestone: MilestoneProps }) => {
         </UnstyledButton>
         <Text className={accomplishedDate}>{formatAccomplishedDate(milestone.accomplished_date)}</Text>
       </Box>
-      {opened && <ClosedMilestoneEvents milestoneId={milestone.id} />}
+      {/* 開閉アニメーション: Collapse は閉時も子を保持するため、閉じるときも滑らかに畳める */}
+      <Collapse in={opened}>
+        <ClosedMilestoneEvents milestoneId={milestone.id} enabled={opened} />
+      </Collapse>
     </Box>
   );
 };

@@ -27,15 +27,20 @@ const events: MilestoneEventProps[] = [
 const renderDrawer = () =>
   render(<MantineProvider><ClosedMilestoneDrawer onClose={vi.fn()} /></MantineProvider>);
 
+// Mantine Collapse は閉時も子を DOM に保持する（height:0 + inert）ため、
+// 表示判定は祖先の aria-hidden で行う。
+const isCollapsed = (element: HTMLElement): boolean =>
+  element.closest('[aria-hidden]')?.getAttribute('aria-hidden') === 'true';
+
 describe('ClosedMilestoneDrawer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (useClosedMilestonesQuery as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: milestones, isPending: false, isError: false,
     });
-    (useClosedMilestoneEventsQuery as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: events, isPending: false, isError: false,
-    });
+    (useClosedMilestoneEventsQuery as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      (id: number | null) => ({ data: id === 1 ? events : [], isPending: false, isError: false }),
+    );
   });
 
   it('lists closed milestones with accomplished date (null → 達成日なし)', () => {
@@ -49,20 +54,40 @@ describe('ClosedMilestoneDrawer', () => {
 
   it('expands a milestone to show only 完了 events', () => {
     renderDrawer();
+    const toggle = screen.getByRole('button', { name: 'M1 の完了イベント' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'M1 の完了イベント' }));
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(isCollapsed(screen.getByText('完了タスク'))).toBe(true);
 
-    expect(screen.getByText('完了タスク')).toBeInTheDocument();
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(isCollapsed(screen.getByText('完了タスク'))).toBe(false);
     expect(screen.queryByText('未完了タスク')).not.toBeInTheDocument();
+  });
+
+  it('collapses again when the milestone title is clicked twice', () => {
+    renderDrawer();
+    const toggle = screen.getByRole('button', { name: 'M1 の完了イベント' });
+
+    fireEvent.click(toggle);
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(isCollapsed(screen.getByText('完了タスク'))).toBe(true);
   });
 
   it('expands an event to show staff_id / group_name / end_time', () => {
     renderDrawer();
 
     fireEvent.click(screen.getByRole('button', { name: 'M1 の完了イベント' }));
-    fireEvent.click(screen.getByRole('button', { name: '完了タスク' }));
+    const eventToggle = screen.getByRole('button', { name: '完了タスク' });
+    expect(isCollapsed(screen.getByText(/スタッフID: 1001/))).toBe(true);
 
-    expect(screen.getByText(/スタッフID: 1001/)).toBeInTheDocument();
+    fireEvent.click(eventToggle);
+
+    expect(eventToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(isCollapsed(screen.getByText(/スタッフID: 1001/))).toBe(false);
     expect(screen.getByText(/グループ名: グループA/)).toBeInTheDocument();
     expect(screen.getByText(/終了日時: 2026\/08\/02 \d{2}:30/)).toBeInTheDocument();
   });

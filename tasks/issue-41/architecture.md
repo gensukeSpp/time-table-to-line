@@ -215,7 +215,7 @@ export const MilestoneClosedButton = ({ admin }: MilestoneClosedButtonProps) => 
 
 ```tsx
 import { useState } from 'react';
-import { Box, Button, Drawer, Loader, Text, UnstyledButton } from '@mantine/core';
+import { Box, Button, Collapse, Drawer, Loader, Text, UnstyledButton } from '@mantine/core';
 import { format } from 'date-fns';
 
 import { MilestoneProps, MilestoneEventProps } from '../../lib/TimelineType';
@@ -251,20 +251,20 @@ const ClosedEventItem = ({ event }: { event: MilestoneEventProps }) => {
       >
         {event.title}
       </UnstyledButton>
-      {expanded && (
-        <>
-          <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
-          <Text className={metaLine}>グループ名: {event.group_name ?? '不明'}</Text>
-          <Text className={metaLine}>終了日時: {format(new Date(event.end), 'yyyy/MM/dd HH:mm')}</Text>
-        </>
-      )}
+      {/* Issue #40 の Accordion と同等の開閉アニメーション (Mantine Collapse: 200ms ease) */}
+      <Collapse in={expanded}>
+        <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
+        <Text className={metaLine}>グループ名: {event.group_name ?? '不明'}</Text>
+        <Text className={metaLine}>終了日時: {format(new Date(event.end), 'yyyy/MM/dd HH:mm')}</Text>
+      </Collapse>
     </Box>
   );
 };
 
 // 段 2: 「完了」イベントのみのアコーディオンリスト
-const ClosedMilestoneEvents = ({ milestoneId }: { milestoneId: number }) => {
-  const { data, isPending, isError, error } = useClosedMilestoneEventsQuery(milestoneId, true);
+// enabled は Collapse の開閉状態をそのまま渡し、開いたときだけ取得する。
+const ClosedMilestoneEvents = ({ milestoneId, enabled }: { milestoneId: number; enabled: boolean }) => {
+  const { data, isPending, isError, error } = useClosedMilestoneEventsQuery(milestoneId, enabled);
   const completed = filterCompletedEvents(data ?? []);
 
   if (isPending) return <Loader size="xs" />;
@@ -295,7 +295,10 @@ const ClosedMilestoneRow = ({ milestone }: { milestone: MilestoneProps }) => {
         </UnstyledButton>
         <Text className={accomplishedDate}>{formatAccomplishedDate(milestone.accomplished_date)}</Text>
       </Box>
-      {opened && <ClosedMilestoneEvents milestoneId={milestone.id} />}
+      {/* 開閉アニメーション: Collapse は閉時も子を保持するため、閉じるときも滑らかに畳める */}
+      <Collapse in={opened}>
+        <ClosedMilestoneEvents milestoneId={milestone.id} enabled={opened} />
+      </Collapse>
     </Box>
   );
 };
@@ -432,7 +435,7 @@ export const adminBar = style({
 | D1 | closed 一覧用に **`GET /milestone/closed`（admin 限定）を新設**する。`/milestone/all` は open + waiting 固定で closed を返さないため、既存 API の再利用は不可。代替案（`/milestone/all?status=closed` へ拡張）は既存契約を壊すため不採用 |
 | D2 | 並び順は `accomplished_date IS NULL` → `accomplished_date DESC`。`DELETE /milestone/remove` 由来の closed（達成日 NULL）は末尾に固定。表示は「達成日なし」 |
 | D3 | 完了イベントの絞り込みは**フロント**で `normalizeProgressGroup(progress) === '完了'`。バックエンドは closed イベントを全件返す（Issue 実装要件どおり）。英字トークン `complete` も「完了」に正規化される |
-| D4 | 3 段構成は Mantine `Drawer` + **自前の開閉 state**（Accordion ではなく `UnstyledButton`）。タイトルのクリックで「開閉」と「2 行化」を同時に行うため、Accordion.Control より自前 state が単純 |
+| D4 | 3 段構成は Mantine `Drawer` + **自前の開閉 state**（Accordion ではなく `UnstyledButton`）。タイトルのクリックで「開閉」と「2 行化」を同時に行うため、Accordion.Control より自前 state が単純。開閉アニメーションは Mantine **`Collapse`（既定 200ms ease）** で付与し、Issue #40 の Accordion と同等にする。`Collapse` は閉時も子を保持（`height:0` + `inert`）するため**閉じるアニメーションも成立**し、子のクエリは `enabled` で開時のみ実行される（2026-10-19 実ブラウザ確認後のフィードバックで追加） |
 | D5 | clamp スタイルは `molecules/clampText.css.ts` に抽出し Issue #40 の Drawer と共有（同一 CSS のコピペを避ける） |
 | D6 | ボタンは `admin` のみ表示。バックエンドも 403 で二重防御。closed events の権限は据え置き（既存仕様） |
 | D7 | closed 一覧・closed イベントは「開いたときにだけ」取得（`enabled` ゲート）。`invalidateMilestoneList` は closed 一覧も無効化する |
