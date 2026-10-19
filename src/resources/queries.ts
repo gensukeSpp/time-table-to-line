@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 
 
-import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember, fetchMilestones, fetchMilestoneEvents } from "./fetch";
+import { fetchEventsDataForTT, fetchEventsData, fetchAuthResponse, refresh, requestGroup, requestGroupMember, fetchMilestones, fetchMilestoneEvents, fetchClosedMilestones, fetchClosedMilestoneEvents } from "./fetch";
 import { eventKeys, authKeys, milestoneKeys } from "./cache";
 import { useAuthContext } from "../hooks/useContextFamily";
 import { MILESTONE_REFRESH_INTERVAL_MS } from "../lib/env";
@@ -131,6 +131,24 @@ export const useMilestoneEventsQuery = (milestoneId: number | null, enabled: boo
   return useQuery({
     queryKey: milestoneKeys.events(milestoneId!),
     queryFn: () => fetchMilestoneEvents(milestoneId!),
+    enabled: enabled && milestoneId != null,
+  });
+};
+
+// Issue #41: 閉じたマイルストーン一覧。Drawer を開いた時だけ取得する。
+export const useClosedMilestonesQuery = (enabled: boolean) => {
+  return useQuery({
+    queryKey: milestoneKeys.closed(),
+    queryFn: fetchClosedMilestones,
+    enabled,
+  });
+};
+
+// Issue #41: マイルストーン行を開いた時だけ、その closed イベントを取得する。
+export const useClosedMilestoneEventsQuery = (milestoneId: number | null, enabled: boolean) => {
+  return useQuery({
+    queryKey: milestoneKeys.closedEvents(milestoneId!),
+    queryFn: () => fetchClosedMilestoneEvents(milestoneId!),
     enabled: enabled && milestoneId != null,
   });
 };

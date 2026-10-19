@@ -52,13 +52,20 @@ export const useAuthCache = () => {
 
 export const milestoneKeys = {
   all: () => ["milestone", "all"] as const,
+  closed: () => ["milestone", "closed"] as const,
   events: (id: number) => ["milestone", "events", id] as const,
-};
+  // ['milestone','closed'] は閉じた一覧のプレフィックスでもあるため、
+  // closed() の invalidate で closedEvents も同時に無効化される（意図どおり）。
+  closedEvents: (id: number) => ["milestone", "closed", "events", id] as const,
+}
 
 export function useMilestoneCache() {
   const queryClient = useQueryClient();
   return useMemo(() => ({
-    invalidateMilestoneList: () =>
-      queryClient.invalidateQueries({ queryKey: milestoneKeys.all() }),
+    invalidateMilestoneList: () => {
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
+      // Issue #41: close / 削除で closed 一覧も変わるため併せて無効化する。
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.closed() });
+    },
   }), [queryClient]);
 }

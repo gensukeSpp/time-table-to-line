@@ -57,3 +57,13 @@ export const fetchMilestoneEvents = async (milestoneId: number): Promise<Milesto
   const { data } = await basicAxios.get<MilestoneEventProps[]>(`/milestone/${milestoneId}/events`);
   return data;
 };
+
+export const fetchClosedMilestones = async (): Promise<MilestoneProps[]> => {
+  const { data } = await basicAxios.get<MilestoneProps[]>('/milestone/closed');
+  return data;
+};
+
+export const fetchClosedMilestoneEvents = async (milestoneId: number): Promise<MilestoneEventProps[]> => {
+  const { data } = await basicAxios.get<MilestoneEventProps[]>(`/milestone/closed/${milestoneId}/events`);
+  return data;
+};
