@@ -9,11 +9,9 @@ import {
   header,
   colorBar,
   eventRow,
-  clampLine,
-  clamp1,
-  clamp2,
   metaLine,
 } from './MilestoneEventsDrawer.css';
+import { clampLine, clamp1, clamp2 } from '../molecules/clampText.css';
 
 interface MilestoneEventsDrawerProps {
   milestone: MilestoneProps;
