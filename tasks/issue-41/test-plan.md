@@ -32,7 +32,7 @@
 | 純粋ヘルパ | `src/tests/milestoneEvents.spec.ts` | `filterCompletedEvents` が「完了」ラベル / `complete` トークンのみ残し、null / 他進捗を落とす。空配列 | 3 |
 | 純粋ヘルパ | `src/tests/milestone.spec.ts`（新規） | `formatAccomplishedDate` が `yyyy/MM/dd`、null / undefined → `達成日なし` | 4 |
 | Query hook | `src/resources/queries.spec.tsx` | `useClosedMilestonesQuery(enabled=false)` で fetch しない / `true` で 1 回。`useClosedMilestoneEventsQuery(id=null)` で fetch しない / id ありで `(7)` 呼び出し | 2 |
-| Drawer | `src/components/organisms/ClosedMilestoneDrawer.test.tsx`（新規） | ① closed 一覧にタイトル + 達成日（null → 達成日なし）② マイルストーン行クリックで **完了イベントのみ** ③ イベント行クリックで staff_id / group_name / 終了日時 ④ 空状態 ⑤ **開閉アニメーション**: `aria-expanded` の切替と、閉時は `Collapse` 配下が `aria-hidden` になること（再クリックで畳まれる） | 2, 3, 4, 6 |
+| Drawer | `src/components/organisms/ClosedMilestoneDrawer.test.tsx`（新規） | ① closed 一覧にタイトル + 達成日（null → 達成日なし）② マイルストーン行クリックで **完了イベントのみ** ③ イベント行クリックで staff_id / group_name / 終了日時 ④ 空状態 ⑤ **開閉アニメーション**: `aria-expanded` の切替と、閉時は `Collapse` 配下が `aria-hidden` になること（再クリックで畳まれる）⑥ **イベント行の開閉ボタン**: `aria-label="{title} の詳細を開閉"` で開閉でき、`data-expanded` が切り替わる | 2, 3, 4, 6 |
 | ボタン | `src/components/organisms/MilestoneClosedButton.test.tsx`（新規） | 非 admin はボタン非表示 / admin はクリックで Drawer が開く | 1 |
 
 **タイムゾーン注意:** `end` は UTC ISO 文字列（`...Z`）で返り、表示はローカル TZ。テストの時刻アサートは「分」だけを見る（`\d{2}:30` 等）。既存 `MilestoneEventsDrawer.test.tsx` と同じ方針。
@@ -45,11 +45,12 @@ Timeline 画面（`/timeline`）にて。
 2. 管理者: クリック → 右から Drawer がスライドし、closed マイルストーンが**達成日の新しい順**に並ぶ
 3. 管理者: 各行は「タイトル + 達成日（小さいフォント）」の 1 行。長いタイトルは三点リーダー → クリックで 2 行
 4. 管理者: マイルストーン行クリック → **開閉がスムーズにアニメーション**（Issue #40 のアコーディオンと同等、約 200ms）し、所属イベントのうち **progress「完了」のみ**がタイトル一覧で開く（「これから」「まだ」等は出ない）
-5. 管理者: イベントタイトルクリック → 同様にアニメーションで `スタッフID` / `グループ名` / `終了日時` が表示される（終了日時が `end_time` と一致）
-6. 管理者: もう一度クリックすると滑らかに畳まれる（マイルストーン行 / イベント行とも）
-7. 管理者: イベントが 0 件の closed マイルストーンでは「完了イベントはありません」
-8. **一般ユーザー（admin=false）**: ボタン自体が表示されない
-9. 閉じる: Drawer 外クリック / Escape / 閉じるボタンで閉じる
+5. 管理者: 各イベントタイトルの**左に開閉ボタン（chevron）**が表示される。クリックで 3 データが開閉し、開くと chevron が 90 度回転する（タイトルクリックでも同じ）
+6. 管理者: イベントタイトルクリック → 同様にアニメーションで `スタッフID` / `グループ名` / `終了日時` が表示される（終了日時が `end_time` と一致）
+7. 管理者: もう一度クリックすると滑らかに畳まれる（マイルストーン行 / イベント行とも）
+8. 管理者: イベントが 0 件の closed マイルストーンでは「完了イベントはありません」
+9. **一般ユーザー（admin=false）**: ボタン自体が表示されない
+10. 閉じる: Drawer 外クリック / Escape / 閉じるボタンで閉じる
 
 > 参考: 一般ユーザーでの API 直叩き確認（ブラウザ DevTools）— `GET /milestone/closed` が 403 を返すこと（フロントの出し分けに依存しない多層防御の確認）。
 

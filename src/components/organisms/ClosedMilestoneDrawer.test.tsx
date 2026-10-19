@@ -92,6 +92,27 @@ describe('ClosedMilestoneDrawer', () => {
     expect(screen.getByText(/終了日時: 2026\/08\/02 \d{2}:30/)).toBeInTheDocument();
   });
 
+  it('has an explicit toggle button on the event title (3 段構成の手掛かり)', () => {
+    renderDrawer();
+    fireEvent.click(screen.getByRole('button', { name: 'M1 の完了イベント' }));
+
+    const toggle = screen.getByRole('button', { name: '完了タスク の詳細を開閉' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAttribute('data-expanded', 'false');
+    expect(isCollapsed(screen.getByText(/スタッフID: 1001/))).toBe(true);
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(toggle).toHaveAttribute('data-expanded', 'true');
+    expect(isCollapsed(screen.getByText(/スタッフID: 1001/))).toBe(false);
+
+    fireEvent.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(isCollapsed(screen.getByText(/スタッフID: 1001/))).toBe(true);
+  });
+
   it('shows empty state when there is no closed milestone', () => {
     (useClosedMilestonesQuery as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: [], isPending: false, isError: false,

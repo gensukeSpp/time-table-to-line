@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Collapse, Drawer, Loader, Text, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Box, Button, Collapse, Drawer, Loader, Text, UnstyledButton } from '@mantine/core';
 import { format } from 'date-fns';
 
 import { MilestoneProps, MilestoneEventProps } from '../../lib/TimelineType';
@@ -7,21 +7,59 @@ import { filterCompletedEvents } from '../../lib/milestoneEvents';
 import { formatAccomplishedDate } from '../../lib/milestone';
 import { useClosedMilestonesQuery, useClosedMilestoneEventsQuery } from '../../resources/queries';
 import { clampLine, clamp1, clamp2 } from '../molecules/clampText.css';
-import { row, colorBar, accomplishedDate, nestedList, eventRow, metaLine } from './ClosedMilestoneDrawer.css';
+import {
+  row,
+  colorBar,
+  accomplishedDate,
+  nestedList,
+  eventRow,
+  eventTitleRow,
+  toggleIcon,
+  metaLine,
+} from './ClosedMilestoneDrawer.css';
+
+// 開閉状態を示す chevron（開くと 90 度回転）
+const ChevronIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+    <path
+      d="M6 3l5 5-5 5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 // 段 3: イベントを開いたときに出す 3 データ (staff_id / グループ名 / end_time)
 const ClosedEventItem = ({ event }: { event: MilestoneEventProps }) => {
   const [expanded, setExpanded] = useState(false);
+  const toggle = () => setExpanded((v) => !v);
 
   return (
     <Box className={eventRow}>
-      <UnstyledButton
-        className={`${clampLine} ${expanded ? clamp2 : clamp1}`}
-        aria-expanded={expanded}
-        onClick={() => setExpanded((v) => !v)}
-      >
-        {event.title}
-      </UnstyledButton>
+      <Box className={eventTitleRow}>
+        <ActionIcon
+          className={toggleIcon}
+          variant="subtle"
+          color="gray"
+          size="sm"
+          aria-label={`${event.title} の詳細を開閉`}
+          aria-expanded={expanded}
+          data-expanded={expanded}
+          onClick={toggle}
+        >
+          <ChevronIcon />
+        </ActionIcon>
+        <UnstyledButton
+          className={`${clampLine} ${expanded ? clamp2 : clamp1}`}
+          aria-expanded={expanded}
+          onClick={toggle}
+        >
+          {event.title}
+        </UnstyledButton>
+      </Box>
       {/* Issue #40 の Accordion と同等の開閉アニメーション (Mantine Collapse: 200ms ease) */}
       <Collapse in={expanded}>
         <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
