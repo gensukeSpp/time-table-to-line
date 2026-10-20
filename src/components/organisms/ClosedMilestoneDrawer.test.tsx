@@ -81,7 +81,7 @@ describe('ClosedMilestoneDrawer', () => {
     renderDrawer();
 
     fireEvent.click(screen.getByRole('button', { name: 'M1 の完了イベント' }));
-    const eventToggle = screen.getByRole('button', { name: '完了タスク' });
+    const eventToggle = screen.getByRole('button', { name: '完了タスク の詳細を開閉' });
     expect(isCollapsed(screen.getByText(/スタッフID: 1001/))).toBe(true);
 
     fireEvent.click(eventToggle);

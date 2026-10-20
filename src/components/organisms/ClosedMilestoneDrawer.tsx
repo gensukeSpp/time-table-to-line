@@ -45,16 +45,20 @@ const ClosedEventItem = ({ event }: { event: MilestoneEventProps }) => {
           variant="subtle"
           color="gray"
           size="sm"
-          aria-label={`${event.title} の詳細を開閉`}
           aria-expanded={expanded}
+          aria-controls={`closed-event-${event.id}-meta`}
           data-expanded={expanded}
           onClick={toggle}
+          aria-hidden="true"
         >
           <ChevronIcon />
         </ActionIcon>
         <UnstyledButton
           className={`${clampLine} ${expanded ? clamp2 : clamp1}`}
+          aria-label={`${event.title} の詳細を開閉`}
           aria-expanded={expanded}
+          aria-controls={`closed-event-${event.id}-meta`}
+          data-expanded={expanded}
           onClick={toggle}
         >
           {event.title}
@@ -62,9 +66,11 @@ const ClosedEventItem = ({ event }: { event: MilestoneEventProps }) => {
       </Box>
       {/* Issue #40 の Accordion と同等の開閉アニメーション (Mantine Collapse: 200ms ease) */}
       <Collapse in={expanded}>
-        <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
-        <Text className={metaLine}>グループ名: {event.group_name ?? '不明'}</Text>
-        <Text className={metaLine}>終了日時: {format(new Date(event.end), 'yyyy/MM/dd HH:mm')}</Text>
+        <Box id={`closed-event-${event.id}-meta`}>
+          <Text className={metaLine}>スタッフID: {event.staff_id}</Text>
+          <Text className={metaLine}>グループ名: {event.group_name ?? '不明'}</Text>
+          <Text className={metaLine}>終了日時: {format(new Date(event.end), 'yyyy/MM/dd HH:mm')}</Text>
+        </Box>
       </Collapse>
     </Box>
   );
