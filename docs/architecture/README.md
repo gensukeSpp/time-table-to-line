@@ -22,3 +22,4 @@
 | 2026-09-24 | Progress-based event coloring implementation (PR #36) |
 | 2026-09-25 | Extend progress color to week/day/agenda/work_week + drop leftover calendar guard (Issue #37) |
 | 2026-10-16 | Milestone events progress-based accordion drawer view (PR #42) |
+| 2026-10-20 | Closed milestone events feature (PR #43) |

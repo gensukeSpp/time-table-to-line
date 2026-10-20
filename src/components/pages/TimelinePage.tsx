@@ -12,7 +12,8 @@ import { TimelineEventProps } from '../../lib/TimelineType';
 import { EventDetailOverlay } from '../organisms/EventDetailOverlay';
 import { MilestoneList } from '../organisms/MilestoneList';
 import { MilestoneAddButton } from '../organisms/MilestoneAddButton';
-import { toolbar } from './TimelinePage.css';
+import { MilestoneClosedButton } from '../organisms/MilestoneClosedButton';
+import { toolbar, adminBar } from './TimelinePage.css';
 
 import 'react-calendar-timeline/style.css';
 
@@ -194,7 +195,10 @@ export const GroupHorizonTimeline = () => {
       {/* マイルストーン操作エリア（タイムライン本体の外に置き、幅測定に影響させない） */}
       <div className={toolbar}>
         <MilestoneList />
-        <MilestoneAddButton admin={isAdmin} />
+        <div className={adminBar}>
+          <MilestoneAddButton admin={isAdmin} />
+          <MilestoneClosedButton admin={isAdmin} />
+        </div>
       </div>
       {/* Add a container div with a ref and mouse event handlers */}
       <div

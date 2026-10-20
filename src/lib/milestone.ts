@@ -14,3 +14,8 @@ export function formatClosedLabel(accomplished_date?: string | null): string | n
   const d = getMilestoneClosedAt(accomplished_date);
   return d ? format(d, 'MM/dd') : null;
 }
+
+// Issue #41: closed 一覧の達成日表示。削除 API 由来の closed は accomplished_date が null。
+export function formatAccomplishedDate(accomplished_date?: string | null): string {
+  return accomplished_date ? format(new Date(accomplished_date), 'yyyy/MM/dd') : '達成日なし';
+}

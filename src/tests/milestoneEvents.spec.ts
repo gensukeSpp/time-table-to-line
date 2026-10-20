@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeProgressGroup, groupMilestoneEventsByProgress } from '../lib/milestoneEvents';
+import { normalizeProgressGroup, groupMilestoneEventsByProgress, filterCompletedEvents } from '../lib/milestoneEvents';
 import { MilestoneEventProps } from '../lib/TimelineType';
 
 const ev = (id: number, progress?: string | null): MilestoneEventProps => ({
@@ -30,5 +30,12 @@ describe('milestoneEvents', () => {
 
   it('returns [] for empty input', () => {
     expect(groupMilestoneEventsByProgress([])).toEqual([]);
+  });
+
+  it('keeps only 完了 events (label / token / null)', () => {
+    const rows = [ev(1, '完了'), ev(2, 'これから'), ev(3, null), ev(4, 'complete'), ev(5, 'まだ')];
+
+    expect(filterCompletedEvents(rows).map((e) => e.id)).toEqual([1, 4]);
+    expect(filterCompletedEvents([])).toEqual([]);
   });
 });

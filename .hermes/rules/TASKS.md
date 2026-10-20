@@ -1,34 +1,10 @@
-# Tasks — Refactoring Plan & Bug History
+# Tasks — 変更履歴
 
-プロジェクトのタスク計画および既知バグの履歴。AGENTS.md には概要のみ記載し、詳細はここを参照する。
+完了したタスク / バグ修正 / 解消済みバグの履歴。
+現在の状況と今後のタスクは [`STATUS.md`](./STATUS.md) を参照。
 
----
-
-## リファクタリング前の前提作業（完了済み）
-
-- [x] パッケージ管理: yarn → **bun** 移行
-- [x] 全ライブラリを現時点の最新版に更新
-- [x] 未使用ファイル削除: `src/DnDApp.tsx`, `src/lib/ClickOrDouble.js`
-- [x] `vite.config.ts` 整理
-
----
-
-## 今後必要なコード修正タスク（順次実施）
-
-1. ESLint フラット設定: `.eslintrc.cjs` → `eslint.config.js` 移行
-2. TypeScript 型エラー修正（`Theme.ts` 削除, `console.log` 一掃）
-3. React 19 互換性修正: useRef の引数なし呼び出し等
-4. `react-calendar-timeline` import 修正: `react-calendar-timeline-v3` → `react-calendar-timeline`
-5. UI ライブラリ統一: Chakra UI / Radix UI → **Mantine v7** に置き換え
-6. 日付ライブラリ統一: moment / dayjs → **date-fns** に書き換え
-7. コンポーネントリファクタリング（molecules / organisms / pages / templates 再配置）
-   - **Phase A** — コードベースクレンジング（未使用ファイル・型・コメントアウト一掃）
-   - **Phase B** — ESLint 安全性回復（no-console / no-unused-vars / exhaustive-deps 段階的有効化）
-   - **Phase C** — クエリ層重複排除（useEventsQuery 統合）
-   - **Phase D** — 型安全性向上（ESLint error 化 / fetch ヘッダー共通化）
-   - **Phase E** — バグ調査（11PM / 重なり / タイムゾーン）
-   - **Phase F** — 品質ゲート（lint / build / test 最終確認）
-   - 詳細は [`tasks/task-07/README.md`](../tasks/task-07/README.md) を参照
+運用: 作業を完了したら、このファイルの「完了したタスク / バグ修正」表に 1 行追記する。
+今後必要なタスクや保留中のバグの更新は `STATUS.md` 側で行う。
 
 ---
 
@@ -50,6 +26,9 @@
 | 30 | 機能追加（Issue #30 / PR 対象ブランチ feature/before-dnd-reflect/30）'month' ビューでの DnD 前処理 — フルデイと時間イベントを区別し、後者の誤リサイズ/移動で 'week' バンドに落ちる事故を防ぐ。**実装:** ① `src/lib/slot.ts` に純関数 `shouldBlockMonthDnd(event, view)`（`view==='month'` **かつ単日** `&& !isFullDayEvent` のとき true）を追加。② `CalendarView.tsx` の旧 `eventPropGetter`（自他判定。`state` が自イベントのみにフィルタ済みのため else 分岐が実効せず、`pointerEvents:'auto'` も no-op → **実質無機能**。issue の要調査項目への回答として削除）を廃止し、`draggableAccessor` / `resizableAccessor`（`useCallback` で closure が `currentView` 参照、ビュー切替時のみ作り直し）を新設 → 'month' で単日時間イベントの DnD を無効化（'week' は従来どおり）。③ `CalendarView.css.ts` に `.rbc-event.rbc-event-allday` を `#00695c`（Teal 800、赤・紫＝マイルストーン色を避けた濃色・白文字可読）で着色、`.rbc-addons-dnd-resize-ew-anchor` に `width:20px; z-index:2` を追加（既定は幅 3px の icon のみで隣イベントに遮られ掴めない → ヒット領域拡大 + 前面化）。**調査結論:** `eventPropGetter` は DnD 可否を制御できず `draggableAccessor`/`resizableAccessor` が正。時間列では `eventPropGetter` の width はレイアウトで上書きされ無効、background は生存 → 色分けは CSS の単一情報源を採用（rbc 1.20 ソース `EventWrapper.js` / `TimeGridEvent.js` / `EventRowMixin.js` / `styles.css` で確認）。ドラッグ可否契約は両アクセサに `!` を付けて渡す（`!shouldBlockMonthDnd`）。**実ブラウザ 2 点修正（2026-09-18 レビュー）:** ① **色が効かない** — `globalStyle` の selector に `:global()` ラッパを付けるとリテラル `.rbc-event-allday` ではなく原文 `:global(...)` が CSS に出て、ブラウザが無効セレクタとして**ルール全体を破棄**する（`computedStyle` は既定色のまま）。`globalStyle` の selector は**スコープなし（グローバル）前提なので `:global()` は付けない**。さらに特異度を `.rbc-event.rbc-event-allday`（(0,2,0)）に上げて rbc 既定 `.rbc-event{background:#3174ad}`（(0,1,0)）より高くし順序非依存で勝たせる。② **単日時間イベントをブロックする一方、フルデイを伸長して日跨ぎ化したイベント（マルチデイ）もブロックされてしまい続けて伸縮不可**（`isFullDayEvent` は `isSameDay` を要求するため日跨ぎで false）→ `shouldBlockMonthDnd` に **`isSameDay` 条件を追加**し、日跨ぎイベントは操作可に（単日時間イベントのみブロック）。テスト: `src/tests/slot.spec.ts` + `src/tests/CalendarView.spec.tsx`（stubRegistry.props からアクセサ取得、view 切替ごとに検証）＋日跨ぎケース追加。`bun run lint` / `build` / `testrun`（111 passed）全て緑。プランは `tasks/issue-30/`（5 ファイル） | **完了** | commit `846674e` / `86c49bf` / `e2efa13` / `544ff01` / `6e5e085` / `03b68a9`, `tasks/issue-30/` |
 | 35 | 機能追加（Issue #35）進捗別の色分け — **'week' ビューのみ**進捗（`TimelineEventProp.progress`）でイベント配色を変更。'month' は従来どおり `#3174ad` / `#00695c` のみ。**実装:** ① `src/lib/progressColor.ts` 新規 — `progressToColor`（進捗値→色。日本語ラベル 4 段階と、旧データ/テスト互換の英字トークン `from now`/`still`/`almost`/`complete` を両方正規化し、null/未設定/未知値はデフォルト `#3174ad` へフォールバック）、`isMonthAllday`（`isFullDayEvent || !isSameDay`。月ビューの日跨ぎイベントを `#00695c` のまま維持し Issue #30 描画を回帰ゼロで再現）、`resolveEventColor`（view 対応。month は進捗配色を出さずフルデイ系のみ teal、week は進捗色/null は default）。② `CalendarView.tsx` に `eventPropGetter`（`useCallback([currentView])`、TDZ 回避のため `currentView` 宣言後に配置）を配線し detail: 月・週全デイ行・時間列すべてに inline `backgroundColor` を適用。③ `CalendarView.css.ts` の `.rbc-event-allday` 固定色 `#00695c`（Issue #30 対策1）を**削除**（静的な globalStyle はビュー切替不可・inline と競合するため。EW アンカー規則は残す）。**決定:** 進捗 4 色の候補（`これから #3949ab` → `まだ #5e35b1` → `もうすぐ #8e24aa` → `完了 #d81b60`、青寄り紫→赤寄り紫・マイルストーン10色/既定色と非衝突・白文字可読）は UX 判断のため**実ブラウザでユーザー確認後、任意で調整**（`PROGRESS_COLORS` とテスト期待値を同時更新）。テスト: `src/tests/progressColor.spec.ts` 新規（11 件）+ `src/tests/CalendarView.spec.tsx` 追記（eventPropGetter、null フルデイ undefined / month で進捗配色なし）。`bun run lint` / `build` / `testrun`（124 passed）全て緑。プランは `tasks/issue-35/`（5 ファイル） | **完了** | commit `4930033` / `7ac58da` / `49b8324`, `tasks/issue-35/` |
 | 40 | 機能追加（Issue #40 / 対象 branch `feature/events-from-milestone/39-`）'open'/'waiting' 状態マイルストーンの**イベント参照** — 各マイルストーンタイトル右の '...' ボタンから、所属イベントを progress 別アコーディオンで閲覧。**フロント + バックエンド両方にまたがる（Issue 型）ため `tasks/issue-40/`（5 ファイル構造）に計画**。**実装:** ① **バックエンド（`light_token_server`, branch `feature/milestone-events/40`）**: `GET /milestone/{milestone_id}/events`（open + waiting）のレスポンス各イベントに **`group_name` を付与**（`group` → `Team.SHORTNAME`、Team 未登録は `null`。`group_id → group_name` はフロント不可のため委譲＝**決定 D1**）と、**admin gate 撤去 → `require_token` のみ**に緩和（一般ユーザー閲覧可＝**決定 D2**。closed 用 `GET /milestone/closed/{milestone_id}/events` は admin のまま）。テスト更新: 非 admin でも閲覧可（旧 403→200）、`group_name` 検証、レスポンスキー 11 個化、非 admin+欠番は open/waiting=404 / closed=403 に分化。② **フロント**: `TimelineType.ts` に `MilestoneEventProps` / `ProgressGroupKey` 型、`src/lib/milestoneEvents.ts`（純粋ヘルパ `normalizeProgressGroup` / `groupMilestoneEventsByProgress`、null/未知→「指定なし」、表示順 `これから→まだ→もうすぐ→完了→指定なし`）、`milestoneKeys.events(id)` / `fetchMilestoneEvents` / `useMilestoneEventsQuery(milestoneId, enabled)`（Drawer を開くまで fetch しない）、`MilestoneEventsDrawer`（Mantine `Drawer position="right"` + `Accordion`、タイトル=カラーバー+マイルストーン名、イベント行=title 1 行三点リーダー→クリックで 2 行 + スタッフID/グループ名(null→不明)/開始日時）、`MilestoneListTitle` に '...' `ActionIcon`（`aria-label="{title} のイベント`、`onOpenEvents` prop）+ `MilestoneList` へ配線。テスト: `milestoneEvents.spec.ts` / `MilestoneEventsDrawer.test.tsx` 新規 + `queries.spec.tsx` / `MilestoneList.test.tsx` 追記。**並列委譲:** 第 1 波 Task 3（ヘルパ）と Task 4+5（クエリ）、第 2 波 Task 8（テスト 2 ファイル）をサブエージェント並列、Task 2（型）と UI 本体（Task 6+7）は親が直列実装、親が最終品質ゲート。品質ゲート: `bun run testrun`（146 passed / 1 skipped）/ `bun run lint`（0 error / 0 warning）/ `bun run build`（0 errors）、バックエンド `pytest`（72 passed）。実ブラウザ確認（ユーザー実施・2026-10-15）: 管理者/一般ユーザーとも「申し分ない」評価。仕様は `specs/2026-10-15-spec.md`（フロント）+ `light_token_server/specs/2026-10-13-milestone-event-retrieval-spec.md` 改訂 | **完了** | フロント commit `51a9059` / `193d15e` / `a0545d6` / `8cf18b6` / `337ee38` / `f50d3a8` / `1b53753`, バックエンド commit `ab5127f` / `e599666`, `tasks/issue-40/` |
+| 41 | 機能追加（Issue #41 / 対象 branch `feature/milestone-events/41`）'closed' マイルストーンの**イベント参照** — 「閉じたマイルストーン」ボタン（管理者のみ、『マイルストーン作成』の直下）→ 右 Drawer で closed を達成日降順に一覧 → マイルストーン行クリックで **progress「完了」のイベントのみ** → イベント行クリックで `staff_id` / グループ名 / `end_time` の **3 段構成**。計画は `tasks/issue-41/`（5 ファイル構造）。**実装:** ① **バックエンド（`light_token_server`, branch `feature/milestone-closed/41`）**: closed 一覧 API が存在しなかったため **`GET /milestone/closed`（新規, admin 限定）** を追加（`status == closed`、`.order_by(accomplished_date.is_(None), accomplished_date.desc())` で **達成日 NULL は末尾** = 決定 D2。`DELETE /milestone/remove` 由来の closed は達成日 NULL）。既存 `GET /milestone/closed/{id}/events` は**権限・仕様とも据え置き**。pytest 4 件追加（降順 / NULL 末尾 / open・waiting 除外 / 非 admin 403）。② **フロント**: `filterCompletedEvents`（`normalizeProgressGroup === '完了'` を再利用。英字 `complete` も完了扱い = D3）、`formatAccomplishedDate`（`yyyy/MM/dd` / null→`達成日なし`）、`milestoneKeys.closed()/closedEvents(id)`（`closed()` の invalidate が closedEvents も巻き込むプレフィックス設計）/ `fetchClosedMilestones` / `fetchClosedMilestoneEvents` / `useClosedMilestonesQuery(enabled)` / `useClosedMilestoneEventsQuery(id, enabled)`、`ClosedMilestoneDrawer`（Mantine `Drawer position="right"` + 自前 `useState` の 3 段開閉。タイトルクリックで「開閉 + 1 行三点リーダー→2 行」を同時に行う = D4）、`MilestoneClosedButton`（admin ゲート）、`TimelinePage` に `adminBar`（column / flex-end）で縦積み配線。**共通化:** clamp スタイル（`clampLine/clamp1/clamp2`）を `src/components/molecules/clampText.css.ts` へ抽出し Issue #40 の `MilestoneEventsDrawer` と共有（D5。横並び用に `flex:1; min-width:0` を追加）。**スコープ外:** closed 一覧の枠線 + スムーズアニメーションは Issue 本文で打ち消し線のため未実装。品質ゲート: `bun run testrun`（157 passed / 1 skipped, 24 files）/ `bun run lint`（0 error / 0 warning）/ `bun run build`（0 errors）、バックエンド `pytest`（78 passed）。**追補 (2026-10-19)**: 実ブラウザ確認で希望どおりと確認後、Issue 本文で打ち消し線だった**開閉アニメーションをユーザー要望により追加**（Mantine `Collapse` 既定 200ms ease = Issue #40 の Accordion 相当。`Collapse` は閉時も子を保持するため閉じるアニメーションも成立し、子クエリは `enabled` 連動で閉時は取得停止。枠線・矢印アイコンは未実装）。**追補2 (同日)**: 3 段構成を明示するため**イベントタイトル左に開閉ボタン**を追加（`ActionIcon` + 自前 SVG chevron、開時 90 度回転。タイトルクリックでも同じ開閉）。追補後ゲート: `bun run testrun`（159 passed / 1 skipped）/ `lint` / `build` 緑 | **完了** | フロント commit `efc48ca` / `490b2c0` / `b7b18d5` / `60c7960` / `e1089c6` / `9bc0b3a`（実装）/ `6e1cc88`（計画書・履歴）/ `61ff067`（Collapse アニメーション）/ `77c645f`（イベント行の開閉ボタン）, バックエンド commit `8174cb8`, `tasks/issue-41/`（5 ファイル）, `specs/2026-10-19-spec.md` |
+
+| 41b | PR #43 レビュー指摘 #1 対応（キャッシュ無効化の抜け）: `useEventMutation.ts` の全 mutation（`useCreateMutation` / `useDeleteMutation` / `useUpdateEventMutation` / `useUpdateDateListMutation`）の onSuccess/onSettled に `milestoneKeys.closed()` の invalidate を追加（`closedEvents` は prefix で連動）。テスト: `src/hooks/useEventMutation.test.tsx` 新規（4 件）。ゲート: `bun run testrun`（163 passed / 1 skipped）/ `lint` / `build` 緑 | **完了** | PR #43 レビュー, `src/hooks/useEventMutation.ts`, `src/hooks/useEventMutation.test.tsx` |
 
 ---
 
@@ -64,7 +43,3 @@
 - ~~**タイムライン**: 表示が壊れる（行 `rct-hl-*` が 3000px 超え）~~ — **Issue #11 Issue 2**: `TimelinePage.tsx` を ResizeObserver + `resizeDetector` 方式に変更
 - ~~**タイムライン**: マイルストーン所属イベントの色が選択解除後にデフォルト `#2196f3` へ戻る~~ — **task-12**: `TimelinePage.tsx` の `itemRenderer` を修正。`getItemProps` には decor を渡さず（`style: {}`）、自作 ref コールバックで `!important` 付き `background-color` を適用（`node.style.setProperty(bg, 'important')`）。`itemContext.selected` を型（`Pick<ItemContext, ...'selected'>`）に追加し、非選択時のみマイルストーン色を適用。詳細は `tasks/task-12/`
 - ~~**タイムライン**: マイルストーン所属イベントをクリックすると選択背景が透明になる（`background` 属性欠落）~~ — **task-12 フォローアップ（同一セッションで解消）**: selected 分岐の `removeProperty('background-color')` がライブラリ選択色 `#ffc107` ごと消して透明化 → `selected ? '#ffc107' : decor.backgroundColor` を `!important` で**明示適用**する方式に変更（選択中 `rgb(255, 193, 7)` を保証、`removeProperty` は使わない）
-
-### 未対応（保留中）
-
-- **タイムテーブル**: DB 保存時刻が日本時間ではない（UTC の可能性）— **E-3** 調査済み・通常は正しく動作するため保留

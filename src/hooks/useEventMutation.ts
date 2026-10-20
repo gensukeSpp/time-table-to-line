@@ -14,6 +14,8 @@ export const useCreateMutation = () => {
     onSuccess: () => {
       eventCache.invalidateList();
       queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
+      // Issue #41: closed マイルストーン配下のイベントも変わり得るため併せて無効化する。
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.closed() });
     }
   });
 }
@@ -30,6 +32,8 @@ export const useDeleteMutation = (targetId: number | string) => {
       // targetIdはユーザーじゃない❗
       eventCache.invalidateList();
       queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
+      // Issue #41: closed マイルストーン配下のイベントも変わり得るため併せて無効化する。
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.closed() });
     }
   });
 }
@@ -48,6 +52,8 @@ export const useUpdateEventMutation = (targetId: number | string) => {
       // targetIdはユーザーじゃない❗
       eventCache.invalidateList();
       queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
+      // Issue #41: closed マイルストーン配下のイベントも変わり得るため併せて無効化する。
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.closed() });
     },
   });
 }
@@ -71,6 +77,8 @@ export const useUpdateDateListMutation = (targetIds: string[]) => {
     onSettled: () => {
       eventCache.invalidateList();
       queryClient.invalidateQueries({ queryKey: milestoneKeys.all() });
+      // Issue #41: closed マイルストーン配下のイベントも変わり得るため併せて無効化する。
+      queryClient.invalidateQueries({ queryKey: milestoneKeys.closed() });
     }
   });
 }

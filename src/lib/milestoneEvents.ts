@@ -23,3 +23,9 @@ export function groupMilestoneEventsByProgress(events: MilestoneEventProps[]): P
     .map((key) => ({ key, events: (events ?? []).filter((e) => normalizeProgressGroup(e.progress) === key) }))
     .filter((g) => g.events.length > 0);
 }
+
+// Issue #41: 閉じたマイルストーンでは「完了」イベントのみを表示する。
+// progress の正規化 (英字トークン / null) は normalizeProgressGroup に一本化する。
+export function filterCompletedEvents(events: MilestoneEventProps[]): MilestoneEventProps[] {
+  return (events ?? []).filter((e) => normalizeProgressGroup(e.progress) === '完了');
+}

@@ -3,8 +3,8 @@ import { render, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest';
 import { act, type ReactNode } from 'react';
 
-import { useAuthQuery, useMilestonesQuery, useMilestoneEventsQuery } from './queries';
-import { fetchAuthResponse, fetchMilestones, fetchMilestoneEvents } from './fetch';
+import { useAuthQuery, useMilestonesQuery, useMilestoneEventsQuery, useClosedMilestonesQuery, useClosedMilestoneEventsQuery } from './queries';
+import { fetchAuthResponse, fetchMilestones, fetchMilestoneEvents, fetchClosedMilestones, fetchClosedMilestoneEvents } from './fetch';
 import { MILESTONE_REFRESH_INTERVAL_MS } from '../lib/env';
 
 vi.mock('./fetch', () => ({
@@ -16,6 +16,8 @@ vi.mock('./fetch', () => ({
   requestGroupMember: vi.fn(),
   fetchMilestones: vi.fn(),
   fetchMilestoneEvents: vi.fn(),
+  fetchClosedMilestones: vi.fn(),
+  fetchClosedMilestoneEvents: vi.fn(),
 }));
 
 const TestComponent = () => {
@@ -137,5 +139,39 @@ describe('useMilestoneEventsQuery', () => {
     rerender({ id: 1, enabled: true });
     await waitFor(() => expect(fetchMilestoneEvents).toHaveBeenCalledWith(1));
     await waitFor(() => expect(result.current.data).toEqual([]));
+  });
+});
+
+describe('useClosedMilestonesQuery', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches only when enabled', async () => {
+    (fetchClosedMilestones as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    const { rerender } = renderHook(
+      ({ enabled }) => useClosedMilestonesQuery(enabled),
+      { initialProps: { enabled: false }, wrapper },
+    );
+    expect(fetchClosedMilestones).not.toHaveBeenCalled();
+    rerender({ enabled: true });
+    await waitFor(() => expect(fetchClosedMilestones).toHaveBeenCalledTimes(1));
+  });
+});
+
+describe('useClosedMilestoneEventsQuery', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches only when enabled and id is present', async () => {
+    (fetchClosedMilestoneEvents as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    const { rerender } = renderHook(
+      ({ id, enabled }: { id: number | null; enabled: boolean }) => useClosedMilestoneEventsQuery(id, enabled),
+      { initialProps: { id: null as number | null, enabled: true }, wrapper },
+    );
+    expect(fetchClosedMilestoneEvents).not.toHaveBeenCalled();
+    rerender({ id: 7, enabled: true });
+    await waitFor(() => expect(fetchClosedMilestoneEvents).toHaveBeenCalledWith(7));
   });
 });
