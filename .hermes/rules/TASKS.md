@@ -1,34 +1,10 @@
-# Tasks — Refactoring Plan & Bug History
+# Tasks — 変更履歴
 
-プロジェクトのタスク計画および既知バグの履歴。AGENTS.md には概要のみ記載し、詳細はここを参照する。
+完了したタスク / バグ修正 / 解消済みバグの履歴。
+現在の状況と今後のタスクは [`STATUS.md`](./STATUS.md) を参照。
 
----
-
-## リファクタリング前の前提作業（完了済み）
-
-- [x] パッケージ管理: yarn → **bun** 移行
-- [x] 全ライブラリを現時点の最新版に更新
-- [x] 未使用ファイル削除: `src/DnDApp.tsx`, `src/lib/ClickOrDouble.js`
-- [x] `vite.config.ts` 整理
-
----
-
-## 今後必要なコード修正タスク（順次実施）
-
-1. ESLint フラット設定: `.eslintrc.cjs` → `eslint.config.js` 移行
-2. TypeScript 型エラー修正（`Theme.ts` 削除, `console.log` 一掃）
-3. React 19 互換性修正: useRef の引数なし呼び出し等
-4. `react-calendar-timeline` import 修正: `react-calendar-timeline-v3` → `react-calendar-timeline`
-5. UI ライブラリ統一: Chakra UI / Radix UI → **Mantine v7** に置き換え
-6. 日付ライブラリ統一: moment / dayjs → **date-fns** に書き換え
-7. コンポーネントリファクタリング（molecules / organisms / pages / templates 再配置）
-   - **Phase A** — コードベースクレンジング（未使用ファイル・型・コメントアウト一掃）
-   - **Phase B** — ESLint 安全性回復（no-console / no-unused-vars / exhaustive-deps 段階的有効化）
-   - **Phase C** — クエリ層重複排除（useEventsQuery 統合）
-   - **Phase D** — 型安全性向上（ESLint error 化 / fetch ヘッダー共通化）
-   - **Phase E** — バグ調査（11PM / 重なり / タイムゾーン）
-   - **Phase F** — 品質ゲート（lint / build / test 最終確認）
-   - 詳細は [`tasks/task-07/README.md`](../tasks/task-07/README.md) を参照
+運用: 作業を完了したら、このファイルの「完了したタスク / バグ修正」表に 1 行追記する。
+今後必要なタスクや保留中のバグの更新は `STATUS.md` 側で行う。
 
 ---
 
@@ -65,7 +41,3 @@
 - ~~**タイムライン**: 表示が壊れる（行 `rct-hl-*` が 3000px 超え）~~ — **Issue #11 Issue 2**: `TimelinePage.tsx` を ResizeObserver + `resizeDetector` 方式に変更
 - ~~**タイムライン**: マイルストーン所属イベントの色が選択解除後にデフォルト `#2196f3` へ戻る~~ — **task-12**: `TimelinePage.tsx` の `itemRenderer` を修正。`getItemProps` には decor を渡さず（`style: {}`）、自作 ref コールバックで `!important` 付き `background-color` を適用（`node.style.setProperty(bg, 'important')`）。`itemContext.selected` を型（`Pick<ItemContext, ...'selected'>`）に追加し、非選択時のみマイルストーン色を適用。詳細は `tasks/task-12/`
 - ~~**タイムライン**: マイルストーン所属イベントをクリックすると選択背景が透明になる（`background` 属性欠落）~~ — **task-12 フォローアップ（同一セッションで解消）**: selected 分岐の `removeProperty('background-color')` がライブラリ選択色 `#ffc107` ごと消して透明化 → `selected ? '#ffc107' : decor.backgroundColor` を `!important` で**明示適用**する方式に変更（選択中 `rgb(255, 193, 7)` を保証、`removeProperty` は使わない）
-
-### 未対応（保留中）
-
-- **タイムテーブル**: DB 保存時刻が日本時間ではない（UTC の可能性）— **E-3** 調査済み・通常は正しく動作するため保留
