@@ -63,12 +63,12 @@
   }}
   data={[
     { value: '', label: '---進捗を選んでください---' },
-    ...options, // { value: 'from now', label: 'これから' } 等、既存 options をそのまま利用
+    ...options.map((o) => ({ value: o.label, label: o.label })), // value も日本語ラベルに（canonical）
   ]}
 />
 ```
 
-- `options`（`InputItem.tsx:26-31`）は既に `{ value, label }` 形のため `...options` で流用（ラベルは不変）。
+- `options`（`InputItem.tsx:26-31`）は `{ value: 英字トークン, label: 日本語 }` だが、**セレクトの `value` は日本語ラベル（`label`）を canonical** とする（`map` で `value: o.label` に変換）。これにより保存値・readOnly 表示が日本語になる。英字トークンは旧データ互換として配色 / グルーピングで正規化継続。
 - 汎用 `handleChange`（L39-43）は `summary` 用として残す（進捗は専用 handler に移る）。
 - `EventUpdateButtons`（`EventUpdateButton.tsx:18-22`）は **`progress: indicateEvent.progress ?? null`** を送る。`eventItem.progress` が `undefined`（未定）なら `progress: null` が明示送信され、バックエンドが解除する。これに伴い `TimelineEventProps.progress` を `string | null` 許容へ拡張（§3）。
 

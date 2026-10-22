@@ -126,7 +126,10 @@ export const AddChildForm = forwardRef(
 		          }}
 		          data={[
 		            { value: '', label: '---進捗を選んでください---' },
-		            ...options,
+		            // Issue #44: 保存・表示は日本語ラベル（label）を canonical とする。
+		            // value に英字トークン（'from now' 等）を渡すと保存値・readOnly 表示が英字になるため、
+		            // セレクトの value 自体を label(=日本語)にして round-trip を成立させる。
+		            ...options.map((o) => ({ value: o.label, label: o.label })),
 		          ]}
 		        />
 		      </section>

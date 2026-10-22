@@ -72,7 +72,7 @@ const otherEvent: TimelineEventProps = {
   admin: false,
   title: 'other event',
   summary: '内容サマリー',
-  progress: 'almost',
+  progress: 'もうすぐ',
   start_time: new Date(),
   end_time: new Date(new Date().getTime() + 3600000),
   start: new Date(),
@@ -109,7 +109,7 @@ describe('AddChildForm (readonly)', () => {
     expect(screen.getByText('フナキカズヨシ')).toBeInTheDocument();
     // 読取専用: 内容・進捗が Text で表示され、編集 UI は出ない
     expect(screen.getByText('内容サマリー')).toBeInTheDocument();
-    expect(screen.getByText('almost')).toBeInTheDocument();
+    expect(screen.getByText('もうすぐ')).toBeInTheDocument(); // 保存された進捗（ラベル）が表示される
     // 更新 / 削除ボタンは表示しない（実装要件 1）
     expect(screen.queryByRole('button', { name: '更新' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '削除' })).not.toBeInTheDocument();
@@ -156,15 +156,28 @@ describe('AddChildForm (edit mode: progress null reset)', () => {
   it('進捗をプレースホルダーに戻すと null を送信する（受入 2）', async () => {
     const mutate = mockUpdateEvent();
     mockDeleteEvent();
-    renderWith({ ...myEvent, progress: 'almost' }); // 自分のイベント（staff 1000 == auth 1000）
+    renderWith({ ...myEvent, progress: 'もうすぐ' }); // 進捗はラベル（日本語）で保存される
     const user = userEvent.setup();
     const progressSelect = screen.getAllByRole('combobox')[0];
-    expect(progressSelect).toHaveValue('almost');
+    expect(progressSelect).toHaveValue('もうすぐ');
     // プレースホルダー（value=''）へ戻す
     fireEvent.change(progressSelect, { target: { value: '' } });
     expect(progressSelect).toHaveValue('');
     await user.click(screen.getByRole('button', { name: '更新' }));
     const call = mutate.mock.calls[0][0] as { progress: unknown };
     expect(call.progress).toBeNull();
+  });
+
+  it('進捗を選択するとラベル（日本語）を送信する', async () => {
+    const mutate = mockUpdateEvent();
+    mockDeleteEvent();
+    renderWith({ ...myEvent }); // 進捗なし（未定）の自分のイベント
+    const user = userEvent.setup();
+    const progressSelect = screen.getAllByRole('combobox')[0];
+    // options の value（英字トークン 'complete'）ではなく label（'完了'）が保存される
+    fireEvent.change(progressSelect, { target: { value: '完了' } });
+    await user.click(screen.getByRole('button', { name: '更新' }));
+    const call = mutate.mock.calls[0][0] as { progress: unknown };
+    expect(call.progress).toBe('完了');
   });
 });

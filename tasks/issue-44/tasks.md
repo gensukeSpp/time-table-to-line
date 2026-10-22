@@ -173,13 +173,13 @@ bunx vitest run src/tests/InputItem.spec.tsx
           }}
           data={[
             { value: '', label: '---進捗を選んでください---' },
-            ...options,
+            ...options.map((o) => ({ value: o.label, label: o.label })), // value も日本語ラベルに（canonical）
           ]}
         />
       </section>
 ```
 
-> `options`（`InputItem.tsx:26-31`）は既に `{ value, label }` 形なのでそのまま流用。汎用 `handleChange`（L39-43）は `summary` 用に残す。
+> `options`（`InputItem.tsx:26-31`）は `{ value: 英字トークン, label: 日本語 }` だが、**セレクトの `value` は日本語ラベル（`label`）を canonical** とし、保存値・readOnly 表示が日本語になるよう `map` で `value: o.label` に変換する（レビュー対応: 英字トークン `value` を保存すると表示が英字になる問題の修正）。汎用 `handleChange`（L39-43）は `summary` 用に残す。
 
 加えて、送信ペイロードと型契約を整える。
 
