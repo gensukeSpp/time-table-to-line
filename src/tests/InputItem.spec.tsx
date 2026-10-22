@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
 import { AxiosResponse } from 'axios';
@@ -8,6 +9,21 @@ import { TimelineEventProps, GroupUserProps, MilestoneProps } from '../lib/Timel
 import { InquiryStaff } from '../lib/authPayload';
 import { AuthStateContext } from '../hooks/useContextFamily';
 import { authKeys, eventKeys, milestoneKeys } from '../resources/cache';
+import { useUpdateEventMutation, useDeleteMutation } from '../hooks/useEventMutation';
+
+vi.mock('../hooks/useEventMutation', () => ({
+  useUpdateEventMutation: vi.fn(),
+  useDeleteMutation: vi.fn(),
+}));
+
+const mockUpdateEvent = () => {
+  const mutate = vi.fn();
+  (useUpdateEventMutation as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ mutate, isPending: false });
+  return mutate;
+};
+const mockDeleteEvent = () => {
+  (useDeleteMutation as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ mutate: vi.fn(), isPending: false });
+};
 
 const authToken = 'valid-token';
 const queryClient = new QueryClient({
@@ -133,5 +149,22 @@ describe('AddChildForm (readonly: milestone)', () => {
     renderWith(msEvent, true);
     expect(screen.getByText('マイルストーン：')).toBeInTheDocument();
     expect(screen.getByText('open-ms')).toBeInTheDocument();
+  });
+});
+
+describe('AddChildForm (edit mode: progress null reset)', () => {
+  it('進捗をプレースホルダーに戻すと null を送信する（受入 2）', async () => {
+    const mutate = mockUpdateEvent();
+    mockDeleteEvent();
+    renderWith({ ...myEvent, progress: 'almost' }); // 自分のイベント（staff 1000 == auth 1000）
+    const user = userEvent.setup();
+    const progressSelect = screen.getAllByRole('combobox')[0];
+    expect(progressSelect).toHaveValue('almost');
+    // プレースホルダー（value=''）へ戻す
+    fireEvent.change(progressSelect, { target: { value: '' } });
+    expect(progressSelect).toHaveValue('');
+    await user.click(screen.getByRole('button', { name: '更新' }));
+    const call = mutate.mock.calls[0][0] as { progress: unknown };
+    expect(call.progress).toBeNull();
   });
 });

@@ -18,6 +18,9 @@ export type TimelineEventProps = Merge<NewTimelineItem, {
 	end_time: Date;
 	isDraggable?: boolean;
 	admin: boolean;
+	// Issue #44: 進捗の「未定」を表すため null を許容する（送信時は明示的 null、
+	// バックエンド EventUpdate.progress: str | None と整合）。in-memory では undefined も許容。
+	progress?: string | null;
 	milestone_id?: number | null;
 	completed?: boolean;
 }>;

@@ -115,10 +115,18 @@ export const AddChildForm = forwardRef(
 		      </section>
 		      <section className={boundaryTop}>
 		        <Text>どんな感じ：</Text>
-		        <NativeSelect name="progress" value={eventItem.progress ?? ''} onChange={handleChange}
+		        <NativeSelect
+		          name="progress"
+		          value={eventItem.progress ?? ''}
+		          onChange={(e) => {
+		            const v = e.currentTarget.value;
+		            // Issue #44: ''（プレースホルダー）選択で未定（undefined）へ戻す。
+		            // 送信時（EventUpdateButtons）に ?? null で明示的 null に変換し、バックエンドで解除する。
+		            setEventItem({ ...eventItem, progress: v === '' ? undefined : v });
+		          }}
 		          data={[
-		            '---進捗を選んでください---',
-		            ...options.map((option) => option.label),
+		            { value: '', label: '---進捗を選んでください---' },
+		            ...options,
 		          ]}
 		        />
 		      </section>
