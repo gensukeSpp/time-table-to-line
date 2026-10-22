@@ -56,7 +56,6 @@ export const GroupHorizonTimeline = () => {
   const [timelineWidth, setTimelineWidth] = useState(0);
 
   // イベントクリックで開く詳細オーバーレイ（Issue #20）
-  const authId = authInfo.type === 'auth' ? authInfo.authId : undefined;
   const [selectedEvent, setSelectedEvent] = useState<TimelineEventProps | null>(null);
   const [overlayPos, setOverlayPos] = useState<{ top: number; left: number } | null>(null);
   // <Timeline> の resize() を非表示→表示の切り替え(タブ切替)時に呼ぶための把持。
@@ -123,12 +122,10 @@ export const GroupHorizonTimeline = () => {
 
   const onBoundsChange = () => {};
 
-  // イベントクリックで詳細オーバーレイを開く（管理者 OR 自分のイベントのみ）
+  // イベントクリックで詳細オーバーレイを開く（Issue #44: 同グループメンバーは全員閲覧可・閲覧専用）
   const handleItemClick = (itemId: Id, e: React.SyntheticEvent, _time: number) => {
     const event = state.find((evt) => evt.id === itemId);
     if (!event) return;
-    // 一般ユーザーには他メンバーの詳細を表示しない（{admin & ...}）
-    if (!(isAdmin || authId === event.staff_id)) return;
     setSelectedEvent(event);
     setOverlayPos(computeOverlayPos(e, containerRef));
   };
