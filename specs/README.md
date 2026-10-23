@@ -18,6 +18,7 @@
 | [2026-09-25](2026-09-25-spec.md) | Issue #37: 進捗配色を week/day/agenda/work_week へ正式拡張＋リファクタ残骸 `stateAll.length > 2` ガード除去 |
 | [2026-10-15](2026-10-15-spec.md) | Issue #40: 'open'/'waiting' マイルストーンのイベント参照（'...' → Drawer + progress 別アコーディオン、`group_name` 付与、閲覧権限緩和） |
 | [2026-10-19](2026-10-19-spec.md) | Issue #41: 'closed' マイルストーンのイベント参照（`GET /milestone/closed` 新設・達成日降順、右 Drawer の 3 段構成 + Collapse アニメーション + イベント行の開閉ボタン、admin 限定） |
+| [2026-10-22](2026-10-22-spec.md) | Issue #44: [Fix] 2 つの調整と 1 つの仕様変更 — マイルストーン作成フォームの再オープン時リセット・イベント進捗の「未定(null)」復帰（`TimelineEventProps.progress` を null 許容へ・送信時 `?? null`・backend `model_fields_set`）・同グループメンバーへのイベント詳細閲覧緩和 |
 
 ## 作成ルール
 - 1 機能 / 1 Issue / 1 PR につき 1 ファイルを `specs/<YYYY-MM-DD>[-連番]-spec.md` で作成する。同一日に複数ある場合は末尾に `-1` / `-2` を付与する。

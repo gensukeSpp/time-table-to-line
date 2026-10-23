@@ -18,7 +18,9 @@ export const EventUpdateButtons = ({ indicateEvent, closeInputForm }: EventUpdat
 		updateEvent.mutate({
 		      ...indicateEvent,
 		      summary: indicateEvent.summary,
-		      progress: indicateEvent.progress
+		      // Issue #44: 進捗「未定」は in-memory では undefined、送信時は明示的 null にして
+		      // バックエンド（model_fields_set 判別）で progress を解除させる。
+		      progress: indicateEvent.progress ?? null
 		    }, {
 		      onSuccess: closeInputForm
 		    });

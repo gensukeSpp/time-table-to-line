@@ -20,23 +20,28 @@ export const PROGRESS_COLORS: Readonly<Record<string, string>> = {
   完了: '#d81b60',
 };
 
-// 英字トークン → ラベル（InputItem options.value / 旧データ / テストフィクスチャ互換）。
+// 英字トークン → ラベル（旧データ / テストフィクスチャ互換）。
 const PROGRESS_TOKEN_TO_LABEL: Readonly<Record<string, string>> = {
   'from now': 'これから',
-  still: 'まだ',
-  almost: 'もうすぐ',
-  complete: '完了',
+  'still': 'まだ',
+  'almost': 'もうすぐ',
+  'complete': '完了',
 };
+
+/** 表示・処理に使う進捗ラベルへ正規化する。値がない場合は「未定」とする。 */
+export function normalizeProgressLabel(progress?: string | null): string {
+  if (!progress) return '未定';
+  return Object.prototype.hasOwnProperty.call(PROGRESS_TOKEN_TO_LABEL, progress)
+    ? PROGRESS_TOKEN_TO_LABEL[progress]
+    : progress;
+}
 
 /**
  * 進捗値（ラベル or 英字トークン）を色へ変換する。
  * null / undefined / 空 / 未知値はデフォルト色へフォールバックする（エラーを出さない）。
  */
 export function progressToColor(progress?: string | null): string {
-  if (!progress) return DEFAULT_EVENT_COLOR;
-  const key = Object.prototype.hasOwnProperty.call(PROGRESS_TOKEN_TO_LABEL, progress)
-    ? PROGRESS_TOKEN_TO_LABEL[progress]
-    : progress;
+  const key = normalizeProgressLabel(progress);
   return PROGRESS_COLORS[key] ?? DEFAULT_EVENT_COLOR;
 }
 

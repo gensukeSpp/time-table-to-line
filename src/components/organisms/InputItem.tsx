@@ -2,6 +2,7 @@ import { useState, forwardRef, Ref } from 'react';
 import { Box, Text, TextInput, NativeSelect, Button } from '@mantine/core';
 
 import { TimelineEventProps } from '../../lib/TimelineType';
+import { normalizeProgressLabel } from '../../lib/progressColor';
 import { useDialog } from '../../hooks/useDialog';
 import { useAuthInfo } from '../../hooks/useAuthGuard';
 import { useGroupUsersQuery, useMilestonesQuery } from '../../resources/queries';
@@ -34,7 +35,10 @@ export const AddChildForm = forwardRef(
 	({selectedEvent, closeClick, readOnly}: InputEventProps,
 		childRef: Ref<HTMLDivElement>) => {
 
-	const [eventItem, setEventItem] = useState<TimelineEventProps>(selectedEvent);
+	const [eventItem, setEventItem] = useState<TimelineEventProps>({
+		...selectedEvent,
+		progress: selectedEvent.progress == null ? selectedEvent.progress : normalizeProgressLabel(selectedEvent.progress),
+	});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement> & React.ChangeEvent<HTMLSelectElement>) => {
 		// name, valueという変数名で決まっているようだ
@@ -88,7 +92,7 @@ export const AddChildForm = forwardRef(
 			      </section>
 			      <section className={boundaryTop}>
 			        <Text>どんな感じ：</Text>
-			        <Text>{selectedEvent.progress ?? ''}</Text>
+			        <Text>{normalizeProgressLabel(selectedEvent.progress)}</Text>
 			      </section>
 			      <section className={boundaryTop}>
 			        <Text>マイルストーン：</Text>
@@ -115,10 +119,21 @@ export const AddChildForm = forwardRef(
 		      </section>
 		      <section className={boundaryTop}>
 		        <Text>どんな感じ：</Text>
-		        <NativeSelect name="progress" value={eventItem.progress ?? ''} onChange={handleChange}
+		        <NativeSelect
+		          name="progress"
+		          value={eventItem.progress == null ? '' : normalizeProgressLabel(eventItem.progress)}
+		          onChange={(e) => {
+		            const v = e.currentTarget.value;
+		            // Issue #44: ''（プレースホルダー）選択で未定（undefined）へ戻す。
+		            // 送信時（EventUpdateButtons）に ?? null で明示的 null に変換し、バックエンドで解除する。
+		            setEventItem({ ...eventItem, progress: v === '' ? undefined : v });
+		          }}
 		          data={[
-		            '---進捗を選んでください---',
-		            ...options.map((option) => option.label),
+		            { value: '', label: '---進捗を選んでください---' },
+		            // Issue #44: 保存・表示は日本語ラベル（label）を canonical とする。
+		            // value に英字トークン（'from now' 等）を渡すと保存値・readOnly 表示が英字になるため、
+		            // セレクトの value 自体を label(=日本語)にして round-trip を成立させる。
+		            ...options.map((o) => ({ value: o.label, label: o.label })),
 		          ]}
 		        />
 		      </section>

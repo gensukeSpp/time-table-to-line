@@ -6,9 +6,20 @@ import {
   MONTH_FULLDAY_COLOR,
   PROGRESS_COLORS,
   progressToColor,
+  normalizeProgressLabel,
   isMonthAllday,
   resolveEventColor,
 } from '../lib/progressColor';
+
+describe('normalizeProgressLabel', () => {
+  it('英字トークンを日本語ラベルへ変換し、値なしは未定とする', () => {
+    expect(normalizeProgressLabel('almost')).toBe('もうすぐ');
+    expect(normalizeProgressLabel('もうすぐ')).toBe('もうすぐ');
+    expect(normalizeProgressLabel(null)).toBe('未定');
+    expect(normalizeProgressLabel('')).toBe('未定');
+    expect(normalizeProgressLabel('unknown')).toBe('unknown');
+  });
+});
 
 describe('progressToColor', () => {
   it('null / undefined / 空文字はデフォルト色を返す', () => {

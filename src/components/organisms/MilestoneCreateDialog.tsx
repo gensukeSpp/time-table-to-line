@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, TextInput, Textarea, Button } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { format } from 'date-fns';
@@ -20,6 +20,15 @@ export const MilestoneCreateDialog = ({
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [guidelineEndDate, setGuidelineEndDate] = useState<Date | null>(null);
+
+  // Issue #44 (受入 1): 再オープン時に前回の内容が残らないよう、opened が true になったら空に戻す。
+  useEffect(() => {
+    if (opened) {
+      setTitle('');
+      setDescription('');
+      setGuidelineEndDate(null);
+    }
+  }, [opened]);
 
   const handleSubmit = () => {
     if (!title.trim()) {

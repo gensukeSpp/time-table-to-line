@@ -1,5 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { MilestoneCreateDialog } from './MilestoneCreateDialog';
 import { useAddMilestoneMutation } from '../../hooks/useMilestoneMutation';
 import { MantineProvider } from '@mantine/core';
@@ -108,5 +109,29 @@ describe('MilestoneCreateDialog', () => {
     });
     const callArgs = mockMutate.mock.calls[0][0] as { title: string };
     expect(callArgs.title).toBe('テストマイルストーン');
+  });
+
+  it('再オープン時にフォームが空になる（受入 1）', async () => {
+    const Wrapper = () => {
+      const [opened, setOpened] = useState(false);
+      return (
+        <MantineProvider>
+          <button onClick={() => setOpened(true)}>開く</button>
+          <MilestoneCreateDialog opened={opened} onClose={() => { setOpened(false); mockOnClose(); }} />
+        </MantineProvider>
+      );
+    };
+    render(<Wrapper />);
+    const user = userEvent.setup();
+    // 1回目: 開いてタイトルを入力 → コミットで閉じる
+    await user.click(screen.getByRole('button', { name: '開く' }));
+    const titleInput = await screen.findByPlaceholderText('マイルストーンのタイトルを入力');
+    await user.type(titleInput, '前回のタイトル');
+    mockMutate.mockImplementation((_v: unknown, o?: { onSuccess?: () => void }) => o?.onSuccess?.());
+    fireEvent.submit(titleInput.closest('form')!);
+    await waitFor(() => expect(mockOnClose).toHaveBeenCalled());
+    // 2回目: 再度開く → フォームが空
+    await user.click(screen.getByRole('button', { name: '開く' }));
+    expect(await screen.findByPlaceholderText('マイルストーンのタイトルを入力')).toHaveValue('');
   });
 });
