@@ -117,6 +117,12 @@ describe('AddChildForm (readonly)', () => {
     expect(screen.queryByText('異なるスタッフの、変更はできません')).not.toBeInTheDocument();
   });
 
+  it('旧英字トークンの進捗を日本語ラベルで表示する', () => {
+    renderWith({ ...otherEvent, progress: 'almost' }, true);
+    expect(screen.getByText('もうすぐ')).toBeInTheDocument();
+    expect(screen.queryByText('almost')).not.toBeInTheDocument();
+  });
+
   it('自分のイベントも readOnly で開くと編集不可（更新/削除ボタンが出ない）', () => {
     renderWith(myEvent, true);
     // 編集は Calendar 側で行うため、タイムライン詳細モーダルでは常に閲覧専用
@@ -153,6 +159,16 @@ describe('AddChildForm (readonly: milestone)', () => {
 });
 
 describe('AddChildForm (edit mode: progress null reset)', () => {
+  it('旧英字トークンの進捗を日本語ラベルで表示し、更新時に正規化する', async () => {
+    const mutate = mockUpdateEvent();
+    mockDeleteEvent();
+    renderWith({ ...myEvent, progress: 'almost' });
+    expect(screen.getAllByRole('combobox')[0]).toHaveValue('もうすぐ');
+    await userEvent.setup().click(screen.getByRole('button', { name: '更新' }));
+    const call = mutate.mock.calls[0][0] as { progress: unknown };
+    expect(call.progress).toBe('もうすぐ');
+  });
+
   it('進捗をプレースホルダーに戻すと null を送信する（受入 2）', async () => {
     const mutate = mockUpdateEvent();
     mockDeleteEvent();

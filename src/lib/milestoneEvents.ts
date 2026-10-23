@@ -1,16 +1,16 @@
 import { MilestoneEventProps, ProgressGroupKey } from './TimelineType';
+import { normalizeProgressLabel } from './progressColor';
 
-const TOKEN_TO_GROUP: Readonly<Record<string, ProgressGroupKey>> = {
+const LABEL_TO_GROUP: Readonly<Record<string, ProgressGroupKey>> = {
   これから: 'これから', まだ: 'まだ', もうすぐ: 'もうすぐ', 完了: '完了',
-  'from now': 'これから', still: 'まだ', almost: 'もうすぐ', complete: '完了',
 };
 
 export const PROGRESS_GROUP_ORDER: Readonly<ProgressGroupKey[]> =
   ['これから', 'まだ', 'もうすぐ', '完了', '指定なし'];
 
 export function normalizeProgressGroup(progress?: string | null): ProgressGroupKey {
-  if (!progress) return '指定なし';
-  return Object.prototype.hasOwnProperty.call(TOKEN_TO_GROUP, progress) ? TOKEN_TO_GROUP[progress] : '指定なし';
+  const label = normalizeProgressLabel(progress);
+  return Object.prototype.hasOwnProperty.call(LABEL_TO_GROUP, label) ? LABEL_TO_GROUP[label] : '指定なし';
 }
 
 export interface ProgressGroup {

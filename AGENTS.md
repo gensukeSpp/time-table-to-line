@@ -292,6 +292,38 @@ gives you structural context (callers, dependents, test coverage) that file sear
 4. 純粋リファクタ (ロジック不変) の監査は `review(action="delta", show_line_shifts=true)`
    を利用する。
 
+### 出力サイズの抑え方（review / query の呼び出し規約）
+
+実測（2026-10-22, PR #45 レビュー時）: `review(action="context", base="origin/main")` の既定呼び出しは **約 1.4MB** を返し、読み切れない。原因は `graph.edges`（約 112KB）と、変更ファイル全体の推移的な影響ノード。以下を既定にする。
+
+- **変更ファイルを明示する**: `changed_files` に対象パスを列挙して渡す（自動検出に任せない）。明示指定 + `max_depth=1` + `include_source=false` で約 72KB まで下がった。
+- **深さは 1 から始める**: `max_depth` の既定値 2 は影響ファイルを一気に広げる。必要な場合だけ 2 にする。
+- **ソース断片は必要な関数だけ読む**: `include_source=true` は `max_lines_per_file` を小さく（例 50）し、詳細は `read_file` で該当行を読む。
+- **大きな結果は再取得しない**: 出力は `~/.hermes/.../cache/spillover/*.txt` に保存される。`read_file` の offset/limit でページングするか、`execute_code` で JSON を分解して必要な項目だけ抽出する。同じ呼び出しを繰り返さない。
+- **ツール呼び出しはファイル単位で分ける**: 変更が多い PR は `changed_files` をディレクトリ単位（例: `src/components/organisms/` → `src/lib/`）に分割して呼ぶ。
+
+### グラフの信頼範囲（フロントエンド TSX）
+
+実測（同日）: `graph(action="stats")` は 108 files / 142 nodes、Function はわずか 34。関数コンポーネント（アロー関数）の多くは Function ノードとして抽出されていない。`query(action="impact")` は `InputItem.tsx` に対して **impacted 0 件**を返したが、実際には `EventDetailOverlay.tsx` と `CalendarView.tsx` が `AddChildForm` を import している。よって次の扱いとする。
+
+- **呼び出し元（逆依存）は graph を信用しない**: `search_files` で `from '.*/InputItem'` などの import を grep し、影響先を確定する。
+- **graph の `CALLS` は組み込み関数（`map` / `find` / `String` / `setState` 等）が多い**: 呼び出し関係の根拠にしない。
+- **フック・lib（`src/hooks/`, `src/lib/`）の依存は graph の結果を参考にできる**（`useContextFamily.ts` や `milestoneLookup.ts` の検出は実在の依存として妥当だった）。ただし最終判断はソースで行う。
+- **空の結果は「未抽出」の可能性がある**: 空の影響範囲を「影響なし」と断定しない。
+
+### グラフの鮮度
+
+- グラフは手動ビルド。ソース変更後は `graph(action="update", base="origin/main")` で差分更新する。初期化やスキーマ変更時のみ `graph(action="build", full_rebuild=true)`。
+- `graph(action="stats")` の `Last updated` が作業時点より古い場合は更新してから使う。
+- レビュー対象が未コミットの作業ツリーなら、base を指定して差分を明示する。
+
+### 役割の使い分け（レビュー時の順序）
+
+1. 変更範囲の把握: `review(action="context")`（明示 `changed_files` + 小さい深さ）
+2. 逆依存の確定: `search_files` で import を grep（TSX は graph が弱い）
+3. 単一シンボルの定義・参照: Serena（`find_referencing_symbols`）
+4. 結論はソース（`git diff origin/main...HEAD -- <path>` と該当ファイルの読解）で検証する
+
 ### Serena との使い分け
 
 **Serena** (`serena` LSP) と知識グラフは**競合せず、役割で使い分ける**。
