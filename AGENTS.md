@@ -250,8 +250,11 @@ gives you structural context (callers, dependents, test coverage) that file sear
 <!-- better-code-review-graph MCP tools -->
 ## MCP Tools: better-code-review-graph
 
-**This is the successor MCP server for the same knowledge graph.** The graph DB
-(`.code-review-graph/graph.db`) is shared by both servers, but the recent,
+**This is the successor MCP server for the same knowledge graph.** ただし実 DB は
+旧 `code-review-graph` と**共有ではなく別々** (実測 2026-10-26: better-CRG の CLI
+`graph build` / `graph stats` が読み書きするのは `<repo>/.crg/graph.db` で、
+旧ツールの `.code-review-graph/graph.db` は別物、`.better-code-review-graph/graph.db`
+は better-CRG が参照しない残骸)。
 集約 API (`config` / `graph` / `query` / `review` / `security`) を後継とする。
 新規の操作では **better 版を優先**し、旧 `*_tool` 名はレガシーとして扱う。
 ※ セキュリティスキャンは `security` ツールで実施可能 (OWASP 系 sink 検出。
@@ -316,6 +319,16 @@ gives you structural context (callers, dependents, test coverage) that file sear
 - グラフは手動ビルド。ソース変更後は `graph(action="update", base="origin/main")` で差分更新する。初期化やスキーマ変更時のみ `graph(action="build", full_rebuild=true)`。
 - `graph(action="stats")` の `Last updated` が作業時点より古い場合は更新してから使う。
 - レビュー対象が未コミットの作業ツリーなら、base を指定して差分を明示する。
+- **better-CRG の実 DB は `<repo>/.crg/graph.db`**（自前の `.gitignore` が `*` を無視するため git 追跡対象外。`graph.build`/`graph stats` が読み書きするのはこのファイルで、`.code-review-graph/` や `.better-code-review-graph/` は参照しない）。CLI での更新・確認:
+  ```bash
+  # 差分更新（ソース変更後に実行。no git hooks のため手動）
+  uvx --python 3.13 better-code-review-graph graph build --repo-root .
+  # 全再構築（初回・大規模リファクタ・不整合時のみ）
+  uvx --python 3.13 better-code-review-graph graph build --full-rebuild --repo-root .
+  # 鮮度確認（Last updated を確認）
+  uvx --python 3.13 better-code-review-graph graph stats --repo-root .
+  ```
+  stats の `Last updated` が作業時点より古い場合、または DB mtime と整合しない場合は更新してから使う。
 
 ### 役割の使い分け（レビュー時の順序）
 
